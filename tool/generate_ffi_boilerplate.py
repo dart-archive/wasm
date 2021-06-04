@@ -11,7 +11,7 @@
 # and runtime.dart.
 
 # Usage:
-# ./generate_ffi_boilerplate.py && dart format -owrite ../lib/
+# ./tool/generate_ffi_boilerplate.py && dart format -owrite .
 
 import os
 import re
