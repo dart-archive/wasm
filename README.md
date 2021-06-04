@@ -32,7 +32,7 @@ void main() {
   final data = File('square.wasm').readAsBytesSync();
   final mod = WasmModule(data);
   print(mod.describe());
-  final inst = mod.instantiate().build();
+  final inst = mod.builder().build();
   final square = inst.lookupFunction('square');
   print(square(12));
 }
