@@ -58,6 +58,31 @@ Uri _getSdkDir() {
   return commonSdkDir;
 }
 
+Uri _getSdkIncDir(Uri sdkDir) {
+  var sdkIncDir = sdkDir.resolve('include/');
+  if (File.fromUri(sdkIncDir.resolve('dart_api.h')).existsSync()) {
+    return sdkIncDir;
+  }
+  // Flutter's Dart SDK puts the API headers in a different directory.
+  sdkIncDir = sdkDir.resolve('include/third_party/dart/');
+  if (File.fromUri(sdkIncDir.resolve('dart_api.h')).existsSync()) {
+    return sdkIncDir;
+  }
+  throw FileSystemException(
+      "Can't find the include directory in the Dart SDK", sdkDir.path);
+}
+
+File _findDartApiDlImpl(Uri sdkIncDir) {
+  var file = File.fromUri(sdkIncDir.resolve('internal/dart_api_dl_impl.h'));
+  if (file.existsSync()) return file;
+  // In some versions of the Dart SDK, this header was in a different directory.
+  file = File.fromUri(sdkIncDir.resolve('runtime/dart_api_dl_impl.h'));
+  if (file.existsSync()) return file;
+  throw FileSystemException(
+      "Can't find dart_api_dl_impl.h in the Dart SDK include directory",
+      sdkIncDir.path);
+}
+
 Uri _getOutDir(Uri root) {
   final pkgRoot = packageRootUri(root);
   if (pkgRoot == null) {
@@ -114,11 +139,13 @@ Future<void> _run(String exe, List<String> args) async {
 
 Future<void> _main(String target) async {
   final sdkDir = _getSdkDir();
+  final sdkIncDir = _getSdkIncDir(sdkDir);
   final binDir = Platform.script;
   final outDir = _getOutDir(Directory.current.uri);
   final outLib = outDir.resolve(_getOutLib(target)).path;
 
   print('Dart SDK directory: ${sdkDir.path}');
+  print('Dart SDK include directory: ${sdkIncDir.path}');
   print('Script directory: ${binDir.path}');
   print('Output directory: ${outDir.path}');
   print('Target: $target');
@@ -136,14 +163,13 @@ Future<void> _main(String target) async {
     '--release'
   ]);
 
-  const dartApiDlImplPath = 'include/internal/dart_api_dl_impl.h';
-
-  final dartApiDlImplFile = File.fromUri(sdkDir.resolve(dartApiDlImplPath));
   // Hack around a bug with dart_api_dl_impl.h include path in dart_api_dl.c.
-  if (!dartApiDlImplFile.existsSync()) {
+  const dartApiDlImplPath = 'include/internal/dart_api_dl_impl.h';
+  if (!File.fromUri(sdkIncDir.resolve(dartApiDlImplPath)).existsSync()) {
     Directory(outDir.resolve('include/internal/').path)
         .createSync(recursive: true);
-    await dartApiDlImplFile.copy(outDir.resolve(dartApiDlImplPath).path);
+    await _findDartApiDlImpl(sdkIncDir)
+        .copy(outDir.resolve(dartApiDlImplPath).path);
   }
 
   // Build dart_api_dl.o.
@@ -156,11 +182,11 @@ Future<void> _main(String target) async {
     '-target',
     target,
     '-I',
-    sdkDir.resolve('include/').path,
+    sdkIncDir.path,
     '-I',
     outDir.resolve('include/').path,
     '-c',
-    sdkDir.resolve('include/dart_api_dl.c').path,
+    sdkIncDir.resolve('dart_api_dl.c').path,
     '-o',
     outDir.resolve('dart_api_dl.o').path
   ]);
@@ -177,7 +203,7 @@ Future<void> _main(String target) async {
     '-target',
     target,
     '-I',
-    sdkDir.path,
+    sdkIncDir.path,
     '-I',
     outDir.resolve('include/').path,
     '-c',
