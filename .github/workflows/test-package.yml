@@ -26,7 +26,7 @@ jobs:
       with:
         sdk: ${{ matrix.sdk }}
     - id: install
-      run: dart pub get
+      run: dart pub upgrade
     - run: dart format --output=none --set-exit-if-changed .
       if: always() && steps.install.outcome == 'success'
     - run: dart analyze --fatal-infos
@@ -51,7 +51,7 @@ jobs:
           "~/.pub-cache/hosted"
           .dart_tool
         key: ${{ runner.os }}-${{ matrix.sdk }}-${{ hashFiles('bin/**') }}
-    - run: dart pub get
+    - run: dart pub upgrade
     - run: dart run wasm:setup
       id: setup
     - run: dart test
