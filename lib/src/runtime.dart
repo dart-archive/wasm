@@ -16,6 +16,9 @@ import 'wasmer_api.dart';
 
 part 'runtime.g.dart';
 
+/// The singleton instance of [WasmRuntime].
+final runtime = WasmRuntime._init();
+
 class WasmImportDescriptor {
   final int kind;
   final String moduleName;
@@ -28,8 +31,7 @@ class WasmImportDescriptor {
   String toString() {
     var kindName = wasmerExternKindName(kind);
     if (kind == wasmerExternKindFunction) {
-      var runtime = WasmRuntime();
-      var sig = WasmRuntime.getSignatureString(
+      var sig = getSignatureString(
         '$moduleName::$name',
         runtime.getArgTypes(funcType),
         runtime.getReturnType(funcType),
@@ -52,8 +54,7 @@ class WasmExportDescriptor {
   String toString() {
     var kindName = wasmerExternKindName(kind);
     if (kind == wasmerExternKindFunction) {
-      var runtime = WasmRuntime();
-      var sig = WasmRuntime.getSignatureString(
+      var sig = getSignatureString(
         name,
         runtime.getArgTypes(funcType),
         runtime.getReturnType(funcType),
@@ -120,3 +121,11 @@ String _getLibPath() {
   if (path != null) return path;
   throw WasmError('Wasm library not found. Did you `$invocationString`?');
 }
+
+String getSignatureString(
+  String name,
+  List<int> argTypes,
+  int returnType,
+) =>
+    '${wasmerValKindName(returnType)} '
+    '$name(${argTypes.map(wasmerValKindName).join(', ')})';

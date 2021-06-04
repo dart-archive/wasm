@@ -18,7 +18,6 @@ class WasmModule {
 
   /// Compile a module.
   WasmModule(Uint8List data) {
-    var runtime = WasmRuntime();
     _store = runtime.newStore(this);
     _module = runtime.compile(this, _store, data);
   }
@@ -36,7 +35,6 @@ class WasmModule {
   /// debugging.
   String describe() {
     var description = StringBuffer();
-    var runtime = WasmRuntime();
     var imports = runtime.importDescriptors(_module);
     for (var imp in imports) {
       description.write('import $imp\n');
@@ -57,7 +55,7 @@ Pointer<WasmerTrap> _wasmFnImportTrampoline(
   try {
     _WasmFnImport._call(imp, args, results);
   } catch (exception) {
-    return WasmRuntime().newTrap(imp.ref.store, exception);
+    return runtime.newTrap(imp.ref.store, exception);
   }
   return nullptr;
 }
@@ -130,7 +128,7 @@ class WasmInstanceBuilder {
   Pointer<WasmerWasiEnv> _wasiEnv = nullptr;
 
   WasmInstanceBuilder._(this._module)
-      : _importDescs = WasmRuntime().importDescriptors(_module._module) {
+      : _importDescs = runtime.importDescriptors(_module._module) {
     _imports.ref.length = _importDescs.length;
     _imports.ref.data = calloc<Pointer<WasmerExtern>>(_importDescs.length);
     for (var i = 0; i < _importDescs.length; ++i) {
@@ -162,7 +160,7 @@ class WasmInstanceBuilder {
     if (imp.kind != wasmerExternKindMemory) {
       throw WasmError('Import is not a memory: $imp');
     }
-    _imports.ref.data[index] = WasmRuntime().memoryToExtern(memory._mem);
+    _imports.ref.data[index] = runtime.memoryToExtern(memory._mem);
   }
 
   /// Add a function to the imports.
@@ -174,7 +172,6 @@ class WasmInstanceBuilder {
       throw WasmError('Import is not a function: $imp');
     }
 
-    var runtime = WasmRuntime();
     var returnType = runtime.getReturnType(imp.funcType);
     var wasmFnImport = calloc<_WasmFnImport>();
     wasmFnImport.ref.returnType = returnType;
@@ -199,7 +196,6 @@ class WasmInstanceBuilder {
     if (_wasiEnv != nullptr) {
       throw WasmError('WASI is already enabled.');
     }
-    var runtime = WasmRuntime();
     var config = runtime.newWasiConfig();
     if (captureStdout) runtime.captureWasiStdout(config);
     if (captureStderr) runtime.captureWasiStderr(config);
@@ -243,7 +239,6 @@ class WasmInstance {
     Pointer<WasmerExternVec> imports,
     this._wasiEnv,
   ) {
-    var runtime = WasmRuntime();
     _instance = runtime.instantiate(
       _importOwner,
       _module._store,
@@ -301,7 +296,7 @@ class WasmInstance {
     if (_wasiEnv == nullptr) {
       throw WasmError("Can't capture stdout without WASI enabled.");
     }
-    return _stdout ??= WasmRuntime().getWasiStdoutStream(_wasiEnv);
+    return _stdout ??= runtime.getWasiStdoutStream(_wasiEnv);
   }
 
   /// Returns a stream that reads from `stderr`.
@@ -312,7 +307,7 @@ class WasmInstance {
     if (_wasiEnv == nullptr) {
       throw WasmError("Can't capture stderr without WASI enabled.");
     }
-    return _stderr ??= WasmRuntime().getWasiStderrStream(_wasiEnv);
+    return _stderr ??= runtime.getWasiStderrStream(_wasiEnv);
   }
 }
 
@@ -324,21 +319,21 @@ class WasmMemory {
   late Uint8List _view;
 
   WasmMemory._fromExport(this._mem) {
-    _view = WasmRuntime().memoryView(_mem);
+    _view = runtime.memoryView(_mem);
   }
 
   /// Create a new memory with the given number of initial pages, and optional
   /// maximum number of pages.
   WasmMemory._create(Pointer<WasmerStore> store, int pages, int? maxPages) {
-    _mem = WasmRuntime().newMemory(this, store, pages, maxPages);
-    _view = WasmRuntime().memoryView(_mem);
+    _mem = runtime.newMemory(this, store, pages, maxPages);
+    _view = runtime.memoryView(_mem);
   }
 
   /// The WASM spec defines the page size as 64KiB.
   static const int kPageSizeInBytes = 64 * 1024;
 
   /// The length of the memory in pages.
-  int get lengthInPages => WasmRuntime().memoryLength(_mem);
+  int get lengthInPages => runtime.memoryLength(_mem);
 
   /// The length of the memory in bytes.
   int get lengthInBytes => _view.lengthInBytes;
@@ -357,7 +352,7 @@ class WasmMemory {
   /// Grow the memory by [deltaPages] and invalidates any existing views into
   /// the memory.
   void grow(int deltaPages) {
-    var runtime = WasmRuntime()..growMemory(_mem, deltaPages);
+    runtime.growMemory(_mem, deltaPages);
     _view = runtime.memoryView(_mem);
   }
 }
@@ -386,8 +381,7 @@ class WasmFunction {
   }
 
   @override
-  String toString() =>
-      WasmRuntime.getSignatureString(_name, _argTypes, _returnType);
+  String toString() => getSignatureString(_name, _argTypes, _returnType);
 
   bool _fillArg(dynamic arg, int i) {
     switch (_argTypes[i]) {
@@ -420,7 +414,7 @@ class WasmFunction {
         throw ArgumentError('Bad argument type for WASM function: $this');
       }
     }
-    WasmRuntime().call(_func, _args, _results, toString());
+    runtime.call(_func, _args, _results, toString());
 
     if (_returnType == wasmerValKindVoid) {
       return null;
