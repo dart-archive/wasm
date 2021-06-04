@@ -39,7 +39,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        sdk: [ 2.12.0, dev ]
+        sdk: [ 2.13.1, dev ]
     steps:
     - uses: dart-lang/setup-dart@v1.0
       with:
