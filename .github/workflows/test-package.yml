@@ -39,7 +39,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest ]
-        sdk: [ 2.13.1, dev ]
+        # TODO: add in 2.14 when it's stable
+        sdk: [ dev ]
     steps:
     - uses: dart-lang/setup-dart@v1.0
       with:
