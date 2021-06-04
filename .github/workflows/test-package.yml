@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-latest, macos-latest ]
         sdk: [ 2.12.0, dev ]
     steps:
     - uses: dart-lang/setup-dart@v1.0
