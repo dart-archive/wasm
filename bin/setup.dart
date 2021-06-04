@@ -69,7 +69,9 @@ Uri _getSdkIncDir(Uri sdkDir) {
     return sdkIncDir;
   }
   throw FileSystemException(
-      "Can't find the include directory in the Dart SDK", sdkDir.path);
+    "Can't find the include directory in the Dart SDK",
+    sdkDir.path,
+  );
 }
 
 File _findDartApiDlImpl(Uri sdkIncDir) {
@@ -79,8 +81,9 @@ File _findDartApiDlImpl(Uri sdkIncDir) {
   file = File.fromUri(sdkIncDir.resolve('runtime/dart_api_dl_impl.h'));
   if (file.existsSync()) return file;
   throw FileSystemException(
-      "Can't find dart_api_dl_impl.h in the Dart SDK include directory",
-      sdkIncDir.path);
+    "Can't find dart_api_dl_impl.h in the Dart SDK include directory",
+    sdkIncDir.path,
+  );
 }
 
 Uri _getOutDir(Uri root) {
