@@ -13,7 +13,6 @@
 part of 'runtime.dart';
 
 class WasmRuntime {
-  static final WasmRuntime _inst = WasmRuntime._init();
   final DynamicLibrary _lib;
   final _traps = <int, _WasmTrapsEntry>{};
   late final Pointer<WasmerEngine> _engine;
@@ -104,8 +103,6 @@ class WasmRuntime {
   late final WasmerValtypeVecNewUninitializedFn _valtype_vec_new_uninitialized;
   late final WasmerWasmerLastErrorLengthFn _wasmer_last_error_length;
   late final WasmerWasmerLastErrorMessageFn _wasmer_last_error_message;
-
-  factory WasmRuntime() => _inst;
 
   WasmRuntime._init() : _lib = DynamicLibrary.open(_getLibPath()) {
     _Dart_InitializeApiDL = _lib.lookupFunction<
@@ -757,12 +754,4 @@ class WasmRuntime {
     }
     return x;
   }
-
-  static String getSignatureString(
-    String name,
-    List<int> argTypes,
-    int returnType,
-  ) =>
-      '${wasmerValKindName(returnType)} '
-      "$name(${argTypes.map(wasmerValKindName).join(", ")})";
 }

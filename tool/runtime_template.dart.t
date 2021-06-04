@@ -11,14 +11,11 @@
 part of 'runtime.dart';
 
 class WasmRuntime {
-  static final WasmRuntime _inst = WasmRuntime._init();
   final DynamicLibrary _lib;
   final _traps = <int, _WasmTrapsEntry>{};
   late final Pointer<WasmerEngine> _engine;
 
 /* <RUNTIME_MEMB> */
-
-  factory WasmRuntime() => _inst;
 
   WasmRuntime._init() : _lib = DynamicLibrary.open(_getLibPath()) {
 /* <RUNTIME_LOAD> */
@@ -333,12 +330,4 @@ class WasmRuntime {
     }
     return x;
   }
-
-  static String getSignatureString(
-    String name,
-    List<int> argTypes,
-    int returnType,
-  ) =>
-      '${wasmerValKindName(returnType)} '
-      "$name(${argTypes.map(wasmerValKindName).join(", ")})";
 }
