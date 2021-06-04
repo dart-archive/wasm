@@ -162,16 +162,16 @@ typedef NativeWasmerSetFinalizerForTrapFn = Void Function(
 typedef WasmerSetFinalizerForTrapFn = void Function(
     Object, Pointer<WasmerTrap>);
 
-// wasi_config_inherit_stderr
-typedef NativeWasmerWasiConfigInheritStderrFn = Void Function(
+// wasi_config_capture_stderr
+typedef NativeWasmerWasiConfigCaptureStderrFn = Void Function(
     Pointer<WasmerWasiConfig>);
-typedef WasmerWasiConfigInheritStderrFn = void Function(
+typedef WasmerWasiConfigCaptureStderrFn = void Function(
     Pointer<WasmerWasiConfig>);
 
-// wasi_config_inherit_stdout
-typedef NativeWasmerWasiConfigInheritStdoutFn = Void Function(
+// wasi_config_capture_stdout
+typedef NativeWasmerWasiConfigCaptureStdoutFn = Void Function(
     Pointer<WasmerWasiConfig>);
-typedef WasmerWasiConfigInheritStdoutFn = void Function(
+typedef WasmerWasiConfigCaptureStdoutFn = void Function(
     Pointer<WasmerWasiConfig>);
 
 // wasi_config_new
