@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: [ main ]
   schedule:
-    - cron: "0 0 * * 0"
+  - cron: "0 0 * * 0"
 
 env:
   PUB_ENVIRONMENT: bot.github
@@ -19,18 +19,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        sdk: [dev]
+        sdk: [ dev ]
     steps:
-      - uses: actions/checkout@v2
-      - uses: dart-lang/setup-dart@v1.0
-        with:
-          sdk: ${{ matrix.sdk }}
-      - id: install
-        run: dart pub get
-      - run: dart format --output=none --set-exit-if-changed .
-        if: always() && steps.install.outcome == 'success'
-      - run: dart analyze --fatal-infos
-        if: always() && steps.install.outcome == 'success'
+    - uses: actions/checkout@v2.3.4
+    - uses: dart-lang/setup-dart@v1.0
+      with:
+        sdk: ${{ matrix.sdk }}
+    - id: install
+      run: dart pub get
+    - run: dart format --output=none --set-exit-if-changed .
+      if: always() && steps.install.outcome == 'success'
+    - run: dart analyze --fatal-infos
+      if: always() && steps.install.outcome == 'success'
 
   test:
     needs: analyze
@@ -38,14 +38,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        sdk: [2.12.0, dev]
+        os: [ ubuntu-latest ]
+        sdk: [ 2.12.0, dev ]
     steps:
-      - uses: actions/checkout@v2
-      - uses: dart-lang/setup-dart@v1.0
-        with:
-          sdk: ${{ matrix.sdk }}
-      - run: dart pub get
-      - run: dart run wasm:setup
-        id: setup
-      - run: dart test
+    - uses: dart-lang/setup-dart@v1.0
+      with:
+        sdk: ${{ matrix.sdk }}
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/cache@v2.1.6
+      with:
+        path: |
+          "~/.pub-cache/hosted"
+          .dart_tool
+        key: ${{ runner.os }}-${{ hashFiles('bin/**') }}
+    - run: dart pub get
+    - run: dart run wasm:setup
+      id: setup
+    - run: dart test
