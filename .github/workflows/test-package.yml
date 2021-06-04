@@ -65,3 +65,27 @@ jobs:
     - run: dart pub upgrade
     - run: dart run wasm:setup
     - run: dart test
+
+  validate_boilerplate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: dart-lang/setup-dart@v1.0
+      with:
+        sdk: dev
+    - uses: actions/checkout@v2
+    - name: validate boilerplate generation
+      run: |
+        pwd
+        ./tool/generate_ffi_boilerplate.py
+        dart format -owrite .
+        export DIFF_OUTPUT="$(git diff)"
+        if [[ $DIFF_OUTPUT ]]; then
+          echo "::error::Build needs to be re-run!"
+          echo "::group::git diff"
+          echo "$DIFF_OUTPUT"
+          echo "::endgroup::"
+          exit 1
+        else
+          echo "Build output is all good!"
+        fi

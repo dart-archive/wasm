@@ -119,19 +119,13 @@ class WasmRuntime {
       // finalizer on the _WasmTrapsEntry. Traps can also be created by WASM
       // code, and in that case we delete them in this function.
       var entry = _traps.remove(trap.address);
-      if (entry != null) {
-        // ignore: only_throw_errors
-        throw entry.exception;
-      } else {
-        // TODO: code path not hit in tests!
-        var trapMessage = calloc<WasmerByteVec>();
-        _trap_message(trap, trapMessage);
-        var message = 'Wasm trap when calling $source: ${trapMessage.ref}';
-        _byte_vec_delete(trapMessage);
-        calloc.free(trapMessage);
-        _trap_delete(trap);
-        throw WasmError(message);
+      if (entry == null) {
+        throw WasmError(
+          'This case is not (yet) supported. Please file an issue on pkg:wasm.',
+        );
       }
+      // ignore: only_throw_errors
+      throw entry.exception;
     }
   }
 
