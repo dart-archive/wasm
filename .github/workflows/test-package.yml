@@ -76,7 +76,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: validate boilerplate generation
       run: |
-        pwd
         ./tool/generate_ffi_boilerplate.py
         dart format -owrite .
         export DIFF_OUTPUT="$(git diff)"
