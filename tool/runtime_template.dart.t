@@ -275,11 +275,11 @@ class WasmRuntime {
   }
 
   void captureWasiStdout(Pointer<WasmerWasiConfig> config) {
-    _wasi_config_inherit_stdout(config);
+    _wasi_config_capture_stdout(config);
   }
 
   void captureWasiStderr(Pointer<WasmerWasiConfig> config) {
-    _wasi_config_inherit_stderr(config);
+    _wasi_config_capture_stderr(config);
   }
 
   Pointer<WasmerWasiEnv> newWasiEnv(Pointer<WasmerWasiConfig> config) =>

@@ -19,10 +19,9 @@ void main() {
 
       var fn = inst.lookupFunction('_start');
       fn();
-      var out = utf8.decode(await inst.stdout.single);
+      var out = utf8.decode(await inst.stdout.first);
       expect(out, 'hello, world!\n');
     },
-    skip: 'failing https://github.com/dart-lang/wasm/issues/3',
   );
 }
 

@@ -26,8 +26,8 @@ class WasmRuntime {
   late final WasmerSetFinalizerForModuleFn _set_finalizer_for_module;
   late final WasmerSetFinalizerForStoreFn _set_finalizer_for_store;
   late final WasmerSetFinalizerForTrapFn _set_finalizer_for_trap;
-  late final WasmerWasiConfigInheritStderrFn _wasi_config_inherit_stderr;
-  late final WasmerWasiConfigInheritStdoutFn _wasi_config_inherit_stdout;
+  late final WasmerWasiConfigCaptureStderrFn _wasi_config_capture_stderr;
+  late final WasmerWasiConfigCaptureStdoutFn _wasi_config_capture_stdout;
   late final WasmerWasiConfigNewFn _wasi_config_new;
   late final WasmerWasiEnvDeleteFn _wasi_env_delete;
   late final WasmerWasiEnvNewFn _wasi_env_new;
@@ -142,13 +142,13 @@ class WasmRuntime {
         NativeWasmerSetFinalizerForTrapFn, WasmerSetFinalizerForTrapFn>(
       'set_finalizer_for_trap',
     );
-    _wasi_config_inherit_stderr = _lib.lookupFunction<
-        NativeWasmerWasiConfigInheritStderrFn, WasmerWasiConfigInheritStderrFn>(
-      'wasi_config_inherit_stderr',
+    _wasi_config_capture_stderr = _lib.lookupFunction<
+        NativeWasmerWasiConfigCaptureStderrFn, WasmerWasiConfigCaptureStderrFn>(
+      'wasi_config_capture_stderr',
     );
-    _wasi_config_inherit_stdout = _lib.lookupFunction<
-        NativeWasmerWasiConfigInheritStdoutFn, WasmerWasiConfigInheritStdoutFn>(
-      'wasi_config_inherit_stdout',
+    _wasi_config_capture_stdout = _lib.lookupFunction<
+        NativeWasmerWasiConfigCaptureStdoutFn, WasmerWasiConfigCaptureStdoutFn>(
+      'wasi_config_capture_stdout',
     );
     _wasi_config_new =
         _lib.lookupFunction<NativeWasmerWasiConfigNewFn, WasmerWasiConfigNewFn>(
@@ -699,11 +699,11 @@ class WasmRuntime {
   }
 
   void captureWasiStdout(Pointer<WasmerWasiConfig> config) {
-    _wasi_config_inherit_stdout(config);
+    _wasi_config_capture_stdout(config);
   }
 
   void captureWasiStderr(Pointer<WasmerWasiConfig> config) {
-    _wasi_config_inherit_stderr(config);
+    _wasi_config_capture_stderr(config);
   }
 
   Pointer<WasmerWasiEnv> newWasiEnv(Pointer<WasmerWasiConfig> config) =>

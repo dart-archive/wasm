@@ -84,7 +84,7 @@ class _WasiStreamIterator implements Iterator<List<int>> {
   @override
   bool moveNext() {
     _length = _reader(_env, _buf, _bufferLength) as int;
-    return true;
+    return _length >= 0;
   }
 
   @override

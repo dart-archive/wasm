@@ -321,8 +321,8 @@ bool wasi_get_imports(const wasm_store_t* store, const wasm_module_t* module, co
 int wasmer_last_error_message(uint8_t* buffer, int length);
 int wasmer_last_error_length();
 void wasi_env_set_memory(wasi_env_t* env, const wasm_memory_t* memory);
-void wasi_config_inherit_stdout(wasi_config_t* config);
-void wasi_config_inherit_stderr(wasi_config_t* config);
+void wasi_config_capture_stdout(wasi_config_t* config);
+void wasi_config_capture_stderr(wasi_config_t* config);
 intptr_t wasi_env_read_stderr(wasi_env_t* env, uint8_t* buffer, uintptr_t buffer_len);
 intptr_t wasi_env_read_stdout(wasi_env_t* env, uint8_t* buffer, uintptr_t buffer_len);
 
