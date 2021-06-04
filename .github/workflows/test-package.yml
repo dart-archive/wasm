@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  # Run on PRs and pushes to the default branch.
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+  - cron: "0 0 * * 0"
+
+env:
+  PUB_ENVIRONMENT: bot.github
+
+jobs:
+  # Check code formatting and static analysis on a single OS (linux)
+  # against Dart dev and stable.
+  analyze:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sdk: [ dev ]
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: dart-lang/setup-dart@v1.0
+      with:
+        sdk: ${{ matrix.sdk }}
+    - id: install
+      run: dart pub upgrade
+    - run: dart format --output=none --set-exit-if-changed .
+      if: always() && steps.install.outcome == 'success'
+    - run: dart analyze --fatal-infos
+      if: always() && steps.install.outcome == 'success'
+
+  test:
+    needs: analyze
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+        # TODO: add in 2.14 when it's stable
+        sdk: [ dev ]
+    steps:
+    - uses: dart-lang/setup-dart@v1.0
+      with:
+        sdk: ${{ matrix.sdk }}
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/cache@v2.1.6
+      with:
+        path: |
+          "~/.pub-cache/hosted"
+          .dart_tool
+        key: ${{ runner.os }}-${{ matrix.sdk }}-${{ hashFiles('bin/**') }}
+    - run: dart pub upgrade
+    - run: dart run wasm:setup
+      id: setup
+    - run: dart test
