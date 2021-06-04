@@ -50,7 +50,7 @@ jobs:
         path: |
           "~/.pub-cache/hosted"
           .dart_tool
-        key: ${{ runner.os }}-${{ hashFiles('bin/**') }}
+        key: ${{ runner.os }}-${{ matrix.sdk }}-${{ hashFiles('bin/**') }}
     - run: dart pub get
     - run: dart run wasm:setup
       id: setup
