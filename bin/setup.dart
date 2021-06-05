@@ -25,9 +25,16 @@ Future<void> main(List<String> args) async {
     await _main(target);
   } on ProcessException catch (e, stack) {
     print('FAILED with exit code ${e.errorCode}');
+    if (e.message.isNotEmpty) {
+      print(e.message);
+    }
     print(stack);
     exitCode = 70; // software error
-    return;
+  } catch (e, stack) {
+    print(e);
+    print(e.runtimeType);
+    print(stack);
+    exitCode = 1;
   }
 }
 
