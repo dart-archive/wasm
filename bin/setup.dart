@@ -133,8 +133,16 @@ Future<String> _getTargetTriple() async {
 
 Future<void> _run(String exe, List<String> args) async {
   print('\n$exe ${args.join(' ')}\n');
-  final process =
-      await Process.start(exe, args, mode: ProcessStartMode.inheritStdio);
+
+  Future<void> capture(Stream<List<int>> std) => std
+      .transform(systemEncoding.decoder)
+      .transform(const LineSplitter())
+      .forEach(print);
+
+  final process = await Process.start(exe, args);
+
+  await Future.wait([capture(process.stdout), capture(process.stderr)]);
+
   final result = await process.exitCode;
   if (result != 0) {
     throw ProcessException(exe, args, '', result);
