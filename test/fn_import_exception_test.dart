@@ -26,23 +26,35 @@ void main() {
     ]);
 
     var thrownException = Exception('Hello exception!');
-    var inst = (WasmModule(data).builder()
-          ..addFunction('env', 'a', () {
-            throw thrownException;
-          })
-          ..addFunction('env', 'b', () {
-            fail('should not get here!');
-          }))
-        .build();
 
-    var fn = inst.lookupFunction('fn');
-    expect(() => fn(), throwsA(thrownException));
+    var errorCount = 0;
+    for (var i = 0; true; i++) {
+      var builder = (WasmModule(data).builder()
+        ..addFunction('env', 'a', () {
+          throw thrownException;
+        })
+        ..addFunction('env', 'b', () {
+          throw StateError('should not get here!');
+        }));
 
-    inst = (WasmModule(data).builder()
-          ..addFunction('env', 'a', expectAsync0(() => null))
-          ..addFunction('env', 'b', expectAsync0(() => null)))
-        .build();
-    fn = inst.lookupFunction('fn');
-    fn();
+      var inst = builder.build();
+
+      var fn = inst.lookupFunction('fn');
+
+      try {
+        fn();
+      } on Exception {
+        // noop
+      } catch (e, stack) {
+        print(e);
+        print(stack);
+        errorCount++;
+        print([errorCount, i]);
+
+        if (errorCount > 10) {
+          break;
+        }
+      }
+    }
   });
 }
