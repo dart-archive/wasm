@@ -150,7 +150,7 @@ Future<void> _run(String exe, List<String> args) async {
   Future<void> capture(Stream<List<int>> std) => std
       .transform(systemEncoding.decoder)
       .transform(const LineSplitter())
-      .forEach((line) => '${++count}  $line');
+      .forEach((line) => print('${++count}  $line'));
 
   final process = await Process.start(exe, args);
 
