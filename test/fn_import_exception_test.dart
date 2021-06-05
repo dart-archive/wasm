@@ -49,12 +49,12 @@ void main() {
         print(e);
         print(stack);
         errorCount++;
-        print([errorCount, i]);
 
         if (errorCount > 10) {
           break;
         }
       }
+      print([errorCount, i]);
     }
   });
 }
