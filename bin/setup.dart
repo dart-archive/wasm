@@ -163,6 +163,8 @@ Future<void> _main(String target) async {
   print('Target: $target');
   print('Output library: $outLib');
 
+  await _run('tree', [sdkIncDir.toFilePath()]);
+
   // Build wasmer crate.
   await _run('cargo', [
     'build',
