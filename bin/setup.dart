@@ -146,12 +146,12 @@ Future<void> _main(String target) async {
   final sdkIncDir = _getSdkIncDir(sdkDir);
   final binDir = Platform.script;
   final outDir = _outputDir();
-  final outLib = outDir.resolve(_getOutLib(target)).path;
+  final outLib = outDir.resolve(_getOutLib(target)).toFilePath();
 
-  print('Dart SDK directory: ${sdkDir.path}');
-  print('Dart SDK include directory: ${sdkIncDir.path}');
-  print('Script directory: ${binDir.path}');
-  print('Output directory: ${outDir.path}');
+  print('Dart SDK directory: ${sdkDir.toFilePath()}');
+  print('Dart SDK include directory: ${sdkIncDir.toFilePath()}');
+  print('Script directory: ${binDir.toFilePath()}');
+  print('Output directory: ${outDir.toFilePath()}');
   print('Target: $target');
   print('Output library: $outLib');
 
@@ -161,19 +161,19 @@ Future<void> _main(String target) async {
     '--target',
     target,
     '--target-dir',
-    outDir.path,
+    outDir.toFilePath(),
     '--manifest-path',
-    binDir.resolve('Cargo.toml').path,
+    binDir.resolve('Cargo.toml').toFilePath(),
     '--release'
   ]);
 
   // Hack around a bug with dart_api_dl_impl.h include path in dart_api_dl.c.
   const dartApiDlImplPath = 'include/internal/dart_api_dl_impl.h';
   if (!File.fromUri(sdkIncDir.resolve(dartApiDlImplPath)).existsSync()) {
-    Directory(outDir.resolve('include/internal/').path)
+    Directory(outDir.resolve('include/internal/').toFilePath())
         .createSync(recursive: true);
     await _findDartApiDlImpl(sdkIncDir)
-        .copy(outDir.resolve(dartApiDlImplPath).path);
+        .copy(outDir.resolve(dartApiDlImplPath).toFilePath());
   }
 
   // Build dart_api_dl.o.
@@ -186,13 +186,13 @@ Future<void> _main(String target) async {
     '-target',
     target,
     '-I',
-    sdkIncDir.path,
+    sdkIncDir.toFilePath(),
     '-I',
-    outDir.resolve('include/').path,
+    outDir.resolve('include/').toFilePath(),
     '-c',
-    sdkIncDir.resolve('dart_api_dl.c').path,
+    sdkIncDir.resolve('dart_api_dl.c').toFilePath(),
     '-o',
-    outDir.resolve('dart_api_dl.o').path
+    outDir.resolve('dart_api_dl.o').toFilePath()
   ]);
 
   // Build finalizers.o.
@@ -207,13 +207,13 @@ Future<void> _main(String target) async {
     '-target',
     target,
     '-I',
-    sdkIncDir.path,
+    sdkIncDir.toFilePath(),
     '-I',
-    outDir.resolve('include/').path,
+    outDir.resolve('include/').toFilePath(),
     '-c',
-    binDir.resolve('finalizers.cc').path,
+    binDir.resolve('finalizers.cc').toFilePath(),
     '-o',
-    outDir.resolve('finalizers.o').path
+    outDir.resolve('finalizers.o').toFilePath()
   ]);
 
   // Link wasmer, dart_api_dl, and finalizers to create the output library.
@@ -222,9 +222,9 @@ Future<void> _main(String target) async {
     '-fPIC',
     '-target',
     target,
-    outDir.resolve('dart_api_dl.o').path,
-    outDir.resolve('finalizers.o').path,
-    outDir.resolve('$target/release/libwasmer.a').path,
+    outDir.resolve('dart_api_dl.o').toFilePath(),
+    outDir.resolve('finalizers.o').toFilePath(),
+    outDir.resolve('$target/release/libwasmer.a').toFilePath(),
     '-o',
     outLib
   ]);
