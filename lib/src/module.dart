@@ -34,16 +34,22 @@ class WasmModule {
   /// Returns a description of all of the module's imports and exports, for
   /// debugging.
   String describe() {
-    var description = StringBuffer();
     var imports = runtime.importDescriptors(_module);
+    var importLines = <String>[];
     for (var imp in imports) {
-      description.write('import $imp\n');
+      importLines.add('import $imp\n');
     }
+    importLines.sort();
     var exports = runtime.exportDescriptors(_module);
+    var exportLines = <String>[];
     for (var exp in exports) {
-      description.write('export $exp\n');
+      exportLines.add('export $exp\n');
     }
-    return description.toString();
+    exportLines.sort();
+    return [
+      ...importLines,
+      ...exportLines,
+    ].join('\n');
   }
 }
 
