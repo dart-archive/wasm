@@ -132,12 +132,18 @@ Future<String> _getTargetTriple() async {
 }
 
 Future<void> _run(String exe, List<String> args) async {
+  if (Platform.isMacOS && exe == 'tree') {
+    print('skipping `tree` on mac!');
+    return;
+  }
+
   print('\n$exe ${args.join(' ')}\n');
 
+  var count = 0;
   Future<void> capture(Stream<List<int>> std) => std
       .transform(systemEncoding.decoder)
       .transform(const LineSplitter())
-      .forEach(print);
+      .forEach((line) => '${++count}  $line');
 
   final process = await Process.start(exe, args);
 
