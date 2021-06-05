@@ -14,7 +14,7 @@ const linuxLib = 'libwasmer.so';
 
 Uri? packageRootUri(Uri root) {
   do {
-    if (FileSystemEntity.isFileSync(root.resolve(pkgConfigFile).path)) {
+    if (FileSystemEntity.isFileSync(root.resolve(pkgConfigFile).toFilePath())) {
       return root;
     }
   } while (root != (root = root.resolve('..')));

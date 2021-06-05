@@ -86,7 +86,8 @@ File _findDartApiDlImpl(Uri sdkIncDir) {
   );
 }
 
-Uri _getOutDir(Uri root) {
+Uri _outputDir() {
+  final root = Directory.current.uri;
   final pkgRoot = packageRootUri(root);
   if (pkgRoot == null) {
     throw ArgumentError('Could not find "$pkgConfigFile" within "$root".');
@@ -144,7 +145,7 @@ Future<void> _main(String target) async {
   final sdkDir = _getSdkDir();
   final sdkIncDir = _getSdkIncDir(sdkDir);
   final binDir = Platform.script;
-  final outDir = _getOutDir(Directory.current.uri);
+  final outDir = _outputDir();
   final outLib = outDir.resolve(_getOutLib(target)).path;
 
   print('Dart SDK directory: ${sdkDir.path}');
