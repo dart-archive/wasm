@@ -13,8 +13,6 @@ env:
   PUB_ENVIRONMENT: bot.github
 
 jobs:
-  # Check code formatting and static analysis on a single OS (linux)
-  # against Dart dev and stable.
   analyze:
     runs-on: ubuntu-latest
     strategy:
@@ -37,9 +35,23 @@ jobs:
       if: always() && steps.install.outcome == 'success'
     - run: dart analyze --fatal-infos
       if: always() && steps.install.outcome == 'success'
+    - name: validate boilerplate generation
+      if: always() && steps.install.outcome == 'success'
+      run: |
+        ./tool/generate_ffi_boilerplate.py
+        dart format -owrite .
+        export DIFF_OUTPUT="$(git diff)"
+        if [[ $DIFF_OUTPUT ]]; then
+          echo "::error::Build needs to be re-run!"
+          echo "::group::git diff"
+          echo "$DIFF_OUTPUT"
+          echo "::endgroup::"
+          exit 1
+        else
+          echo "Build output is all good!"
+        fi
 
   test:
-    needs: analyze
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -64,26 +76,3 @@ jobs:
     - run: dart pub upgrade
     - run: dart run wasm:setup
     - run: dart test
-
-  validate_boilerplate:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2.3.4
-    - uses: dart-lang/setup-dart@v1.0
-      with:
-        sdk: dev
-    - uses: actions/checkout@v2
-    - name: validate boilerplate generation
-      run: |
-        ./tool/generate_ffi_boilerplate.py
-        dart format -owrite .
-        export DIFF_OUTPUT="$(git diff)"
-        if [[ $DIFF_OUTPUT ]]; then
-          echo "::error::Build needs to be re-run!"
-          echo "::group::git diff"
-          echo "$DIFF_OUTPUT"
-          echo "::endgroup::"
-          exit 1
-        else
-          echo "Build output is all good!"
-        fi
