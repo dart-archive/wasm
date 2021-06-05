@@ -23,9 +23,9 @@ Future<void> main(List<String> args) async {
 
   try {
     await _main(target);
-  } on ProcessException catch (e) {
-    final invocation = [e.executable, ...e.arguments].join(' ');
-    print('FAILED with exit code ${e.errorCode} `$invocation`');
+  } on ProcessException catch (e, stack) {
+    print('FAILED with exit code ${e.errorCode}');
+    print(stack);
     exitCode = 70; // software error
     return;
   }
