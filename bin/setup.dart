@@ -177,6 +177,8 @@ Future<void> _main(String target) async {
     '--release'
   ]);
 
+  await _run('tree', [outDir.toFilePath()]);
+
   // Hack around a bug with dart_api_dl_impl.h include path in dart_api_dl.c.
   const dartApiDlImplPath = 'include/internal/dart_api_dl_impl.h';
   if (!File.fromUri(sdkIncDir.resolve(dartApiDlImplPath)).existsSync()) {
