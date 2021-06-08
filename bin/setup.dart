@@ -36,7 +36,7 @@ Uri _getSdkDir() {
   // path.dirname called twice on Platform.resolvedExecutable.
   final exe = Uri.file(Platform.resolvedExecutable);
   final commonSdkDir = exe.resolve('../../dart-sdk/');
-  if (FileSystemEntity.isDirectorySync(commonSdkDir.path)) {
+  if (FileSystemEntity.isDirectorySync(commonSdkDir.toFilePath())) {
     return commonSdkDir;
   }
 
@@ -44,13 +44,13 @@ Uri _getSdkDir() {
   // SDK, and is executing dart via:
   // ./out/ReleaseX64/dart ...
   final checkedOutSdkDir = exe.resolve('../dart-sdk/');
-  if (FileSystemEntity.isDirectorySync(checkedOutSdkDir.path)) {
+  if (FileSystemEntity.isDirectorySync(checkedOutSdkDir.toFilePath())) {
     return checkedOutSdkDir;
   }
 
   final homebrewOutSdkDir = exe.resolve('..');
   final homebrewIncludeDir = homebrewOutSdkDir.resolve('include');
-  if (FileSystemEntity.isDirectorySync(homebrewIncludeDir.path)) {
+  if (FileSystemEntity.isDirectorySync(homebrewIncludeDir.toFilePath())) {
     return homebrewOutSdkDir;
   }
 
@@ -70,7 +70,7 @@ Uri _getSdkIncDir(Uri sdkDir) {
   }
   throw FileSystemException(
     "Can't find the include directory in the Dart SDK",
-    sdkDir.path,
+    sdkDir.toFilePath(),
   );
 }
 
@@ -82,7 +82,7 @@ File _findDartApiDlImpl(Uri sdkIncDir) {
   if (file.existsSync()) return file;
   throw FileSystemException(
     "Can't find dart_api_dl_impl.h in the Dart SDK include directory",
-    sdkIncDir.path,
+    sdkIncDir.toFilePath(),
   );
 }
 
@@ -94,14 +94,24 @@ Uri _getOutDir(Uri root) {
   return pkgRoot.resolve(wasmToolDir);
 }
 
-String _getOutLib(String target) {
-  final os = RegExp(r'^.*-.*-(.*)').firstMatch(target)?.group(1) ?? '';
+String _getOsFromTarget(String target) {
+  return RegExp(r'^[^-]*-[^-]*-([^-]*)').firstMatch(target)?.group(1) ?? '';
+}
+
+String _getOutLib(String os) {
   if (os == 'darwin' || os == 'ios') {
     return appleLib;
   } else if (os == 'windows') {
-    return 'wasmer.dll';
+    return windowsLib;
   }
   return linuxLib;
+}
+
+String _getWasmerLib(String os) {
+  if (os == 'windows') {
+    return 'wasmer.lib';
+  }
+  return 'libwasmer.a';
 }
 
 Future<String> _getTargetTriple() async {
@@ -143,15 +153,17 @@ Future<void> _run(String exe, List<String> args) async {
 Future<void> _main(String target) async {
   final sdkDir = _getSdkDir();
   final sdkIncDir = _getSdkIncDir(sdkDir);
-  final binDir = Platform.script;
+  final binDir = Platform.script.resolve('./');
   final outDir = _getOutDir(Directory.current.uri);
-  final outLib = outDir.resolve(_getOutLib(target)).path;
+  final os = _getOsFromTarget(target);
+  final outLib = outDir.resolve(_getOutLib(os)).toFilePath();
 
-  print('Dart SDK directory: ${sdkDir.path}');
-  print('Dart SDK include directory: ${sdkIncDir.path}');
-  print('Script directory: ${binDir.path}');
-  print('Output directory: ${outDir.path}');
+  print('Dart SDK directory: ${sdkDir.toFilePath()}');
+  print('Dart SDK include directory: ${sdkIncDir.toFilePath()}');
+  print('Script directory: ${binDir.toFilePath()}');
+  print('Output directory: ${outDir.toFilePath()}');
   print('Target: $target');
+  print('OS: $os');
   print('Output library: $outLib');
 
   // Build wasmer crate.
@@ -160,19 +172,19 @@ Future<void> _main(String target) async {
     '--target',
     target,
     '--target-dir',
-    outDir.path,
+    outDir.toFilePath(),
     '--manifest-path',
-    binDir.resolve('Cargo.toml').path,
+    binDir.resolve('Cargo.toml').toFilePath(),
     '--release'
   ]);
 
   // Hack around a bug with dart_api_dl_impl.h include path in dart_api_dl.c.
   const dartApiDlImplPath = 'include/internal/dart_api_dl_impl.h';
   if (!File.fromUri(sdkIncDir.resolve(dartApiDlImplPath)).existsSync()) {
-    Directory(outDir.resolve('include/internal/').path)
+    Directory(outDir.resolve('include/internal/').toFilePath())
         .createSync(recursive: true);
     await _findDartApiDlImpl(sdkIncDir)
-        .copy(outDir.resolve(dartApiDlImplPath).path);
+        .copy(outDir.resolve(dartApiDlImplPath).toFilePath());
   }
 
   // Build dart_api_dl.o.
@@ -180,18 +192,18 @@ Future<void> _main(String target) async {
     '-DDART_SHARED_LIB',
     '-DNDEBUG',
     '-fno-exceptions',
-    '-fPIC',
+    if (os != 'windows') '-fPIC',
     '-O3',
     '-target',
     target,
     '-I',
-    sdkIncDir.path,
+    sdkIncDir.toFilePath(),
     '-I',
-    outDir.resolve('include/').path,
+    outDir.resolve('include/').toFilePath(),
     '-c',
-    sdkIncDir.resolve('dart_api_dl.c').path,
+    sdkIncDir.resolve('dart_api_dl.c').toFilePath(),
     '-o',
-    outDir.resolve('dart_api_dl.o').path
+    outDir.resolve('dart_api_dl.o').toFilePath()
   ]);
 
   // Build finalizers.o.
@@ -200,30 +212,31 @@ Future<void> _main(String target) async {
     '-DNDEBUG',
     '-fno-exceptions',
     '-fno-rtti',
-    '-fPIC',
+    if (os != 'windows') '-fPIC',
     '-O3',
     '-std=c++11',
     '-target',
     target,
     '-I',
-    sdkIncDir.path,
+    sdkIncDir.toFilePath(),
     '-I',
-    outDir.resolve('include/').path,
+    outDir.resolve('include/').toFilePath(),
     '-c',
-    binDir.resolve('finalizers.cc').path,
+    binDir.resolve('finalizers.cc').toFilePath(),
     '-o',
-    outDir.resolve('finalizers.o').path
+    outDir.resolve('finalizers.o').toFilePath()
   ]);
 
   // Link wasmer, dart_api_dl, and finalizers to create the output library.
   await _run('clang++', [
     '-shared',
-    '-fPIC',
+    if (os != 'windows') '-fPIC',
+    if (os == 'windows') ...['-lws2_32', '-ladvapi32', '-lbcrypt', '-luserenv'],
     '-target',
     target,
-    outDir.resolve('dart_api_dl.o').path,
-    outDir.resolve('finalizers.o').path,
-    outDir.resolve('$target/release/libwasmer.a').path,
+    outDir.resolve('dart_api_dl.o').toFilePath(),
+    outDir.resolve('finalizers.o').toFilePath(),
+    outDir.resolve('$target/release/${_getWasmerLib(os)}').toFilePath(),
     '-o',
     outLib
   ]);

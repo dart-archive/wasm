@@ -104,6 +104,7 @@ class _WasiStreamIterable extends Iterable<List<int>> {
 String _getLibName() {
   if (Platform.isMacOS) return appleLib;
   if (Platform.isLinux) return linuxLib;
+  if (Platform.isWindows) return windowsLib;
   // TODO(dartbug.com/37882): Support more platforms.
   throw WasmError('Wasm not currently supported on this platform');
 }
@@ -111,7 +112,7 @@ String _getLibName() {
 String? _getLibPathFrom(Uri root) {
   final pkgRoot = packageRootUri(root);
 
-  return pkgRoot?.resolve('$wasmToolDir${_getLibName()}').path;
+  return pkgRoot?.resolve('$wasmToolDir${_getLibName()}').toFilePath();
 }
 
 String _getLibPath() {

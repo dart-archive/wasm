@@ -11,10 +11,11 @@ const wasmToolDir = '.dart_tool/wasm/';
 
 const appleLib = 'libwasmer.dylib';
 const linuxLib = 'libwasmer.so';
+const windowsLib = 'wasmer.dll';
 
 Uri? packageRootUri(Uri root) {
   do {
-    if (FileSystemEntity.isFileSync(root.resolve(pkgConfigFile).path)) {
+    if (FileSystemEntity.isFileSync(root.resolve(pkgConfigFile).toFilePath())) {
       return root;
     }
   } while (root != (root = root.resolve('..')));

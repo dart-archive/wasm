@@ -38,7 +38,7 @@ void main(List<String> args) {
 
   print('\nLoading wasm module');
   var brotliPath = Platform.script.resolve('libbrotli.wasm');
-  var moduleData = File(brotliPath.path).readAsBytesSync();
+  var moduleData = File(brotliPath.toFilePath()).readAsBytesSync();
   var module = WasmModule(moduleData);
   print(module.describe());
 
