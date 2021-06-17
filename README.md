@@ -16,7 +16,8 @@ example directory.
 extern "C" int square(int n) { return n * n; }
 ```
 
-We can compile this C++ code to WASM using a recent version of clang:
+We can compile this C++ code to WASM using a recent version of the
+[clang compiler](https://clang.llvm.org/get_started.html):
 
 ```bash
 clang --target=wasm32 -nostdlib -Wl,--export-all -Wl,--no-entry -o square.wasm square.cc
