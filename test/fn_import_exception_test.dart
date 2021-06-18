@@ -44,5 +44,7 @@ void main() {
         .build();
     fn = inst.lookupFunction('fn');
     fn();
-  }, onPlatform: {'windows': Skip('Broken on windows. See #14')});
+  }, onPlatform: {
+    'windows': Skip('Broken on windows. See #14'),
+  });
 }
