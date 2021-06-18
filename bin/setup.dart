@@ -5,7 +5,7 @@
 // Builds the wasmer runtime library, to by used by package:wasm. Requires
 // rustc, cargo, clang, and clang++. If a target triple is not specified, it
 // will default to the host target.
-// Usage: dart run wasm:setup [target-triple]
+// Usage: dart run wasm:setup [optional target-triple]
 
 import 'dart:convert';
 import 'dart:io' hide exit;
@@ -231,7 +231,16 @@ Future<void> _main(String target) async {
   await _run('clang++', [
     '-shared',
     if (os != 'windows') '-fPIC',
-    if (os == 'windows') ...['-lws2_32', '-ladvapi32', '-lbcrypt', '-luserenv'],
+    if (os == 'windows') ...[
+      '-lws2_32',
+      '-ladvapi32',
+      '-lbcrypt',
+      '-luserenv',
+      '-z',
+      '/DEF:${binDir.resolve('module.g.def').toFilePath()}',
+      '-z',
+      '/NODEFAULTLIB:MSVCRT',
+    ],
     '-target',
     target,
     outDir.resolve('dart_api_dl.o').toFilePath(),
