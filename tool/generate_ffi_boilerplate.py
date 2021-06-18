@@ -145,6 +145,10 @@ def getRuntimeLoad():
     ])
 
 
+def getWindowsExports():
+    return '\n'.join(['   %s' % name for name, _, _ in getFns()])
+
+
 def predefinedType(nativeType, ffiType, dartType):
     predefTypes[nativeType] = (ffiType, dartType)
 
@@ -372,7 +376,7 @@ def readFile(filename):
 
 
 def writeFile(filename, content):
-    with open(os.path.abspath(os.path.join(thisDir, '../lib/src', filename)),
+    with open(os.path.abspath(os.path.join(thisDir, '..', filename)),
               'w') as f:
         f.write(content)
 
@@ -380,10 +384,14 @@ def writeFile(filename, content):
 wasmerApiText = readFile('wasmer_api_template.dart.t')
 wasmerApiText = wasmerApiText.replace('/* <WASMER_API> */', getWasmerApi())
 wasmerApiText = wasmerApiText.replace('/* <GEN_DOC> */', genDoc)
-writeFile('wasmer_api.g.dart', wasmerApiText)
+writeFile('lib/src/wasmer_api.g.dart', wasmerApiText)
 
 runtimeText = readFile('runtime_template.dart.t')
 runtimeText = runtimeText.replace('/* <RUNTIME_MEMB> */', getRuntimeMemb())
 runtimeText = runtimeText.replace('/* <RUNTIME_LOAD> */', getRuntimeLoad())
 runtimeText = runtimeText.replace('/* <GEN_DOC> */', genDoc)
-writeFile('runtime.g.dart', runtimeText)
+writeFile('lib/src/runtime.g.dart', runtimeText)
+
+winModuleText = readFile('module.def.t')
+winModuleText = winModuleText.replace('; WINDOWS_EXPORTS', getWindowsExports())
+writeFile('bin/module.g.def', winModuleText)
