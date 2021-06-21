@@ -106,7 +106,7 @@ Future<Uri> _getSrcDir() async {
     );
   }
   for (final pkg in config.packages) {
-    if (pkg.name == "wasm") {
+    if (pkg.name == 'wasm') {
       return pkg.root.resolve('bin/');
     }
   }
