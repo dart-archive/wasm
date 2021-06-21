@@ -10,6 +10,7 @@
 import 'dart:convert';
 import 'dart:io' hide exit;
 
+import 'package:package_config/package_config.dart' show findPackageConfig;
 import 'package:wasm/src/shared.dart';
 
 Future<void> main(List<String> args) async {
@@ -86,6 +87,35 @@ File _findDartApiDlImpl(Uri sdkIncDir) {
   );
 }
 
+Future<Uri> _getSrcDir() async {
+  final srcDir = Platform.script.resolve('./');
+  if (await File.fromUri(srcDir.resolve('setup.dart')).exists()) {
+    // Typical case, where this script is being run from source, or was
+    // precompiled into that directory.
+    return srcDir;
+  }
+  // If the wasm is included as a git dependency, then pub can precompile this
+  // script to a different directory. In that case, the only way to find where
+  // the original script was located is by reading the package_config file.
+  // See #17 for more info.
+  final config = await findPackageConfig(Directory.fromUri(srcDir));
+  if (config == null) {
+    throw FileSystemException(
+      "Can't find a package config file above this directory",
+      srcDir.toFilePath(),
+    );
+  }
+  for (final pkg in config.packages) {
+    if (pkg.name == 'wasm') {
+      return pkg.root.resolve('bin/');
+    }
+  }
+  throw FileSystemException(
+    "Can't find package:wasm in the package config file above this directory",
+    srcDir.toFilePath(),
+  );
+}
+
 Uri _getOutDir(Uri root) {
   final pkgRoot = packageRootUri(root);
   if (pkgRoot == null) {
@@ -153,14 +183,14 @@ Future<void> _run(String exe, List<String> args) async {
 Future<void> _main(String target) async {
   final sdkDir = _getSdkDir();
   final sdkIncDir = _getSdkIncDir(sdkDir);
-  final binDir = Platform.script.resolve('./');
+  final srcDir = await _getSrcDir();
   final outDir = _getOutDir(Directory.current.uri);
   final os = _getOsFromTarget(target);
   final outLib = outDir.resolve(_getOutLib(os)).toFilePath();
 
   print('Dart SDK directory: ${sdkDir.toFilePath()}');
   print('Dart SDK include directory: ${sdkIncDir.toFilePath()}');
-  print('Script directory: ${binDir.toFilePath()}');
+  print('Source directory: ${srcDir.toFilePath()}');
   print('Output directory: ${outDir.toFilePath()}');
   print('Target: $target');
   print('OS: $os');
@@ -174,7 +204,7 @@ Future<void> _main(String target) async {
     '--target-dir',
     outDir.toFilePath(),
     '--manifest-path',
-    binDir.resolve('Cargo.toml').toFilePath(),
+    srcDir.resolve('Cargo.toml').toFilePath(),
     '--release'
   ]);
 
@@ -222,7 +252,7 @@ Future<void> _main(String target) async {
     '-I',
     outDir.resolve('include/').toFilePath(),
     '-c',
-    binDir.resolve('finalizers.cc').toFilePath(),
+    srcDir.resolve('finalizers.cc').toFilePath(),
     '-o',
     outDir.resolve('finalizers.o').toFilePath()
   ]);
@@ -237,7 +267,7 @@ Future<void> _main(String target) async {
       '-lbcrypt',
       '-luserenv',
       '-z',
-      '/DEF:${binDir.resolve('module.g.def').toFilePath()}',
+      '/DEF:${srcDir.resolve('module.g.def').toFilePath()}',
       '-z',
       '/NODEFAULTLIB:MSVCRT',
     ],
