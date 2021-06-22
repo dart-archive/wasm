@@ -12,7 +12,7 @@ part of 'runtime.dart';
 
 class WasmRuntime {
   final DynamicLibrary _lib;
-  final _traps = <int, _WasmTrapsEntry>{};
+  final _traps = <String, _WasmTrapsEntry>{};
   late final Pointer<WasmerEngine> _engine;
 
 /* <RUNTIME_MEMB> */
@@ -115,7 +115,12 @@ class WasmRuntime {
       // with a corresponding exception, and their memory is managed using a
       // finalizer on the _WasmTrapsEntry. Traps can also be created by WASM
       // code, and in that case we delete them in this function.
-      var entry = _traps.remove(trap.address);
+      final trapMessage = calloc<WasmerByteVec>();
+      _trap_message(trap, trapMessage);
+      final message = trapMessage.ref.toString();
+      _byte_vec_delete(trapMessage);
+      calloc.free(trapMessage);
+      final entry = _traps.remove(message);
       if (entry == null) {
         throw WasmError(
           'This case is not (yet) supported. Please file an issue on pkg:wasm.',
@@ -252,17 +257,19 @@ class WasmRuntime {
   }
 
   Pointer<WasmerTrap> newTrap(Pointer<WasmerStore> store, Object exception) {
-    var msg = calloc<WasmerByteVec>();
-    msg.ref.data = calloc<Uint8>();
-    msg.ref.data[0] = 0;
-    msg.ref.length = 0;
-    var trap = _trap_new(store, msg);
-    calloc.free(msg.ref.data);
-    calloc.free(msg);
+    final msg = 'dart:${exception.hashCode.toRadixString(36)}';
+    final msgList = utf8.encode(msg);
+    final bytes = calloc<WasmerByteVec>();
+    bytes.ref.data = calloc<Uint8>(msgList.length);
+    for (var i = 0; i < msgList.length; ++i) bytes.ref.data[i] = msgList[i];
+    bytes.ref.length = msgList.length;
+    var trap = _trap_new(store, bytes);
+    calloc.free(bytes.ref.data);
+    calloc.free(bytes);
     _checkNotEqual(trap, nullptr, 'Failed to create trap.');
     var entry = _WasmTrapsEntry(exception);
     _set_finalizer_for_trap(entry, trap);
-    _traps[trap.address] = entry;
+    _traps[msg] = entry;
     return trap;
   }
 
