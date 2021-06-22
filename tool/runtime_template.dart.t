@@ -261,7 +261,9 @@ class WasmRuntime {
     final msgList = utf8.encode(msg);
     final bytes = calloc<WasmerByteVec>();
     bytes.ref.data = calloc<Uint8>(msgList.length);
-    for (var i = 0; i < msgList.length; ++i) bytes.ref.data[i] = msgList[i];
+    for (var i = 0; i < msgList.length; ++i) {
+      bytes.ref.data[i] = msgList[i];
+    }
     bytes.ref.length = msgList.length;
     var trap = _trap_new(store, bytes);
     calloc.free(bytes.ref.data);
