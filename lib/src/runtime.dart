@@ -19,51 +19,46 @@ part 'runtime.g.dart';
 /// The singleton instance of [WasmRuntime].
 final runtime = WasmRuntime._init();
 
+_getImportExportString(int kind, String name, Pointer type) {
+  final kindName = wasmerExternKindName(kind);
+  if (kind == wasmerExternKindFunction) {
+    final funcType = type as Pointer<WasmerFunctype>;
+    final sig = getSignatureString(
+      name,
+      runtime.getArgTypes(funcType),
+      runtime.getReturnType(funcType),
+    );
+    return '$kindName: $sig';
+  } else if (kind == wasmerExternKindGlobal) {
+    final globalType = type as Pointer<WasmerGlobaltype>;
+    final typeName = wasmerValKindName(runtime.getContentType(globalType));
+    return '$kindName: $typeName $name';
+  } else {
+    return '$kindName: $name';
+  }
+}
+
 class WasmImportDescriptor {
   final int kind;
   final String moduleName;
   final String name;
-  final Pointer<WasmerFunctype> funcType;
+  final Pointer type;
 
-  WasmImportDescriptor._(this.kind, this.moduleName, this.name, this.funcType);
+  WasmImportDescriptor._(this.kind, this.moduleName, this.name, this.type);
 
   @override
-  String toString() {
-    var kindName = wasmerExternKindName(kind);
-    if (kind == wasmerExternKindFunction) {
-      var sig = getSignatureString(
-        '$moduleName::$name',
-        runtime.getArgTypes(funcType),
-        runtime.getReturnType(funcType),
-      );
-      return '$kindName: $sig';
-    } else {
-      return '$kindName: $moduleName::$name';
-    }
-  }
+  String toString() => _getImportExportString(kind, '$moduleName::$name', type);
 }
 
 class WasmExportDescriptor {
   final int kind;
   final String name;
-  final Pointer<WasmerFunctype> funcType;
+  final Pointer type;
 
-  WasmExportDescriptor._(this.kind, this.name, this.funcType);
+  WasmExportDescriptor._(this.kind, this.name, this.type);
 
   @override
-  String toString() {
-    var kindName = wasmerExternKindName(kind);
-    if (kind == wasmerExternKindFunction) {
-      var sig = getSignatureString(
-        name,
-        runtime.getArgTypes(funcType),
-        runtime.getReturnType(funcType),
-      );
-      return '$kindName: $sig';
-    } else {
-      return '$kindName: $name';
-    }
-  }
+  String toString() => _getImportExportString(kind, name, type);
 }
 
 class _WasmTrapsEntry {

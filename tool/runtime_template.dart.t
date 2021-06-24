@@ -61,6 +61,16 @@ class WasmRuntime {
     return modulePtr;
   }
 
+  Pointer _externTypeToFuncOrGlobalType(
+      int kind, Pointer<WasmerExterntype> extern) {
+    if (kind == wasmerExternKindFunction) {
+      return _externtype_as_functype(extern);
+    } else if (kind == wasmerExternKindGlobal) {
+      return _externtype_as_globaltype(extern);
+    }
+    return nullptr;
+  }
+
   List<WasmExportDescriptor> exportDescriptors(Pointer<WasmerModule> module) {
     var exportsVec = calloc<WasmerExporttypeVec>();
     _module_exports(module, exportsVec);
@@ -69,14 +79,11 @@ class WasmRuntime {
       var exp = exportsVec.ref.data[i];
       var extern = _exporttype_type(exp);
       var kind = _externtype_kind(extern);
-      var fnType = kind == wasmerExternKindFunction
-          ? _externtype_as_functype(extern)
-          : nullptr;
       exps.add(
         WasmExportDescriptor._(
           kind,
           _exporttype_name(exp).ref.toString(),
-          fnType,
+          _externTypeToFuncOrGlobalType(kind, extern),
         ),
       );
     }
@@ -92,15 +99,12 @@ class WasmRuntime {
       var imp = importsVec.ref.data[i];
       var extern = _importtype_type(imp);
       var kind = _externtype_kind(extern);
-      var fnType = kind == wasmerExternKindFunction
-          ? _externtype_as_functype(extern)
-          : nullptr;
       imps.add(
         WasmImportDescriptor._(
           kind,
           _importtype_module(imp).ref.toString(),
           _importtype_name(imp).ref.toString(),
-          fnType,
+          _externTypeToFuncOrGlobalType(kind, extern),
         ),
       );
     }
@@ -179,6 +183,10 @@ class WasmRuntime {
       throw WasmError('Multiple return values are not supported');
     }
     return _valtype_kind(rets.ref.data[0]);
+  }
+
+  int getContentType(Pointer<WasmerGlobaltype> globalType) {
+    return _valtype_kind(_globaltype_content(globalType));
   }
 
   void call(
