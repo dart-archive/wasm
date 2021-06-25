@@ -31,8 +31,9 @@ _getImportExportString(int kind, String name, Pointer type) {
     return '$kindName: $sig';
   } else if (kind == wasmerExternKindGlobal) {
     final globalType = type as Pointer<WasmerGlobaltype>;
-    final typeName = wasmerValKindName(runtime.getContentType(globalType));
-    return '$kindName: $typeName $name';
+    final typeName = wasmerValKindName(runtime.getGlobalKind(globalType));
+    final mutName = wasmerMutabilityName(runtime.getGlobalMut(globalType));
+    return '$kindName: $mutName $typeName $name';
   } else {
     return '$kindName: $name';
   }

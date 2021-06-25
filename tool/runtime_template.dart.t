@@ -185,10 +185,6 @@ class WasmRuntime {
     return _valtype_kind(rets.ref.data[0]);
   }
 
-  int getContentType(Pointer<WasmerGlobaltype> globalType) {
-    return _valtype_kind(_globaltype_content(globalType));
-  }
-
   void call(
     Pointer<WasmerFunc> func,
     Pointer<WasmerValVec> args,
@@ -257,6 +253,55 @@ class WasmRuntime {
     _checkNotEqual(f, nullptr, 'Failed to create function.');
     _set_finalizer_for_func(owner, f);
     return f;
+  }
+
+  Pointer<WasmerVal> newValue(int type, dynamic val) {
+    final wasmerVal = calloc<WasmerVal>();
+    if (!wasmerVal.ref.fill(type, val)) {
+      throw ArgumentError(
+          'Bad value for WASM type: ${wasmerValKindName(type)}');
+    }
+    return wasmerVal;
+  }
+
+  Pointer<WasmerGlobal> newGlobal(
+      Pointer<WasmerStore> store, int type, dynamic val, bool mutable) {
+    final wasmerVal = newValue(type, val);
+    final globalType = _globaltype_new(_valtype_new(type),
+        mutable ? wasmerMutabilityVar : wasmerMutabilityConst);
+    final global = _global_new(store, globalType, wasmerVal);
+    _globaltype_delete(globalType);
+    calloc.free(wasmerVal);
+    return global;
+  }
+
+  Pointer<WasmerGlobaltype> getGlobalType(Pointer<WasmerGlobal> global) =>
+      _global_type(global);
+
+  int getGlobalKind(Pointer<WasmerGlobaltype> globalType) =>
+      _valtype_kind(_globaltype_content(globalType));
+
+  int getGlobalMut(Pointer<WasmerGlobaltype> globalType) =>
+      _globaltype_mutability(globalType);
+
+  Pointer<WasmerGlobal> externToGlobal(Pointer<WasmerExtern> extern) =>
+      _extern_as_global(extern);
+
+  Pointer<WasmerExtern> globalToExtern(Pointer<WasmerGlobal> global) =>
+      _global_as_extern(global);
+
+  dynamic globalGet(Pointer<WasmerGlobal> global, int type) {
+    final wasmerVal = newValue(type, 0);
+    _global_get(global, wasmerVal);
+    final result = wasmerVal.ref.toDynamic;
+    calloc.free(wasmerVal);
+    return result;
+  }
+
+  void globalSet(Pointer<WasmerGlobal> global, int type, dynamic val) {
+    final wasmerVal = newValue(type, val);
+    _global_set(global, wasmerVal);
+    calloc.free(wasmerVal);
   }
 
   Pointer<WasmerTrap> newTrap(Pointer<WasmerStore> store, Object exception) {

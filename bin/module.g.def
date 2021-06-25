@@ -34,6 +34,7 @@ EXPORTS
    wasm_exporttype_vec_new_empty
    wasm_exporttype_vec_new_uninitialized
    wasm_extern_as_func
+   wasm_extern_as_global
    wasm_extern_as_memory
    wasm_extern_delete
    wasm_extern_kind
@@ -52,9 +53,16 @@ EXPORTS
    wasm_functype_delete
    wasm_functype_params
    wasm_functype_results
+   wasm_global_as_extern
    wasm_global_delete
+   wasm_global_get
+   wasm_global_new
+   wasm_global_set
+   wasm_global_type
    wasm_globaltype_content
    wasm_globaltype_delete
+   wasm_globaltype_mutability
+   wasm_globaltype_new
    wasm_importtype_module
    wasm_importtype_name
    wasm_importtype_type
@@ -85,6 +93,7 @@ EXPORTS
    wasm_trap_new
    wasm_valtype_delete
    wasm_valtype_kind
+   wasm_valtype_new
    wasm_valtype_vec_delete
    wasm_valtype_vec_new
    wasm_valtype_vec_new_empty
