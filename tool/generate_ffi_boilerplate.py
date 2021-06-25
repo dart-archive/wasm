@@ -166,6 +166,7 @@ reReplace = [(re.compile('\\b%s\\b' % k), v) for k, v in [
     ('wasm_memory_pages_t', 'uint32_t'),
     ('wasm_externkind_t', 'uint8_t'),
     ('wasm_valkind_t', 'uint8_t'),
+    ('wasm_mutability_t', 'uint8_t'),
 ]]
 reWord = re.compile(r'\b\w+\b')
 
@@ -275,6 +276,7 @@ declareType('extern', False)
 declareOwn('memorytype')
 declareOwn('externtype')
 declareOwn('functype')
+declareOwn('globaltype')
 
 # These are actually DECLARE_SHARABLE_REF, but we don't need the ref stuff.
 declareOwn('module')
@@ -284,6 +286,7 @@ declareOwn('memory')
 declareOwn('trap')
 declareOwn('instance')
 declareOwn('func')
+declareOwn('global')
 
 rawFns = '''
 WASM_API_EXTERN own wasm_engine_t* wasm_engine_new();
@@ -295,6 +298,7 @@ WASM_API_EXTERN const wasm_name_t* wasm_importtype_module(const wasm_importtype_
 WASM_API_EXTERN const wasm_name_t* wasm_importtype_name(const wasm_importtype_t*);
 WASM_API_EXTERN const wasm_externtype_t* wasm_importtype_type(const wasm_importtype_t*);
 WASM_API_EXTERN wasm_functype_t* wasm_externtype_as_functype(wasm_externtype_t*);
+WASM_API_EXTERN wasm_globaltype_t* wasm_externtype_as_globaltype(wasm_externtype_t*);
 WASM_API_EXTERN void wasm_module_exports(const wasm_module_t*, own wasm_exporttype_vec_t* out);
 WASM_API_EXTERN const wasm_name_t* wasm_exporttype_name(const wasm_exporttype_t*);
 WASM_API_EXTERN const wasm_externtype_t* wasm_exporttype_type(const wasm_exporttype_t*);
@@ -306,13 +310,21 @@ WASM_API_EXTERN byte_t* wasm_memory_data(wasm_memory_t*);
 WASM_API_EXTERN size_t wasm_memory_data_size(const wasm_memory_t*);
 WASM_API_EXTERN wasm_memory_pages_t wasm_memory_size(const wasm_memory_t*);
 WASM_API_EXTERN bool wasm_memory_grow(wasm_memory_t*, wasm_memory_pages_t delta);
+WASM_API_EXTERN own wasm_global_t* wasm_global_new(wasm_store_t*, const wasm_globaltype_t*, const wasm_val_t*);
+WASM_API_EXTERN own wasm_globaltype_t* wasm_global_type(const wasm_global_t*);
+WASM_API_EXTERN void wasm_global_get(const wasm_global_t*, own wasm_val_t* out);
+WASM_API_EXTERN void wasm_global_set(wasm_global_t*, const wasm_val_t*);
 WASM_API_EXTERN wasm_externkind_t wasm_extern_kind(const wasm_extern_t*);
 WASM_API_EXTERN wasm_func_t* wasm_extern_as_func(wasm_extern_t*);
 WASM_API_EXTERN wasm_extern_t* wasm_func_as_extern(wasm_func_t*);
+WASM_API_EXTERN wasm_global_t* wasm_extern_as_global(wasm_extern_t*);
+WASM_API_EXTERN wasm_extern_t* wasm_global_as_extern(wasm_global_t*);
 WASM_API_EXTERN wasm_memory_t* wasm_extern_as_memory(wasm_extern_t*);
 WASM_API_EXTERN wasm_extern_t* wasm_memory_as_extern(wasm_memory_t*);
 WASM_API_EXTERN const wasm_valtype_vec_t* wasm_functype_params(const wasm_functype_t*);
 WASM_API_EXTERN const wasm_valtype_vec_t* wasm_functype_results(const wasm_functype_t*);
+WASM_API_EXTERN const wasm_valtype_t* wasm_globaltype_content(const wasm_globaltype_t*);
+WASM_API_EXTERN wasm_mutability_t wasm_globaltype_mutability(const wasm_globaltype_t*);
 WASM_API_EXTERN own wasm_func_t* wasm_func_new_with_env( wasm_store_t*, const wasm_functype_t* type, void* fn, void* env, void *finalizer);
 WASM_API_EXTERN own wasm_trap_t* wasm_func_call(const wasm_func_t*, const wasm_val_vec_t* args, wasm_val_vec_t* results);
 WASM_API_EXTERN own wasm_trap_t* wasm_trap_new(wasm_store_t* store, const wasm_message_t*);

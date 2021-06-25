@@ -61,6 +61,18 @@ class WasmRuntime {
     return modulePtr;
   }
 
+  Pointer _externTypeToFuncOrGlobalType(
+    int kind,
+    Pointer<WasmerExterntype> extern,
+  ) {
+    if (kind == wasmerExternKindFunction) {
+      return _externtype_as_functype(extern);
+    } else if (kind == wasmerExternKindGlobal) {
+      return _externtype_as_globaltype(extern);
+    }
+    return nullptr;
+  }
+
   List<WasmExportDescriptor> exportDescriptors(Pointer<WasmerModule> module) {
     var exportsVec = calloc<WasmerExporttypeVec>();
     _module_exports(module, exportsVec);
@@ -69,14 +81,11 @@ class WasmRuntime {
       var exp = exportsVec.ref.data[i];
       var extern = _exporttype_type(exp);
       var kind = _externtype_kind(extern);
-      var fnType = kind == wasmerExternKindFunction
-          ? _externtype_as_functype(extern)
-          : nullptr;
       exps.add(
         WasmExportDescriptor._(
           kind,
           _exporttype_name(exp).ref.toString(),
-          fnType,
+          _externTypeToFuncOrGlobalType(kind, extern),
         ),
       );
     }
@@ -92,15 +101,12 @@ class WasmRuntime {
       var imp = importsVec.ref.data[i];
       var extern = _importtype_type(imp);
       var kind = _externtype_kind(extern);
-      var fnType = kind == wasmerExternKindFunction
-          ? _externtype_as_functype(extern)
-          : nullptr;
       imps.add(
         WasmImportDescriptor._(
           kind,
           _importtype_module(imp).ref.toString(),
           _importtype_name(imp).ref.toString(),
-          fnType,
+          _externTypeToFuncOrGlobalType(kind, extern),
         ),
       );
     }
@@ -249,6 +255,54 @@ class WasmRuntime {
     _checkNotEqual(f, nullptr, 'Failed to create function.');
     _set_finalizer_for_func(owner, f);
     return f;
+  }
+
+  Pointer<WasmerVal> newValue(int type, dynamic val) {
+    final wasmerVal = calloc<WasmerVal>();
+    if (!wasmerVal.ref.fill(type, val)) {
+      throw WasmError('Bad value for WASM type: ${wasmerValKindName(type)}');
+    }
+    return wasmerVal;
+  }
+
+  Pointer<WasmerGlobal> newGlobal(
+    Pointer<WasmerStore> store,
+    Pointer<WasmerGlobaltype> globalType,
+    dynamic val,
+  ) {
+    final wasmerVal = newValue(getGlobalKind(globalType), val);
+    final global = _global_new(store, globalType, wasmerVal);
+    calloc.free(wasmerVal);
+    return global;
+  }
+
+  Pointer<WasmerGlobaltype> getGlobalType(Pointer<WasmerGlobal> global) =>
+      _global_type(global);
+
+  int getGlobalKind(Pointer<WasmerGlobaltype> globalType) =>
+      _valtype_kind(_globaltype_content(globalType));
+
+  int getGlobalMut(Pointer<WasmerGlobaltype> globalType) =>
+      _globaltype_mutability(globalType);
+
+  Pointer<WasmerGlobal> externToGlobal(Pointer<WasmerExtern> extern) =>
+      _extern_as_global(extern);
+
+  Pointer<WasmerExtern> globalToExtern(Pointer<WasmerGlobal> global) =>
+      _global_as_extern(global);
+
+  dynamic globalGet(Pointer<WasmerGlobal> global, int type) {
+    final wasmerVal = newValue(type, 0);
+    _global_get(global, wasmerVal);
+    final result = wasmerVal.ref.toDynamic;
+    calloc.free(wasmerVal);
+    return result;
+  }
+
+  void globalSet(Pointer<WasmerGlobal> global, int type, dynamic val) {
+    final wasmerVal = newValue(type, val);
+    _global_set(global, wasmerVal);
+    calloc.free(wasmerVal);
   }
 
   Pointer<WasmerTrap> newTrap(Pointer<WasmerStore> store, Object exception) {

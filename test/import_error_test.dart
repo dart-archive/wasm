@@ -2,9 +2,8 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
+// Test errors thrown by imports.
 import 'dart:typed_data';
-
-// Test errors thrown by function imports.
 
 import 'package:test/test.dart';
 import 'package:wasm/wasm.dart';
@@ -12,7 +11,7 @@ import 'package:wasm/wasm.dart';
 import 'test_shared.dart';
 
 void main() {
-  test('bad function imports', () {
+  test('bad imports', () {
     // This module expects a function import like:
     // int64_t someFn(int32_t a, int64_t b, float c, double d);
     var data = Uint8List.fromList([
@@ -49,6 +48,10 @@ void main() {
     expect(
       () => mod.builder().addMemory('env', 'someFn', mod.createMemory(10)),
       throwsWasmError(startsWith('Import is not a memory:')),
+    );
+    expect(
+      () => mod.builder().addGlobal('env', 'someFn', 123),
+      throwsWasmError(startsWith('Import is not a global:')),
     );
 
     // Wrong namespace.

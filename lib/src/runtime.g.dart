@@ -49,6 +49,7 @@ class WasmRuntime {
   late final WasmerExporttypeVecNewUninitializedFn
       _exporttype_vec_new_uninitialized;
   late final WasmerExternAsFuncFn _extern_as_func;
+  late final WasmerExternAsGlobalFn _extern_as_global;
   late final WasmerExternAsMemoryFn _extern_as_memory;
   late final WasmerExternDeleteFn _extern_delete;
   late final WasmerExternKindFn _extern_kind;
@@ -57,6 +58,7 @@ class WasmRuntime {
   late final WasmerExternVecNewEmptyFn _extern_vec_new_empty;
   late final WasmerExternVecNewUninitializedFn _extern_vec_new_uninitialized;
   late final WasmerExterntypeAsFunctypeFn _externtype_as_functype;
+  late final WasmerExterntypeAsGlobaltypeFn _externtype_as_globaltype;
   late final WasmerExterntypeDeleteFn _externtype_delete;
   late final WasmerExterntypeKindFn _externtype_kind;
   late final WasmerFuncAsExternFn _func_as_extern;
@@ -66,6 +68,15 @@ class WasmRuntime {
   late final WasmerFunctypeDeleteFn _functype_delete;
   late final WasmerFunctypeParamsFn _functype_params;
   late final WasmerFunctypeResultsFn _functype_results;
+  late final WasmerGlobalAsExternFn _global_as_extern;
+  late final WasmerGlobalDeleteFn _global_delete;
+  late final WasmerGlobalGetFn _global_get;
+  late final WasmerGlobalNewFn _global_new;
+  late final WasmerGlobalSetFn _global_set;
+  late final WasmerGlobalTypeFn _global_type;
+  late final WasmerGlobaltypeContentFn _globaltype_content;
+  late final WasmerGlobaltypeDeleteFn _globaltype_delete;
+  late final WasmerGlobaltypeMutabilityFn _globaltype_mutability;
   late final WasmerImporttypeModuleFn _importtype_module;
   late final WasmerImporttypeNameFn _importtype_name;
   late final WasmerImporttypeTypeFn _importtype_type;
@@ -231,6 +242,10 @@ class WasmRuntime {
         _lib.lookupFunction<NativeWasmerExternAsFuncFn, WasmerExternAsFuncFn>(
       'wasm_extern_as_func',
     );
+    _extern_as_global = _lib
+        .lookupFunction<NativeWasmerExternAsGlobalFn, WasmerExternAsGlobalFn>(
+      'wasm_extern_as_global',
+    );
     _extern_as_memory = _lib
         .lookupFunction<NativeWasmerExternAsMemoryFn, WasmerExternAsMemoryFn>(
       'wasm_extern_as_memory',
@@ -263,6 +278,10 @@ class WasmRuntime {
     _externtype_as_functype = _lib.lookupFunction<
         NativeWasmerExterntypeAsFunctypeFn, WasmerExterntypeAsFunctypeFn>(
       'wasm_externtype_as_functype',
+    );
+    _externtype_as_globaltype = _lib.lookupFunction<
+        NativeWasmerExterntypeAsGlobaltypeFn, WasmerExterntypeAsGlobaltypeFn>(
+      'wasm_externtype_as_globaltype',
     );
     _externtype_delete = _lib.lookupFunction<NativeWasmerExterntypeDeleteFn,
         WasmerExterntypeDeleteFn>(
@@ -298,6 +317,42 @@ class WasmRuntime {
     _functype_results = _lib
         .lookupFunction<NativeWasmerFunctypeResultsFn, WasmerFunctypeResultsFn>(
       'wasm_functype_results',
+    );
+    _global_as_extern = _lib
+        .lookupFunction<NativeWasmerGlobalAsExternFn, WasmerGlobalAsExternFn>(
+      'wasm_global_as_extern',
+    );
+    _global_delete =
+        _lib.lookupFunction<NativeWasmerGlobalDeleteFn, WasmerGlobalDeleteFn>(
+      'wasm_global_delete',
+    );
+    _global_get =
+        _lib.lookupFunction<NativeWasmerGlobalGetFn, WasmerGlobalGetFn>(
+      'wasm_global_get',
+    );
+    _global_new =
+        _lib.lookupFunction<NativeWasmerGlobalNewFn, WasmerGlobalNewFn>(
+      'wasm_global_new',
+    );
+    _global_set =
+        _lib.lookupFunction<NativeWasmerGlobalSetFn, WasmerGlobalSetFn>(
+      'wasm_global_set',
+    );
+    _global_type =
+        _lib.lookupFunction<NativeWasmerGlobalTypeFn, WasmerGlobalTypeFn>(
+      'wasm_global_type',
+    );
+    _globaltype_content = _lib.lookupFunction<NativeWasmerGlobaltypeContentFn,
+        WasmerGlobaltypeContentFn>(
+      'wasm_globaltype_content',
+    );
+    _globaltype_delete = _lib.lookupFunction<NativeWasmerGlobaltypeDeleteFn,
+        WasmerGlobaltypeDeleteFn>(
+      'wasm_globaltype_delete',
+    );
+    _globaltype_mutability = _lib.lookupFunction<
+        NativeWasmerGlobaltypeMutabilityFn, WasmerGlobaltypeMutabilityFn>(
+      'wasm_globaltype_mutability',
     );
     _importtype_module = _lib.lookupFunction<NativeWasmerImporttypeModuleFn,
         WasmerImporttypeModuleFn>(
@@ -485,6 +540,18 @@ class WasmRuntime {
     return modulePtr;
   }
 
+  Pointer _externTypeToFuncOrGlobalType(
+    int kind,
+    Pointer<WasmerExterntype> extern,
+  ) {
+    if (kind == wasmerExternKindFunction) {
+      return _externtype_as_functype(extern);
+    } else if (kind == wasmerExternKindGlobal) {
+      return _externtype_as_globaltype(extern);
+    }
+    return nullptr;
+  }
+
   List<WasmExportDescriptor> exportDescriptors(Pointer<WasmerModule> module) {
     var exportsVec = calloc<WasmerExporttypeVec>();
     _module_exports(module, exportsVec);
@@ -493,14 +560,11 @@ class WasmRuntime {
       var exp = exportsVec.ref.data[i];
       var extern = _exporttype_type(exp);
       var kind = _externtype_kind(extern);
-      var fnType = kind == wasmerExternKindFunction
-          ? _externtype_as_functype(extern)
-          : nullptr;
       exps.add(
         WasmExportDescriptor._(
           kind,
           _exporttype_name(exp).ref.toString(),
-          fnType,
+          _externTypeToFuncOrGlobalType(kind, extern),
         ),
       );
     }
@@ -516,15 +580,12 @@ class WasmRuntime {
       var imp = importsVec.ref.data[i];
       var extern = _importtype_type(imp);
       var kind = _externtype_kind(extern);
-      var fnType = kind == wasmerExternKindFunction
-          ? _externtype_as_functype(extern)
-          : nullptr;
       imps.add(
         WasmImportDescriptor._(
           kind,
           _importtype_module(imp).ref.toString(),
           _importtype_name(imp).ref.toString(),
-          fnType,
+          _externTypeToFuncOrGlobalType(kind, extern),
         ),
       );
     }
@@ -673,6 +734,54 @@ class WasmRuntime {
     _checkNotEqual(f, nullptr, 'Failed to create function.');
     _set_finalizer_for_func(owner, f);
     return f;
+  }
+
+  Pointer<WasmerVal> newValue(int type, dynamic val) {
+    final wasmerVal = calloc<WasmerVal>();
+    if (!wasmerVal.ref.fill(type, val)) {
+      throw WasmError('Bad value for WASM type: ${wasmerValKindName(type)}');
+    }
+    return wasmerVal;
+  }
+
+  Pointer<WasmerGlobal> newGlobal(
+    Pointer<WasmerStore> store,
+    Pointer<WasmerGlobaltype> globalType,
+    dynamic val,
+  ) {
+    final wasmerVal = newValue(getGlobalKind(globalType), val);
+    final global = _global_new(store, globalType, wasmerVal);
+    calloc.free(wasmerVal);
+    return global;
+  }
+
+  Pointer<WasmerGlobaltype> getGlobalType(Pointer<WasmerGlobal> global) =>
+      _global_type(global);
+
+  int getGlobalKind(Pointer<WasmerGlobaltype> globalType) =>
+      _valtype_kind(_globaltype_content(globalType));
+
+  int getGlobalMut(Pointer<WasmerGlobaltype> globalType) =>
+      _globaltype_mutability(globalType);
+
+  Pointer<WasmerGlobal> externToGlobal(Pointer<WasmerExtern> extern) =>
+      _extern_as_global(extern);
+
+  Pointer<WasmerExtern> globalToExtern(Pointer<WasmerGlobal> global) =>
+      _global_as_extern(global);
+
+  dynamic globalGet(Pointer<WasmerGlobal> global, int type) {
+    final wasmerVal = newValue(type, 0);
+    _global_get(global, wasmerVal);
+    final result = wasmerVal.ref.toDynamic;
+    calloc.free(wasmerVal);
+    return result;
+  }
+
+  void globalSet(Pointer<WasmerGlobal> global, int type, dynamic val) {
+    final wasmerVal = newValue(type, val);
+    _global_set(global, wasmerVal);
+    calloc.free(wasmerVal);
   }
 
   Pointer<WasmerTrap> newTrap(Pointer<WasmerStore> store, Object exception) {

@@ -34,13 +34,13 @@ class WasmModule {
   /// Returns a description of all of the module's imports and exports, for
   /// debugging.
   String describe() {
-    var description = StringBuffer();
-    var imports = runtime.importDescriptors(_module);
-    for (var imp in imports) {
+    final description = StringBuffer();
+    final imports = runtime.importDescriptors(_module);
+    for (final imp in imports) {
       description.write('import $imp\n');
     }
-    var exports = runtime.exportDescriptors(_module);
-    for (var exp in exports) {
+    final exports = runtime.exportDescriptors(_module);
+    for (final exp in exports) {
       description.write('export $exp\n');
     }
     return description.toString();
@@ -88,31 +88,17 @@ class _WasmFnImport extends Struct {
     Pointer<WasmerValVec> rawArgs,
     Pointer<WasmerValVec> rawResult,
   ) {
-    var fn = _wasmFnImportToFn[imp.address] as Function;
-    var args = [];
+    final fn = _wasmFnImportToFn[imp.address] as Function;
+    final args = [];
     for (var i = 0; i < rawArgs.ref.length; ++i) {
       args.add(rawArgs.ref.data[i].toDynamic);
     }
     assert(
       rawResult.ref.length == 1 || imp.ref.returnType == wasmerValKindVoid,
     );
-    var result = Function.apply(fn, args);
+    final result = Function.apply(fn, args);
     if (imp.ref.returnType != wasmerValKindVoid) {
-      rawResult.ref.data[0].kind = imp.ref.returnType;
-      switch (imp.ref.returnType) {
-        case wasmerValKindI32:
-          rawResult.ref.data[0].i32 = result as int;
-          break;
-        case wasmerValKindI64:
-          rawResult.ref.data[0].i64 = result as int;
-          break;
-        case wasmerValKindF32:
-          rawResult.ref.data[0].f32 = result as int;
-          break;
-        case wasmerValKindF64:
-          rawResult.ref.data[0].f64 = result as int;
-          break;
-      }
+      rawResult.ref.data[0].fill(imp.ref.returnType, result);
     }
   }
 }
@@ -132,14 +118,14 @@ class WasmInstanceBuilder {
     _imports.ref.length = _importDescs.length;
     _imports.ref.data = calloc<Pointer<WasmerExtern>>(_importDescs.length);
     for (var i = 0; i < _importDescs.length; ++i) {
-      var imp = _importDescs[i];
+      final imp = _importDescs[i];
       _importIndex['${imp.moduleName}::${imp.name}'] = i;
       _imports.ref.data[i] = nullptr;
     }
   }
 
   int _getIndex(String moduleName, String name) {
-    var index = _importIndex['$moduleName::$name'];
+    final index = _importIndex['$moduleName::$name'];
     if (index == null) {
       throw WasmError('Import not found: $moduleName::$name');
     } else if (_imports.ref.data[index] != nullptr) {
@@ -155,8 +141,8 @@ class WasmInstanceBuilder {
     String name,
     WasmMemory memory,
   ) {
-    var index = _getIndex(moduleName, name);
-    var imp = _importDescs[index];
+    final index = _getIndex(moduleName, name);
+    final imp = _importDescs[index];
     if (imp.kind != wasmerExternKindMemory) {
       throw WasmError('Import is not a memory: $imp');
     }
@@ -165,27 +151,43 @@ class WasmInstanceBuilder {
 
   /// Add a function to the imports.
   void addFunction(String moduleName, String name, Function fn) {
-    var index = _getIndex(moduleName, name);
-    var imp = _importDescs[index];
+    final index = _getIndex(moduleName, name);
+    final imp = _importDescs[index];
 
     if (imp.kind != wasmerExternKindFunction) {
       throw WasmError('Import is not a function: $imp');
     }
 
-    var returnType = runtime.getReturnType(imp.funcType);
-    var wasmFnImport = calloc<_WasmFnImport>();
+    final funcType = imp.type as Pointer<WasmerFunctype>;
+    final returnType = runtime.getReturnType(funcType);
+    final wasmFnImport = calloc<_WasmFnImport>();
     wasmFnImport.ref.returnType = returnType;
     wasmFnImport.ref.store = _module._store;
     _wasmFnImportToFn[wasmFnImport.address] = fn;
-    var fnImp = runtime.newFunc(
+    final fnImp = runtime.newFunc(
       _importOwner,
       _module._store,
-      imp.funcType,
+      funcType,
       _wasmFnImportTrampolineNative,
       wasmFnImport,
       _wasmFnImportFinalizerNative,
     );
     _imports.ref.data[index] = runtime.functionToExtern(fnImp);
+  }
+
+  /// Add a global to the imports.
+  WasmGlobal addGlobal(String moduleName, String name, dynamic val) {
+    final index = _getIndex(moduleName, name);
+    final imp = _importDescs[index];
+
+    if (imp.kind != wasmerExternKindGlobal) {
+      throw WasmError('Import is not a global: $imp');
+    }
+
+    final globalType = imp.type as Pointer<WasmerGlobaltype>;
+    final global = runtime.newGlobal(_module._store, globalType, val);
+    _imports.ref.data[index] = runtime.globalToExtern(global);
+    return WasmGlobal._('${imp.moduleName}::${imp.name}', global);
   }
 
   /// Enable WASI and add the default WASI imports.
@@ -196,7 +198,7 @@ class WasmInstanceBuilder {
     if (_wasiEnv != nullptr) {
       throw WasmError('WASI is already enabled.');
     }
-    var config = runtime.newWasiConfig();
+    final config = runtime.newWasiConfig();
     if (captureStdout) runtime.captureWasiStdout(config);
     if (captureStderr) runtime.captureWasiStderr(config);
     _wasiEnv = runtime.newWasiEnv(config);
@@ -224,6 +226,7 @@ class _WasmImportOwner {}
 class WasmInstance {
   final _WasmImportOwner _importOwner;
   final _functions = <String, WasmFunction>{};
+  final _globals = <String, WasmGlobal>{};
   final WasmModule _module;
   final Pointer<WasmerWasiEnv> _wasiEnv;
 
@@ -245,16 +248,16 @@ class WasmInstance {
       _module._module,
       imports,
     );
-    var exports = runtime.exports(_instance);
-    var exportDescs = runtime.exportDescriptors(_module._module);
+    final exports = runtime.exports(_instance);
+    final exportDescs = runtime.exportDescriptors(_module._module);
     assert(exports.ref.length == exportDescs.length);
     for (var i = 0; i < exports.ref.length; ++i) {
-      var e = exports.ref.data[i];
-      var kind = runtime.externKind(exports.ref.data[i]);
-      var name = exportDescs[i].name;
+      final e = exports.ref.data[i];
+      final kind = runtime.externKind(exports.ref.data[i]);
+      final name = exportDescs[i].name;
       if (kind == wasmerExternKindFunction) {
-        var f = runtime.externToFunction(e);
-        var ft = exportDescs[i].funcType;
+        final f = runtime.externToFunction(e);
+        final ft = exportDescs[i].type as Pointer<WasmerFunctype>;
         _functions[name] = WasmFunction._(
           name,
           f,
@@ -263,11 +266,13 @@ class WasmInstance {
         );
       } else if (kind == wasmerExternKindMemory) {
         // WASM currently allows only one memory per module.
-        var mem = runtime.externToMemory(e);
+        final mem = runtime.externToMemory(e);
         _exportedMemory = mem;
         if (_wasiEnv != nullptr) {
           runtime.wasiEnvSetMemory(_wasiEnv, mem);
         }
+      } else if (kind == wasmerExternKindGlobal) {
+        _globals[name] = WasmGlobal._(name, runtime.externToGlobal(e));
       }
     }
   }
@@ -279,6 +284,11 @@ class WasmInstance {
   ///
   /// Returns `null` if no function exists with name [name].
   dynamic lookupFunction(String name) => _functions[name];
+
+  /// Searches the instantiated module for the given global.
+  ///
+  /// Returns `null` if no global exists with name [name].
+  WasmGlobal? lookupGlobal(String name) => _globals[name];
 
   /// Returns the memory exported from this instance.
   WasmMemory get memory {
@@ -322,8 +332,6 @@ class WasmMemory {
     _view = runtime.memoryView(_mem);
   }
 
-  /// Create a new memory with the given number of initial pages, and optional
-  /// maximum number of pages.
   WasmMemory._create(Pointer<WasmerStore> store, int pages, int? maxPages) {
     _mem = runtime.newMemory(this, store, pages, maxPages);
     _view = runtime.memoryView(_mem);
@@ -383,34 +391,12 @@ class WasmFunction {
   @override
   String toString() => getSignatureString(_name, _argTypes, _returnType);
 
-  bool _fillArg(dynamic arg, int i) {
-    switch (_argTypes[i]) {
-      case wasmerValKindI32:
-        if (arg is! int) return false;
-        _args.ref.data[i].i32 = arg;
-        return true;
-      case wasmerValKindI64:
-        if (arg is! int) return false;
-        _args.ref.data[i].i64 = arg;
-        return true;
-      case wasmerValKindF32:
-        if (arg is! num) return false;
-        _args.ref.data[i].f32 = arg;
-        return true;
-      case wasmerValKindF64:
-        if (arg is! num) return false;
-        _args.ref.data[i].f64 = arg;
-        return true;
-    }
-    return false;
-  }
-
   dynamic apply(List<dynamic> args) {
     if (args.length != _argTypes.length) {
       throw ArgumentError('Wrong number arguments for WASM function: $this');
     }
     for (var i = 0; i < args.length; ++i) {
-      if (!_fillArg(args[i], i)) {
+      if (!_args.ref.data[i].fill(_argTypes[i], args[i])) {
         throw ArgumentError('Bad argument type for WASM function: $this');
       }
     }
@@ -419,18 +405,9 @@ class WasmFunction {
     if (_returnType == wasmerValKindVoid) {
       return null;
     }
-    var result = _results.ref.data[0];
+    final result = _results.ref.data[0];
     assert(_returnType == result.kind);
-    switch (_returnType) {
-      case wasmerValKindI32:
-        return result.i32;
-      case wasmerValKindI64:
-        return result.i64;
-      case wasmerValKindF32:
-        return result.f32;
-      case wasmerValKindF64:
-        return result.f64;
-    }
+    return result.toDynamic;
   }
 
   @override
@@ -439,5 +416,37 @@ class WasmFunction {
       return apply(invocation.positionalArguments);
     }
     return super.noSuchMethod(invocation);
+  }
+}
+
+/// A global variable.
+///
+/// To access globals exported from an instance, call
+/// [WasmInstance.lookupGlobal].
+///
+/// To import globals during module instantiation, create the global using one
+/// of the WasmModule.createGlobal methods, then import it using
+/// [WasmInstanceBuilder.addGlobal].
+class WasmGlobal {
+  final String _name;
+  final Pointer<WasmerGlobal> _global;
+  final int _type;
+  final int _mut;
+
+  WasmGlobal._(this._name, this._global)
+      : _type = runtime.getGlobalKind(runtime.getGlobalType(_global)),
+        _mut = runtime.getGlobalMut(runtime.getGlobalType(_global));
+
+  @override
+  String toString() =>
+      '${wasmerMutabilityName(_mut)} ${wasmerValKindName(_type)} $_name';
+
+  dynamic get value => runtime.globalGet(_global, _type);
+
+  set value(dynamic val) {
+    if (_mut == wasmerMutabilityConst) {
+      throw WasmError("Can't set value of const global: $this");
+    }
+    runtime.globalSet(_global, _type, val);
   }
 }

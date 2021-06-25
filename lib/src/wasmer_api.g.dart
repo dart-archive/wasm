@@ -28,6 +28,12 @@ class WasmerFunc extends Opaque {}
 // wasm_functype_t
 class WasmerFunctype extends Opaque {}
 
+// wasm_global_t
+class WasmerGlobal extends Opaque {}
+
+// wasm_globaltype_t
+class WasmerGlobaltype extends Opaque {}
+
 // wasm_importtype_t
 class WasmerImporttype extends Opaque {}
 
@@ -284,6 +290,12 @@ typedef NativeWasmerExternAsFuncFn = Pointer<WasmerFunc> Function(
 typedef WasmerExternAsFuncFn = Pointer<WasmerFunc> Function(
     Pointer<WasmerExtern>);
 
+// wasm_extern_as_global
+typedef NativeWasmerExternAsGlobalFn = Pointer<WasmerGlobal> Function(
+    Pointer<WasmerExtern>);
+typedef WasmerExternAsGlobalFn = Pointer<WasmerGlobal> Function(
+    Pointer<WasmerExtern>);
+
 // wasm_extern_as_memory
 typedef NativeWasmerExternAsMemoryFn = Pointer<WasmerMemory> Function(
     Pointer<WasmerExtern>);
@@ -323,6 +335,12 @@ typedef WasmerExternVecNewUninitializedFn = void Function(
 typedef NativeWasmerExterntypeAsFunctypeFn = Pointer<WasmerFunctype> Function(
     Pointer<WasmerExterntype>);
 typedef WasmerExterntypeAsFunctypeFn = Pointer<WasmerFunctype> Function(
+    Pointer<WasmerExterntype>);
+
+// wasm_externtype_as_globaltype
+typedef NativeWasmerExterntypeAsGlobaltypeFn = Pointer<WasmerGlobaltype>
+    Function(Pointer<WasmerExterntype>);
+typedef WasmerExterntypeAsGlobaltypeFn = Pointer<WasmerGlobaltype> Function(
     Pointer<WasmerExterntype>);
 
 // wasm_externtype_delete
@@ -380,6 +398,56 @@ typedef NativeWasmerFunctypeResultsFn = Pointer<WasmerValtypeVec> Function(
     Pointer<WasmerFunctype>);
 typedef WasmerFunctypeResultsFn = Pointer<WasmerValtypeVec> Function(
     Pointer<WasmerFunctype>);
+
+// wasm_global_as_extern
+typedef NativeWasmerGlobalAsExternFn = Pointer<WasmerExtern> Function(
+    Pointer<WasmerGlobal>);
+typedef WasmerGlobalAsExternFn = Pointer<WasmerExtern> Function(
+    Pointer<WasmerGlobal>);
+
+// wasm_global_delete
+typedef NativeWasmerGlobalDeleteFn = Void Function(Pointer<WasmerGlobal>);
+typedef WasmerGlobalDeleteFn = void Function(Pointer<WasmerGlobal>);
+
+// wasm_global_get
+typedef NativeWasmerGlobalGetFn = Void Function(
+    Pointer<WasmerGlobal>, Pointer<WasmerVal>);
+typedef WasmerGlobalGetFn = void Function(
+    Pointer<WasmerGlobal>, Pointer<WasmerVal>);
+
+// wasm_global_new
+typedef NativeWasmerGlobalNewFn = Pointer<WasmerGlobal> Function(
+    Pointer<WasmerStore>, Pointer<WasmerGlobaltype>, Pointer<WasmerVal>);
+typedef WasmerGlobalNewFn = Pointer<WasmerGlobal> Function(
+    Pointer<WasmerStore>, Pointer<WasmerGlobaltype>, Pointer<WasmerVal>);
+
+// wasm_global_set
+typedef NativeWasmerGlobalSetFn = Void Function(
+    Pointer<WasmerGlobal>, Pointer<WasmerVal>);
+typedef WasmerGlobalSetFn = void Function(
+    Pointer<WasmerGlobal>, Pointer<WasmerVal>);
+
+// wasm_global_type
+typedef NativeWasmerGlobalTypeFn = Pointer<WasmerGlobaltype> Function(
+    Pointer<WasmerGlobal>);
+typedef WasmerGlobalTypeFn = Pointer<WasmerGlobaltype> Function(
+    Pointer<WasmerGlobal>);
+
+// wasm_globaltype_content
+typedef NativeWasmerGlobaltypeContentFn = Pointer<WasmerValtype> Function(
+    Pointer<WasmerGlobaltype>);
+typedef WasmerGlobaltypeContentFn = Pointer<WasmerValtype> Function(
+    Pointer<WasmerGlobaltype>);
+
+// wasm_globaltype_delete
+typedef NativeWasmerGlobaltypeDeleteFn = Void Function(
+    Pointer<WasmerGlobaltype>);
+typedef WasmerGlobaltypeDeleteFn = void Function(Pointer<WasmerGlobaltype>);
+
+// wasm_globaltype_mutability
+typedef NativeWasmerGlobaltypeMutabilityFn = Uint8 Function(
+    Pointer<WasmerGlobaltype>);
+typedef WasmerGlobaltypeMutabilityFn = int Function(Pointer<WasmerGlobaltype>);
 
 // wasm_importtype_module
 typedef NativeWasmerImporttypeModuleFn = Pointer<WasmerByteVec> Function(

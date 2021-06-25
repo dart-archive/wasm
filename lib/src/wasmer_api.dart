@@ -27,6 +27,10 @@ const int wasmerExternKindGlobal = 1;
 const int wasmerExternKindTable = 2;
 const int wasmerExternKindMemory = 3;
 
+// wasm_mutability_enum
+const int wasmerMutabilityConst = 0;
+const int wasmerMutabilityVar = 1;
+
 String wasmerExternKindName(int kind) {
   switch (kind) {
     case wasmerExternKindFunction:
@@ -54,6 +58,17 @@ String wasmerValKindName(int kind) {
       return 'float64';
     case wasmerValKindVoid:
       return 'void';
+    default:
+      return 'unknown';
+  }
+}
+
+String wasmerMutabilityName(int kind) {
+  switch (kind) {
+    case wasmerMutabilityConst:
+      return 'const';
+    case wasmerMutabilityVar:
+      return 'var';
     default:
       return 'unknown';
   }
@@ -114,6 +129,29 @@ class WasmerVal extends Struct {
       case wasmerValKindF64:
         return f64;
     }
+  }
+
+  bool fill(int _kind, dynamic val) {
+    kind = _kind;
+    switch (kind) {
+      case wasmerValKindI32:
+        if (val is! int) return false;
+        i32 = val;
+        return true;
+      case wasmerValKindI64:
+        if (val is! int) return false;
+        i64 = val;
+        return true;
+      case wasmerValKindF32:
+        if (val is! num) return false;
+        f32 = val;
+        return true;
+      case wasmerValKindF64:
+        if (val is! num) return false;
+        f64 = val;
+        return true;
+    }
+    return false;
   }
 }
 
