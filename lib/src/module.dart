@@ -31,22 +31,6 @@ class WasmModule {
   WasmMemory createMemory(int pages, [int? maxPages]) =>
       WasmMemory._create(_store, pages, maxPages);
 
-  /// Create a global I32 variable.
-  WasmGlobal createGlobalI32(int val, [bool mutable = true]) =>
-      WasmGlobal._create(_store, wasmerValKindI32, val, mutable);
-
-  /// Create a global I64 variable.
-  WasmGlobal createGlobalI64(int val, [bool mutable = true]) =>
-      WasmGlobal._create(_store, wasmerValKindI64, val, mutable);
-
-  /// Create a global F32 variable.
-  WasmGlobal createGlobalF32(num val, [bool mutable = true]) =>
-      WasmGlobal._create(_store, wasmerValKindF32, val, mutable);
-
-  /// Create a global F64 variable.
-  WasmGlobal createGlobalF64(num val, [bool mutable = true]) =>
-      WasmGlobal._create(_store, wasmerValKindF64, val, mutable);
-
   /// Returns a description of all of the module's imports and exports, for
   /// debugging.
   String describe() {
@@ -114,21 +98,7 @@ class _WasmFnImport extends Struct {
     );
     final result = Function.apply(fn, args);
     if (imp.ref.returnType != wasmerValKindVoid) {
-      rawResult.ref.data[0].kind = imp.ref.returnType;
-      switch (imp.ref.returnType) {
-        case wasmerValKindI32:
-          rawResult.ref.data[0].i32 = result as int;
-          break;
-        case wasmerValKindI64:
-          rawResult.ref.data[0].i64 = result as int;
-          break;
-        case wasmerValKindF32:
-          rawResult.ref.data[0].f32 = result as int;
-          break;
-        case wasmerValKindF64:
-          rawResult.ref.data[0].f64 = result as int;
-          break;
-      }
+      rawResult.ref.data[0].fill(imp.ref.returnType, result);
     }
   }
 }
@@ -206,7 +176,7 @@ class WasmInstanceBuilder {
   }
 
   /// Add a global to the imports.
-  void addGlobal(String moduleName, String name, WasmGlobal global) {
+  WasmGlobal addGlobal(String moduleName, String name, dynamic val) {
     final index = _getIndex(moduleName, name);
     final imp = _importDescs[index];
 
@@ -214,7 +184,10 @@ class WasmInstanceBuilder {
       throw WasmError('Import is not a global: $imp');
     }
 
-    _imports.ref.data[index] = runtime.globalToExtern(global._global);
+    final globalType = imp.type as Pointer<WasmerGlobaltype>;
+    final global = runtime.newGlobal(_module._store, globalType, val);
+    _imports.ref.data[index] = runtime.globalToExtern(global);
+    return WasmGlobal._('${imp.moduleName}::${imp.name}', global);
   }
 
   /// Enable WASI and add the default WASI imports.
@@ -299,7 +272,7 @@ class WasmInstance {
           runtime.wasiEnvSetMemory(_wasiEnv, mem);
         }
       } else if (kind == wasmerExternKindGlobal) {
-        _globals[name] = WasmGlobal._fromExport(runtime.externToGlobal(e));
+        _globals[name] = WasmGlobal._(name, runtime.externToGlobal(e));
       }
     }
   }
@@ -455,20 +428,25 @@ class WasmFunction {
 /// of the WasmModule.createGlobal methods, then import it using
 /// [WasmInstanceBuilder.addGlobal].
 class WasmGlobal {
+  final String _name;
   final Pointer<WasmerGlobal> _global;
   final int _type;
+  final int _mut;
 
-  WasmGlobal._fromExport(this._global)
-      : _type = runtime.getGlobalKind(runtime.getGlobalType(_global));
-
-  WasmGlobal._create(
-      Pointer<WasmerStore> store, this._type, dynamic val, bool mutable)
-      : _global = runtime.newGlobal(store, _type, val, mutable) {}
+  WasmGlobal._(this._name, this._global)
+      : _type = runtime.getGlobalKind(runtime.getGlobalType(_global)),
+        _mut = runtime.getGlobalMut(runtime.getGlobalType(_global));
 
   @override
-  String toString() => 'WasmGlobal<${wasmerValKindName(_type)}>';
+  String toString() =>
+      '${wasmerMutabilityName(_mut)} ${wasmerValKindName(_type)} $_name';
 
   dynamic get value => runtime.globalGet(_global, _type);
 
-  set value(dynamic val) => runtime.globalSet(_global, _type, val);
+  set value(dynamic val) {
+    if (_mut == wasmerMutabilityConst) {
+      throw WasmError("Can't set value of const global: $this");
+    }
+    runtime.globalSet(_global, _type, val);
+  }
 }

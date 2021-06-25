@@ -10,5 +10,5 @@ class WasmError extends Error {
   WasmError(this.message) : assert(message.trim() == message);
 
   @override
-  String toString() => 'WasmError:$message';
+  String toString() => 'WasmError: $message';
 }

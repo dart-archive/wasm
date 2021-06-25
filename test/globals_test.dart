@@ -27,8 +27,18 @@ void main() {
 
   final mod = WasmModule(data);
   print(mod.describe());
-  final bar = mod.createGlobalI32(10, false);
-  final inst = (mod.builder()..addGlobal("env", "bar", bar)).build();
+  final builder = mod.builder();
+  final bar = builder.addGlobal('env', 'bar', 10);
+  final inst = builder.build();
+  final foo = inst.lookupGlobal('foo')!;
   final baz = inst.lookupFunction('baz');
+  print(foo);
+  print(bar);
   print(baz());
+  print(foo.value);
+  print(bar.value);
+  foo.value = 99;
+  print(foo.value);
+  print(baz());
+  bar.value = 100;
 }

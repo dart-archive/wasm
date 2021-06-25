@@ -264,13 +264,10 @@ class WasmRuntime {
     return wasmerVal;
   }
 
-  Pointer<WasmerGlobal> newGlobal(
-      Pointer<WasmerStore> store, int type, dynamic val, bool mutable) {
-    final wasmerVal = newValue(type, val);
-    final globalType = _globaltype_new(_valtype_new(type),
-        mutable ? wasmerMutabilityVar : wasmerMutabilityConst);
+  Pointer<WasmerGlobal> newGlobal(Pointer<WasmerStore> store,
+      Pointer<WasmerGlobaltype> globalType, dynamic val) {
+    final wasmerVal = newValue(getGlobalKind(globalType), val);
     final global = _global_new(store, globalType, wasmerVal);
-    _globaltype_delete(globalType);
     calloc.free(wasmerVal);
     return global;
   }

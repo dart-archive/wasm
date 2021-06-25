@@ -310,8 +310,6 @@ WASM_API_EXTERN byte_t* wasm_memory_data(wasm_memory_t*);
 WASM_API_EXTERN size_t wasm_memory_data_size(const wasm_memory_t*);
 WASM_API_EXTERN wasm_memory_pages_t wasm_memory_size(const wasm_memory_t*);
 WASM_API_EXTERN bool wasm_memory_grow(wasm_memory_t*, wasm_memory_pages_t delta);
-WASM_API_EXTERN own wasm_valtype_t* wasm_valtype_new(wasm_valkind_t);
-WASM_API_EXTERN own wasm_globaltype_t* wasm_globaltype_new(own wasm_valtype_t*, wasm_mutability_t);
 WASM_API_EXTERN own wasm_global_t* wasm_global_new(wasm_store_t*, const wasm_globaltype_t*, const wasm_val_t*);
 WASM_API_EXTERN own wasm_globaltype_t* wasm_global_type(const wasm_global_t*);
 WASM_API_EXTERN void wasm_global_get(const wasm_global_t*, own wasm_val_t* out);

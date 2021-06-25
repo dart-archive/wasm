@@ -449,12 +449,6 @@ typedef NativeWasmerGlobaltypeMutabilityFn = Uint8 Function(
     Pointer<WasmerGlobaltype>);
 typedef WasmerGlobaltypeMutabilityFn = int Function(Pointer<WasmerGlobaltype>);
 
-// wasm_globaltype_new
-typedef NativeWasmerGlobaltypeNewFn = Pointer<WasmerGlobaltype> Function(
-    Pointer<WasmerValtype>, Uint8);
-typedef WasmerGlobaltypeNewFn = Pointer<WasmerGlobaltype> Function(
-    Pointer<WasmerValtype>, int);
-
 // wasm_importtype_module
 typedef NativeWasmerImporttypeModuleFn = Pointer<WasmerByteVec> Function(
     Pointer<WasmerImporttype>);
@@ -618,10 +612,6 @@ typedef WasmerValtypeDeleteFn = void Function(Pointer<WasmerValtype>);
 // wasm_valtype_kind
 typedef NativeWasmerValtypeKindFn = Uint8 Function(Pointer<WasmerValtype>);
 typedef WasmerValtypeKindFn = int Function(Pointer<WasmerValtype>);
-
-// wasm_valtype_new
-typedef NativeWasmerValtypeNewFn = Pointer<WasmerValtype> Function(Uint8);
-typedef WasmerValtypeNewFn = Pointer<WasmerValtype> Function(int);
 
 // wasm_valtype_vec_delete
 typedef NativeWasmerValtypeVecDeleteFn = Void Function(

@@ -62,7 +62,6 @@ EXPORTS
    wasm_globaltype_content
    wasm_globaltype_delete
    wasm_globaltype_mutability
-   wasm_globaltype_new
    wasm_importtype_module
    wasm_importtype_name
    wasm_importtype_type
@@ -93,7 +92,6 @@ EXPORTS
    wasm_trap_new
    wasm_valtype_delete
    wasm_valtype_kind
-   wasm_valtype_new
    wasm_valtype_vec_delete
    wasm_valtype_vec_new
    wasm_valtype_vec_new_empty

@@ -77,7 +77,6 @@ class WasmRuntime {
   late final WasmerGlobaltypeContentFn _globaltype_content;
   late final WasmerGlobaltypeDeleteFn _globaltype_delete;
   late final WasmerGlobaltypeMutabilityFn _globaltype_mutability;
-  late final WasmerGlobaltypeNewFn _globaltype_new;
   late final WasmerImporttypeModuleFn _importtype_module;
   late final WasmerImporttypeNameFn _importtype_name;
   late final WasmerImporttypeTypeFn _importtype_type;
@@ -109,7 +108,6 @@ class WasmRuntime {
   late final WasmerTrapNewFn _trap_new;
   late final WasmerValtypeDeleteFn _valtype_delete;
   late final WasmerValtypeKindFn _valtype_kind;
-  late final WasmerValtypeNewFn _valtype_new;
   late final WasmerValtypeVecDeleteFn _valtype_vec_delete;
   late final WasmerValtypeVecNewFn _valtype_vec_new;
   late final WasmerValtypeVecNewEmptyFn _valtype_vec_new_empty;
@@ -356,10 +354,6 @@ class WasmRuntime {
         NativeWasmerGlobaltypeMutabilityFn, WasmerGlobaltypeMutabilityFn>(
       'wasm_globaltype_mutability',
     );
-    _globaltype_new =
-        _lib.lookupFunction<NativeWasmerGlobaltypeNewFn, WasmerGlobaltypeNewFn>(
-      'wasm_globaltype_new',
-    );
     _importtype_module = _lib.lookupFunction<NativeWasmerImporttypeModuleFn,
         WasmerImporttypeModuleFn>(
       'wasm_importtype_module',
@@ -478,10 +472,6 @@ class WasmRuntime {
     _valtype_kind =
         _lib.lookupFunction<NativeWasmerValtypeKindFn, WasmerValtypeKindFn>(
       'wasm_valtype_kind',
-    );
-    _valtype_new =
-        _lib.lookupFunction<NativeWasmerValtypeNewFn, WasmerValtypeNewFn>(
-      'wasm_valtype_new',
     );
     _valtype_vec_delete = _lib.lookupFunction<NativeWasmerValtypeVecDeleteFn,
         WasmerValtypeVecDeleteFn>(
@@ -753,13 +743,10 @@ class WasmRuntime {
     return wasmerVal;
   }
 
-  Pointer<WasmerGlobal> newGlobal(
-      Pointer<WasmerStore> store, int type, dynamic val, bool mutable) {
-    final wasmerVal = newValue(type, val);
-    final globalType = _globaltype_new(_valtype_new(type),
-        mutable ? wasmerMutabilityVar : wasmerMutabilityConst);
+  Pointer<WasmerGlobal> newGlobal(Pointer<WasmerStore> store,
+      Pointer<WasmerGlobaltype> globalType, dynamic val) {
+    final wasmerVal = newValue(getGlobalKind(globalType), val);
     final global = _global_new(store, globalType, wasmerVal);
-    _globaltype_delete(globalType);
     calloc.free(wasmerVal);
     return global;
   }
