@@ -258,8 +258,7 @@ class WasmRuntime {
   Pointer<WasmerVal> newValue(int type, dynamic val) {
     final wasmerVal = calloc<WasmerVal>();
     if (!wasmerVal.ref.fill(type, val)) {
-      throw ArgumentError(
-          'Bad value for WASM type: ${wasmerValKindName(type)}');
+      throw WasmError('Bad value for WASM type: ${wasmerValKindName(type)}');
     }
     return wasmerVal;
   }
