@@ -101,7 +101,16 @@ class Wasmer%sVec extends Struct {
 }'''
 
 byteVecToStringTemplate = '''
-  Uint8List get list => data.asTypedList(length);
+  Uint8List get list {
+    final l = data.asTypedList(length);
+    if (l.last == 0) {
+      // Work around https://github.com/wasmerio/wasmer/issues/2439 by dropping
+      // extraneous null-terminators.
+      return l.sublist(0, l.length - 1);
+    }
+    return l;
+  }
+
   @override
   String toString() => utf8.decode(list);
 '''
