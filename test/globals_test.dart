@@ -3,7 +3,6 @@
 // BSD-style license that can be found in the LICENSE file.
 
 // Tests importing, exporting, and manipulating global variables.
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:test/test.dart';
@@ -48,7 +47,7 @@ void main() {
     );
     expect(
       () => foo.value = 3.14159,
-      throwsWasmError(startsWith("Bad value for WASM type")),
+      throwsWasmError(startsWith('Bad value for WASM type')),
     );
   });
 }

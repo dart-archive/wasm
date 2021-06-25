@@ -541,7 +541,9 @@ class WasmRuntime {
   }
 
   Pointer _externTypeToFuncOrGlobalType(
-      int kind, Pointer<WasmerExterntype> extern) {
+    int kind,
+    Pointer<WasmerExterntype> extern,
+  ) {
     if (kind == wasmerExternKindFunction) {
       return _externtype_as_functype(extern);
     } else if (kind == wasmerExternKindGlobal) {
@@ -742,8 +744,11 @@ class WasmRuntime {
     return wasmerVal;
   }
 
-  Pointer<WasmerGlobal> newGlobal(Pointer<WasmerStore> store,
-      Pointer<WasmerGlobaltype> globalType, dynamic val) {
+  Pointer<WasmerGlobal> newGlobal(
+    Pointer<WasmerStore> store,
+    Pointer<WasmerGlobaltype> globalType,
+    dynamic val,
+  ) {
     final wasmerVal = newValue(getGlobalKind(globalType), val);
     final global = _global_new(store, globalType, wasmerVal);
     calloc.free(wasmerVal);

@@ -19,7 +19,7 @@ part 'runtime.g.dart';
 /// The singleton instance of [WasmRuntime].
 final runtime = WasmRuntime._init();
 
-_getImportExportString(int kind, String name, Pointer type) {
+String _getImportExportString(int kind, String name, Pointer type) {
   final kindName = wasmerExternKindName(kind);
   if (kind == wasmerExternKindFunction) {
     final funcType = type as Pointer<WasmerFunctype>;
