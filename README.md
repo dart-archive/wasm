@@ -47,10 +47,6 @@ Then we can load and run it like this:
     }
     ```
 
-1. Copy wasmer runtime built during setup
-(`/wasm/.dart_tool/wasm/libwasmer.dylib`; `/wasmer.dll` on Windows)
-to the `.dart_tool/wasm` subfolder of your `wasmtest` app folder.
-
 1. Run the Dart program: `dart run`
 
 This should print:
