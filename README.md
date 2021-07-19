@@ -4,10 +4,20 @@ Built on top of the [Wasmer](https://github.com/wasmerio/wasmer) runtime.
 
 ## Setup
 
-Start by [installing Rust](https://www.rust-lang.org/tools/install).
-This is used to build the needed runtime.
+1. Start by installing the tools needed to build the Wasmer runtime:
 
-Next run `dart run wasm:setup` to build the Wasmer runtime.
+   * Install the [Rust SDK].
+
+   * On Windows, to get `link.exe`, install the [Visual Studio build tools]
+     with the "Desktop development with C++"-option selected.
+
+1. Next run `dart run wasm:setup` to build the Wasmer runtime.
+
+1. Finally, install [LLVM] to enable compiling C code to WASM with `clang`
+
+[Rust SDK]: https://www.rust-lang.org/tools/install
+[Visual Studio build tools]: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+[LLVM]: https://clang.llvm.org/get_started.html
 
 ## Basic Usage
 
@@ -20,7 +30,7 @@ extern "C" int square(int n) { return n * n; }
 ```
 
 We can compile this C++ code to WASM using a recent version of the
-[clang compiler](https://clang.llvm.org/get_started.html):
+clang compiler from LLVM:
 
 ```bash
 clang --target=wasm32 -nostdlib -Wl,--export-all -Wl,--no-entry -o square.wasm square.cc
