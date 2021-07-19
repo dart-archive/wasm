@@ -13,11 +13,8 @@ Built on top of the [Wasmer](https://github.com/wasmerio/wasmer) runtime.
 
 1. Next run `dart run wasm:setup` to build the Wasmer runtime.
 
-1. Finally, install [LLVM] to enable compiling C code to WASM with `clang`
-
 [Rust SDK]: https://www.rust-lang.org/tools/install
 [Visual Studio build tools]: https://visualstudio.microsoft.com/visual-cpp-build-tools/
-[LLVM]: https://clang.llvm.org/get_started.html
 
 ## Basic Usage
 
