@@ -4,7 +4,10 @@ Built on top of the [Wasmer](https://github.com/wasmerio/wasmer) runtime.
 
 ## Setup
 
-Run `dart run wasm:setup` to build the Wasmer runtime.
+Start by [installing Rust](https://www.rust-lang.org/tools/install).
+This is used to build the needed runtime.
+
+Next run `dart run wasm:setup` to build the Wasmer runtime.
 
 ## Basic Usage
 
