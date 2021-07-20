@@ -36,7 +36,7 @@ example directory.
 [clang compiler](https://clang.llvm.org/get_started.html):
 
     ```bash
-    clang --target=wasm32 -nostdlib -Wl,--export-all -Wl,--no-entry -o square.wasm square.cc
+    clang --target=wasm32 -nostdlib "-Wl,--export-all" "-Wl,--no-entry" -o square.wasm square.cc
     ```
 
 1. Replace the contents of your Dart program (`bin/wasmtest.dart`) with:
