@@ -4,14 +4,12 @@ Built on top of the [Wasmer](https://github.com/wasmerio/wasmer) runtime.
 
 ## Setup
 
-1. Start by installing the tools needed to build the Wasmer runtime:
+Start by installing the tools needed to build the Wasmer runtime:
 
    * Install the [Rust SDK].
 
    * On Windows, to get `link.exe`, install the [Visual Studio build tools]
      with the "Desktop development with C++"-option selected.
-
-1. Next run `dart run wasm:setup` to build the Wasmer runtime.
 
 [Rust SDK]: https://www.rust-lang.org/tools/install
 [Visual Studio build tools]: https://visualstudio.microsoft.com/visual-cpp-build-tools/
@@ -23,6 +21,10 @@ As a simple example, we'll try to call a simple C function from Dart using
 example directory.
 
 1. First create new Dart app folder: `dart create wasmtest`
+
+1. Add a dependency to package `wasm` in `pubspec.yaml` and run `dart pub get`
+
+1. Next run `dart run wasm:setup` to build the Wasmer runtime.
 
 1. Then add a new file `square.cc` with the following contents:
 
@@ -37,11 +39,7 @@ example directory.
     clang --target=wasm32 -nostdlib -Wl,--export-all -Wl,--no-entry -o square.wasm square.cc
     ```
 
-Then we can load and run it like this:
-
-1. Add a dependency to package `wasm` in `pubspec.yaml` and run `dart pub get`
-
-1. Replace the contents of `bin/wasmtest.dart` with:
+1. Replace the contents of your Dart program (`bin/wasmtest.dart`) with:
 
     ```dart
     import 'dart:io';
@@ -57,13 +55,11 @@ Then we can load and run it like this:
     }
     ```
 
-1. Run the Dart program: `dart run`
+1. Run the Dart program: `dart run`. This should print:
 
-This should print:
-
-```
-export memory: memory
-export function: int32 square(int32)
-
-144
-```
+    ```
+    export memory: memory
+    export function: int32 square(int32)
+    
+    144
+    ```
