@@ -24,8 +24,8 @@ example directory.
 
 1. Add a dependency to package `wasm` in `pubspec.yaml` and run `dart pub get`
 
-1. Next run `dart run wasm:setup` to build the Wasmer runtime.
-
+1. Next run `dart run wasm:setup` to build the Wasmer runtime. This will take a few minutes.
+   
 1. Then add a new file `square.cc` with the following contents:
 
     ```c++
