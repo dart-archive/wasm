@@ -424,8 +424,7 @@ class WasmFunction {
 /// To access globals exported from an instance, call
 /// [WasmInstance.lookupGlobal].
 ///
-/// To import globals during module instantiation, create the global using one
-/// of the WasmModule.createGlobal methods, then import it using
+/// To import globals during module instantiation, use
 /// [WasmInstanceBuilder.addGlobal].
 class WasmGlobal {
   final String _name;
