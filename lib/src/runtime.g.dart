@@ -115,7 +115,7 @@ class WasmRuntime {
   late final WasmerWasmerLastErrorLengthFn _wasmer_last_error_length;
   late final WasmerWasmerLastErrorMessageFn _wasmer_last_error_message;
 
-  WasmRuntime._init() : _lib = DynamicLibrary.open(_getLibPath()) {
+  WasmRuntime._init() : _lib = _load_dynamic_lib() {
     _Dart_InitializeApiDL = _lib.lookupFunction<
         NativeWasmerDartInitializeApiDLFn, WasmerDartInitializeApiDLFn>(
       'Dart_InitializeApiDL',
@@ -505,6 +505,17 @@ class WasmRuntime {
     _engine = _engine_new();
     _checkNotEqual(_engine, nullptr, 'Failed to initialize Wasm engine.');
     _set_finalizer_for_engine(this, _engine);
+  }
+
+  static DynamicLibrary _load_dynamic_lib() {
+    try {
+      return DynamicLibrary.open(_getLibPath());
+    } catch (e) {
+      throw WasmError(
+        'Failed to load Wasm dynamic library. '
+        'Have you run `dart run wasm:setup`?\n    $e',
+      );
+    }
   }
 
   Pointer<WasmerStore> newStore(Object owner) {
