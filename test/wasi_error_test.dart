@@ -185,7 +185,9 @@ void main() {
 
     // Trying to import WASI twice.
     expect(
-      () => WasmModule(helloWorldData).builder()..enableWasi()..enableWasi(),
+      () => WasmModule(helloWorldData).builder()
+        ..enableWasi()
+        ..enableWasi(),
       throwsWasmError(startsWith('WASI is already enabled')),
     );
 
