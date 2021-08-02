@@ -511,8 +511,10 @@ class WasmRuntime {
     try {
       return DynamicLibrary.open(_getLibPath());
     } catch (e) {
-      throw WasmError('Failed to load Wasm dynamic library. '
-          'Have you run `dart run wasm:setup`?\n    $e');
+      throw WasmError(
+        'Failed to load Wasm dynamic library. '
+        'Have you run `dart run wasm:setup`?\n    $e',
+      );
     }
   }
 
