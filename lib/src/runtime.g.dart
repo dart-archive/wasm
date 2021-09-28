@@ -16,6 +16,7 @@ class WasmRuntime {
   final DynamicLibrary _lib;
   final _traps = <String, _WasmTrapsEntry>{};
   late final Pointer<WasmerEngine> _engine;
+  late final Pointer<WasmerStore> _store;
 
   late final WasmerDartInitializeApiDLFn _Dart_InitializeApiDL;
   late final WasmerSetFinalizerForEngineFn _set_finalizer_for_engine;
@@ -505,6 +506,9 @@ class WasmRuntime {
     _engine = _engine_new();
     _checkNotEqual(_engine, nullptr, 'Failed to initialize Wasm engine.');
     _set_finalizer_for_engine(this, _engine);
+    _store = _store_new(_engine);
+    _checkNotEqual(_store, nullptr, 'Failed to create Wasm store.');
+    _set_finalizer_for_store(this, _store);
   }
 
   static DynamicLibrary _load_dynamic_lib() {
@@ -518,19 +522,8 @@ class WasmRuntime {
     }
   }
 
-  Pointer<WasmerStore> newStore(Object owner) {
-    var store = _checkNotEqual(
-      _store_new(_engine),
-      nullptr,
-      'Failed to create Wasm store.',
-    );
-    _set_finalizer_for_store(owner, store);
-    return store;
-  }
-
   Pointer<WasmerModule> compile(
     Object owner,
-    Pointer<WasmerStore> store,
     Uint8List data,
   ) {
     var dataPtr = calloc<Uint8>(data.length);
@@ -541,7 +534,7 @@ class WasmRuntime {
     dataVec.ref.data = dataPtr;
     dataVec.ref.length = data.length;
 
-    var modulePtr = _module_new(store, dataVec);
+    var modulePtr = _module_new(_store, dataVec);
 
     calloc.free(dataPtr);
     calloc.free(dataVec);
@@ -629,13 +622,12 @@ class WasmRuntime {
 
   Pointer<WasmerInstance> instantiate(
     Object owner,
-    Pointer<WasmerStore> store,
     Pointer<WasmerModule> module,
     Pointer<WasmerExternVec> imports,
   ) {
     var trap = calloc<Pointer<WasmerTrap>>();
     trap.value = nullptr;
-    var inst = _instance_new(store, module, imports, trap);
+    var inst = _instance_new(_store, module, imports, trap);
     maybeThrowTrap(trap.value, 'module initialization function');
     calloc.free(trap);
     _checkNotEqual(inst, nullptr, 'Wasm module instantiation failed.');
@@ -699,7 +691,6 @@ class WasmRuntime {
 
   Pointer<WasmerMemory> newMemory(
     Object owner,
-    Pointer<WasmerStore> store,
     int pages,
     int? maxPages,
   ) {
@@ -711,7 +702,7 @@ class WasmRuntime {
     _checkNotEqual(memType, nullptr, 'Failed to create memory type.');
     _set_finalizer_for_memorytype(owner, memType);
     var memory = _checkNotEqual(
-      _memory_new(store, memType),
+      _memory_new(_store, memType),
       nullptr,
       'Failed to create memory.',
     );
@@ -734,14 +725,13 @@ class WasmRuntime {
 
   Pointer<WasmerFunc> newFunc(
     Object owner,
-    Pointer<WasmerStore> store,
     Pointer<WasmerFunctype> funcType,
     Pointer func,
     Pointer env,
     Pointer finalizer,
   ) {
     var f = _func_new_with_env(
-      store,
+      _store,
       funcType,
       func.cast(),
       env.cast(),
@@ -761,12 +751,11 @@ class WasmRuntime {
   }
 
   Pointer<WasmerGlobal> newGlobal(
-    Pointer<WasmerStore> store,
     Pointer<WasmerGlobaltype> globalType,
     dynamic val,
   ) {
     final wasmerVal = newValue(getGlobalKind(globalType), val);
-    final global = _global_new(store, globalType, wasmerVal);
+    final global = _global_new(_store, globalType, wasmerVal);
     calloc.free(wasmerVal);
     return global;
   }
@@ -800,7 +789,7 @@ class WasmRuntime {
     calloc.free(wasmerVal);
   }
 
-  Pointer<WasmerTrap> newTrap(Pointer<WasmerStore> store, Object exception) {
+  Pointer<WasmerTrap> newTrap(Object exception) {
     final msg = 'dart:${exception.hashCode.toRadixString(36)}';
     final msgList = utf8.encode(msg);
     final bytes = calloc<WasmerByteVec>();
@@ -809,7 +798,7 @@ class WasmRuntime {
       bytes.ref.data[i] = msgList[i];
     }
     bytes.ref.length = msgList.length;
-    var trap = _trap_new(store, bytes);
+    var trap = _trap_new(_store, bytes);
     calloc.free(bytes.ref.data);
     calloc.free(bytes);
     _checkNotEqual(trap, nullptr, 'Failed to create trap.');
@@ -850,13 +839,12 @@ class WasmRuntime {
   }
 
   void getWasiImports(
-    Pointer<WasmerStore> store,
     Pointer<WasmerModule> mod,
     Pointer<WasmerWasiEnv> env,
     Pointer<WasmerExternVec> imports,
   ) {
     _checkNotEqual(
-      _wasi_get_imports(store, mod, env, imports),
+      _wasi_get_imports(_store, mod, env, imports),
       0,
       'Failed to fill WASI imports.',
     );
