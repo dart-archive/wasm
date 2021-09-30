@@ -13,13 +13,11 @@ import 'wasmer_api.dart';
 
 /// A compiled module that can be instantiated.
 class WasmModule {
-  late final Pointer<WasmerStore> _store;
   late final Pointer<WasmerModule> _module;
 
   /// Compile a module.
   WasmModule(Uint8List data) {
-    _store = runtime.newStore(this);
-    _module = runtime.compile(this, _store, data);
+    _module = runtime.compile(this, data);
   }
 
   /// Returns a [WasmInstanceBuilder] that is used to add all the imports that
@@ -29,7 +27,7 @@ class WasmModule {
   /// Create a new memory with the given number of initial pages, and optional
   /// maximum number of pages.
   WasmMemory createMemory(int pages, [int? maxPages]) =>
-      WasmMemory._create(_store, pages, maxPages);
+      WasmMemory._create(pages, maxPages);
 
   /// Returns a description of all of the module's imports and exports, for
   /// debugging.
@@ -55,7 +53,7 @@ Pointer<WasmerTrap> _wasmFnImportTrampoline(
   try {
     _WasmFnImport._call(imp, args, results);
   } catch (exception) {
-    return runtime.newTrap(imp.ref.store, exception);
+    return runtime.newTrap(exception);
   }
   return nullptr;
 }
@@ -80,8 +78,6 @@ final _wasmFnImportFinalizerNative =
 class _WasmFnImport extends Struct {
   @Int32()
   external int returnType;
-
-  external Pointer<WasmerStore> store;
 
   static void _call(
     Pointer<_WasmFnImport> imp,
@@ -162,11 +158,9 @@ class WasmInstanceBuilder {
     final returnType = runtime.getReturnType(funcType);
     final wasmFnImport = calloc<_WasmFnImport>();
     wasmFnImport.ref.returnType = returnType;
-    wasmFnImport.ref.store = _module._store;
     _wasmFnImportToFn[wasmFnImport.address] = fn;
     final fnImp = runtime.newFunc(
       _importOwner,
-      _module._store,
       funcType,
       _wasmFnImportTrampolineNative,
       wasmFnImport,
@@ -185,7 +179,7 @@ class WasmInstanceBuilder {
     }
 
     final globalType = imp.type as Pointer<WasmerGlobaltype>;
-    final global = runtime.newGlobal(_module._store, globalType, val);
+    final global = runtime.newGlobal(globalType, val);
     _imports.ref.data[index] = runtime.globalToExtern(global);
     return WasmGlobal._('${imp.moduleName}::${imp.name}', global);
   }
@@ -202,7 +196,7 @@ class WasmInstanceBuilder {
     if (captureStdout) runtime.captureWasiStdout(config);
     if (captureStderr) runtime.captureWasiStderr(config);
     _wasiEnv = runtime.newWasiEnv(config);
-    runtime.getWasiImports(_module._store, _module._module, _wasiEnv, _imports);
+    runtime.getWasiImports(_module._module, _wasiEnv, _imports);
   }
 
   /// Build the module instance.
@@ -244,7 +238,6 @@ class WasmInstance {
   ) {
     _instance = runtime.instantiate(
       _importOwner,
-      _module._store,
       _module._module,
       imports,
     );
@@ -332,8 +325,8 @@ class WasmMemory {
     _view = runtime.memoryView(_mem);
   }
 
-  WasmMemory._create(Pointer<WasmerStore> store, int pages, int? maxPages) {
-    _mem = runtime.newMemory(this, store, pages, maxPages);
+  WasmMemory._create(int pages, int? maxPages) {
+    _mem = runtime.newMemory(this, pages, maxPages);
     _view = runtime.memoryView(_mem);
   }
 
