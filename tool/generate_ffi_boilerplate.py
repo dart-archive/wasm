@@ -359,6 +359,7 @@ void set_finalizer_for_trap(Dart_Handle, wasm_trap_t*);
 void set_finalizer_for_memorytype(Dart_Handle, wasm_memorytype_t*);
 void set_finalizer_for_memory(Dart_Handle, wasm_memory_t*);
 void set_finalizer_for_func(Dart_Handle, wasm_func_t*);
+void set_finalizer_for_global(Dart_Handle, wasm_global_t*);
 '''
 for f in rawFns.split('\n'):
     if len(f.strip()) > 0:

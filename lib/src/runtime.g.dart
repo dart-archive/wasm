@@ -21,6 +21,7 @@ class WasmRuntime {
   late final WasmerDartInitializeApiDLFn _Dart_InitializeApiDL;
   late final WasmerSetFinalizerForEngineFn _set_finalizer_for_engine;
   late final WasmerSetFinalizerForFuncFn _set_finalizer_for_func;
+  late final WasmerSetFinalizerForGlobalFn _set_finalizer_for_global;
   late final WasmerSetFinalizerForInstanceFn _set_finalizer_for_instance;
   late final WasmerSetFinalizerForMemoryFn _set_finalizer_for_memory;
   late final WasmerSetFinalizerForMemorytypeFn _set_finalizer_for_memorytype;
@@ -127,6 +128,10 @@ class WasmRuntime {
     _set_finalizer_for_func = _lib.lookupFunction<
         NativeWasmerSetFinalizerForFuncFn, WasmerSetFinalizerForFuncFn>(
       'set_finalizer_for_func',
+    );
+    _set_finalizer_for_global = _lib.lookupFunction<
+        NativeWasmerSetFinalizerForGlobalFn, WasmerSetFinalizerForGlobalFn>(
+      'set_finalizer_for_global',
     );
     _set_finalizer_for_instance = _lib.lookupFunction<
         NativeWasmerSetFinalizerForInstanceFn, WasmerSetFinalizerForInstanceFn>(
@@ -746,11 +751,13 @@ class WasmRuntime {
   }
 
   Pointer<WasmerGlobal> newGlobal(
+    Object owner,
     Pointer<WasmerGlobaltype> globalType,
     dynamic val,
   ) {
     final wasmerVal = newValue(getGlobalKind(globalType), val);
     final global = _global_new(_store, globalType, wasmerVal);
+    _set_finalizer_for_global(owner, global);
     calloc.free(wasmerVal);
     return global;
   }

@@ -164,7 +164,7 @@ class WasmInstanceBuilder {
       funcType,
       _wasmFnImportTrampolineNative,
       wasmFnImport,
-      _wasmFnImportFinalizerNative,
+      nullptr, // TODO(#47): Re-enable _wasmFnImportFinalizerNative.
     );
     _imports.ref.data[index] = runtime.functionToExtern(fnImp);
   }
@@ -179,7 +179,7 @@ class WasmInstanceBuilder {
     }
 
     final globalType = imp.type as Pointer<WasmerGlobaltype>;
-    final global = runtime.newGlobal(globalType, val);
+    final global = runtime.newGlobal(_importOwner, globalType, val);
     _imports.ref.data[index] = runtime.globalToExtern(global);
     return WasmGlobal._('${imp.moduleName}::${imp.name}', global);
   }

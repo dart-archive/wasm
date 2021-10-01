@@ -6,6 +6,7 @@ EXPORTS
    Dart_InitializeApiDL
    set_finalizer_for_engine
    set_finalizer_for_func
+   set_finalizer_for_global
    set_finalizer_for_instance
    set_finalizer_for_memory
    set_finalizer_for_memorytype

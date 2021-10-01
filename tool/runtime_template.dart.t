@@ -272,11 +272,13 @@ class WasmRuntime {
   }
 
   Pointer<WasmerGlobal> newGlobal(
+    Object owner,
     Pointer<WasmerGlobaltype> globalType,
     dynamic val,
   ) {
     final wasmerVal = newValue(getGlobalKind(globalType), val);
     final global = _global_new(_store, globalType, wasmerVal);
+    _set_finalizer_for_global(owner, global);
     calloc.free(wasmerVal);
     return global;
   }
