@@ -70,6 +70,9 @@ final _wasmFnImportTrampolineNative = Pointer.fromFunction<
   Pointer<WasmerValVec>,
 )>(_wasmFnImportTrampoline);
 final _wasmFnImportToFn = <int, Function>{};
+
+// This will be needed again once #47 is fixed.
+// ignore: unused_element
 final _wasmFnImportFinalizerNative =
     Pointer.fromFunction<Void Function(Pointer<_WasmFnImport>)>(
   _wasmFnImportFinalizer,
@@ -164,7 +167,7 @@ class WasmInstanceBuilder {
       funcType,
       _wasmFnImportTrampolineNative,
       wasmFnImport,
-      _wasmFnImportFinalizerNative,
+      nullptr, // TODO(#47): Re-enable _wasmFnImportFinalizerNative.
     );
     _imports.ref.data[index] = runtime.functionToExtern(fnImp);
   }
@@ -179,7 +182,7 @@ class WasmInstanceBuilder {
     }
 
     final globalType = imp.type as Pointer<WasmerGlobaltype>;
-    final global = runtime.newGlobal(globalType, val);
+    final global = runtime.newGlobal(_importOwner, globalType, val);
     _imports.ref.data[index] = runtime.globalToExtern(global);
     return WasmGlobal._('${imp.moduleName}::${imp.name}', global);
   }
@@ -261,9 +264,6 @@ class WasmInstance {
         // WASM currently allows only one memory per module.
         final mem = runtime.externToMemory(e);
         _exportedMemory = mem;
-        if (_wasiEnv != nullptr) {
-          runtime.wasiEnvSetMemory(_wasiEnv, mem);
-        }
       } else if (kind == wasmerExternKindGlobal) {
         _globals[name] = WasmGlobal._(name, runtime.externToGlobal(e));
       }

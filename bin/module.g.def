@@ -6,6 +6,7 @@ EXPORTS
    Dart_InitializeApiDL
    set_finalizer_for_engine
    set_finalizer_for_func
+   set_finalizer_for_global
    set_finalizer_for_instance
    set_finalizer_for_memory
    set_finalizer_for_memorytype
@@ -19,7 +20,6 @@ EXPORTS
    wasi_env_new
    wasi_env_read_stderr
    wasi_env_read_stdout
-   wasi_env_set_memory
    wasi_get_imports
    wasm_byte_vec_delete
    wasm_byte_vec_new

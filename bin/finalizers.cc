@@ -24,3 +24,4 @@ FINALIZER(trap);
 FINALIZER(memorytype);
 FINALIZER(memory);
 FINALIZER(func);
+FINALIZER(global);

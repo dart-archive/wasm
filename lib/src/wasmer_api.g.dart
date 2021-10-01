@@ -141,6 +141,12 @@ typedef NativeWasmerSetFinalizerForFuncFn = Void Function(
 typedef WasmerSetFinalizerForFuncFn = void Function(
     Object, Pointer<WasmerFunc>);
 
+// set_finalizer_for_global
+typedef NativeWasmerSetFinalizerForGlobalFn = Void Function(
+    Handle, Pointer<WasmerGlobal>);
+typedef WasmerSetFinalizerForGlobalFn = void Function(
+    Object, Pointer<WasmerGlobal>);
+
 // set_finalizer_for_instance
 typedef NativeWasmerSetFinalizerForInstanceFn = Void Function(
     Handle, Pointer<WasmerInstance>);
@@ -216,12 +222,6 @@ typedef NativeWasmerWasiEnvReadStdoutFn = Int64 Function(
     Pointer<WasmerWasiEnv>, Pointer<Uint8>, Uint64);
 typedef WasmerWasiEnvReadStdoutFn = int Function(
     Pointer<WasmerWasiEnv>, Pointer<Uint8>, int);
-
-// wasi_env_set_memory
-typedef NativeWasmerWasiEnvSetMemoryFn = Void Function(
-    Pointer<WasmerWasiEnv>, Pointer<WasmerMemory>);
-typedef WasmerWasiEnvSetMemoryFn = void Function(
-    Pointer<WasmerWasiEnv>, Pointer<WasmerMemory>);
 
 // wasi_get_imports
 typedef NativeWasmerWasiGetImportsFn = Uint8 Function(Pointer<WasmerStore>,

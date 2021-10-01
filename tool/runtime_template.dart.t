@@ -272,11 +272,13 @@ class WasmRuntime {
   }
 
   Pointer<WasmerGlobal> newGlobal(
+    Object owner,
     Pointer<WasmerGlobaltype> globalType,
     dynamic val,
   ) {
     final wasmerVal = newValue(getGlobalKind(globalType), val);
     final global = _global_new(_store, globalType, wasmerVal);
+    _set_finalizer_for_global(owner, global);
     calloc.free(wasmerVal);
     return global;
   }
@@ -351,13 +353,6 @@ class WasmRuntime {
         nullptr,
         'Failed to create WASI environment.',
       );
-
-  void wasiEnvSetMemory(
-    Pointer<WasmerWasiEnv> env,
-    Pointer<WasmerMemory> memory,
-  ) {
-    _wasi_env_set_memory(env, memory);
-  }
 
   void getWasiImports(
     Pointer<WasmerModule> mod,

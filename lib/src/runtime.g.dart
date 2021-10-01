@@ -21,6 +21,7 @@ class WasmRuntime {
   late final WasmerDartInitializeApiDLFn _Dart_InitializeApiDL;
   late final WasmerSetFinalizerForEngineFn _set_finalizer_for_engine;
   late final WasmerSetFinalizerForFuncFn _set_finalizer_for_func;
+  late final WasmerSetFinalizerForGlobalFn _set_finalizer_for_global;
   late final WasmerSetFinalizerForInstanceFn _set_finalizer_for_instance;
   late final WasmerSetFinalizerForMemoryFn _set_finalizer_for_memory;
   late final WasmerSetFinalizerForMemorytypeFn _set_finalizer_for_memorytype;
@@ -34,7 +35,6 @@ class WasmRuntime {
   late final WasmerWasiEnvNewFn _wasi_env_new;
   late final WasmerWasiEnvReadStderrFn _wasi_env_read_stderr;
   late final WasmerWasiEnvReadStdoutFn _wasi_env_read_stdout;
-  late final WasmerWasiEnvSetMemoryFn _wasi_env_set_memory;
   late final WasmerWasiGetImportsFn _wasi_get_imports;
   late final WasmerByteVecDeleteFn _byte_vec_delete;
   late final WasmerByteVecNewFn _byte_vec_new;
@@ -129,6 +129,10 @@ class WasmRuntime {
         NativeWasmerSetFinalizerForFuncFn, WasmerSetFinalizerForFuncFn>(
       'set_finalizer_for_func',
     );
+    _set_finalizer_for_global = _lib.lookupFunction<
+        NativeWasmerSetFinalizerForGlobalFn, WasmerSetFinalizerForGlobalFn>(
+      'set_finalizer_for_global',
+    );
     _set_finalizer_for_instance = _lib.lookupFunction<
         NativeWasmerSetFinalizerForInstanceFn, WasmerSetFinalizerForInstanceFn>(
       'set_finalizer_for_instance',
@@ -181,10 +185,6 @@ class WasmRuntime {
     _wasi_env_read_stdout = _lib.lookupFunction<NativeWasmerWasiEnvReadStdoutFn,
         WasmerWasiEnvReadStdoutFn>(
       'wasi_env_read_stdout',
-    );
-    _wasi_env_set_memory = _lib.lookupFunction<NativeWasmerWasiEnvSetMemoryFn,
-        WasmerWasiEnvSetMemoryFn>(
-      'wasi_env_set_memory',
     );
     _wasi_get_imports = _lib
         .lookupFunction<NativeWasmerWasiGetImportsFn, WasmerWasiGetImportsFn>(
@@ -751,11 +751,13 @@ class WasmRuntime {
   }
 
   Pointer<WasmerGlobal> newGlobal(
+    Object owner,
     Pointer<WasmerGlobaltype> globalType,
     dynamic val,
   ) {
     final wasmerVal = newValue(getGlobalKind(globalType), val);
     final global = _global_new(_store, globalType, wasmerVal);
+    _set_finalizer_for_global(owner, global);
     calloc.free(wasmerVal);
     return global;
   }
@@ -830,13 +832,6 @@ class WasmRuntime {
         nullptr,
         'Failed to create WASI environment.',
       );
-
-  void wasiEnvSetMemory(
-    Pointer<WasmerWasiEnv> env,
-    Pointer<WasmerMemory> memory,
-  ) {
-    _wasi_env_set_memory(env, memory);
-  }
 
   void getWasiImports(
     Pointer<WasmerModule> mod,
