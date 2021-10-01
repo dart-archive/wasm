@@ -34,7 +34,6 @@ class WasmRuntime {
   late final WasmerWasiEnvNewFn _wasi_env_new;
   late final WasmerWasiEnvReadStderrFn _wasi_env_read_stderr;
   late final WasmerWasiEnvReadStdoutFn _wasi_env_read_stdout;
-  late final WasmerWasiEnvSetMemoryFn _wasi_env_set_memory;
   late final WasmerWasiGetImportsFn _wasi_get_imports;
   late final WasmerByteVecDeleteFn _byte_vec_delete;
   late final WasmerByteVecNewFn _byte_vec_new;
@@ -181,10 +180,6 @@ class WasmRuntime {
     _wasi_env_read_stdout = _lib.lookupFunction<NativeWasmerWasiEnvReadStdoutFn,
         WasmerWasiEnvReadStdoutFn>(
       'wasi_env_read_stdout',
-    );
-    _wasi_env_set_memory = _lib.lookupFunction<NativeWasmerWasiEnvSetMemoryFn,
-        WasmerWasiEnvSetMemoryFn>(
-      'wasi_env_set_memory',
     );
     _wasi_get_imports = _lib
         .lookupFunction<NativeWasmerWasiGetImportsFn, WasmerWasiGetImportsFn>(
@@ -830,13 +825,6 @@ class WasmRuntime {
         nullptr,
         'Failed to create WASI environment.',
       );
-
-  void wasiEnvSetMemory(
-    Pointer<WasmerWasiEnv> env,
-    Pointer<WasmerMemory> memory,
-  ) {
-    _wasi_env_set_memory(env, memory);
-  }
 
   void getWasiImports(
     Pointer<WasmerModule> mod,

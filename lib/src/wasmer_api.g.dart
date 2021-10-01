@@ -217,12 +217,6 @@ typedef NativeWasmerWasiEnvReadStdoutFn = Int64 Function(
 typedef WasmerWasiEnvReadStdoutFn = int Function(
     Pointer<WasmerWasiEnv>, Pointer<Uint8>, int);
 
-// wasi_env_set_memory
-typedef NativeWasmerWasiEnvSetMemoryFn = Void Function(
-    Pointer<WasmerWasiEnv>, Pointer<WasmerMemory>);
-typedef WasmerWasiEnvSetMemoryFn = void Function(
-    Pointer<WasmerWasiEnv>, Pointer<WasmerMemory>);
-
 // wasi_get_imports
 typedef NativeWasmerWasiGetImportsFn = Uint8 Function(Pointer<WasmerStore>,
     Pointer<WasmerModule>, Pointer<WasmerWasiEnv>, Pointer<WasmerExternVec>);

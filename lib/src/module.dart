@@ -261,9 +261,6 @@ class WasmInstance {
         // WASM currently allows only one memory per module.
         final mem = runtime.externToMemory(e);
         _exportedMemory = mem;
-        if (_wasiEnv != nullptr) {
-          runtime.wasiEnvSetMemory(_wasiEnv, mem);
-        }
       } else if (kind == wasmerExternKindGlobal) {
         _globals[name] = WasmGlobal._(name, runtime.externToGlobal(e));
       }

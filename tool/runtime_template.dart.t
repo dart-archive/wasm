@@ -352,13 +352,6 @@ class WasmRuntime {
         'Failed to create WASI environment.',
       );
 
-  void wasiEnvSetMemory(
-    Pointer<WasmerWasiEnv> env,
-    Pointer<WasmerMemory> memory,
-  ) {
-    _wasi_env_set_memory(env, memory);
-  }
-
   void getWasiImports(
     Pointer<WasmerModule> mod,
     Pointer<WasmerWasiEnv> env,
