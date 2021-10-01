@@ -70,6 +70,8 @@ final _wasmFnImportTrampolineNative = Pointer.fromFunction<
   Pointer<WasmerValVec>,
 )>(_wasmFnImportTrampoline);
 final _wasmFnImportToFn = <int, Function>{};
+
+// ignore: unused_element
 final _wasmFnImportFinalizerNative =
     Pointer.fromFunction<Void Function(Pointer<_WasmFnImport>)>(
   _wasmFnImportFinalizer,
