@@ -236,20 +236,6 @@ Future<void> _run(
   }
 }
 
-String _findToolInPath(String tool) {
-  final delim = Platform.isWindows ? ';' : ':';
-  for (final path in (Platform.environment['PATH'] ?? '').split(delim)) {
-    final file = Uri.directory(path).resolve(tool).toFilePath();
-    if (FileSystemEntity.isFileSync(file)) {
-      return file;
-    }
-  }
-  throw FileSystemException(
-    "Can't find $tool in PATH variable",
-    Platform.environment['PATH'],
-  );
-}
-
 String _toUpperUnderscore(String string) {
   return string.toUpperCase().replaceAll('-', '_');
 }
