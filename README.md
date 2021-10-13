@@ -1,6 +1,8 @@
-Provides utilities for loading and running WASM modules
+Provides utilities for loading and running WASM modules.
 
 Built on top of the [Wasmer](https://github.com/wasmerio/wasmer) runtime.
+
+Flutter and web are **not supported** at the moment. Stay tuned though ;)
 
 ## Setup
 

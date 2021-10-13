@@ -356,6 +356,7 @@ Future<void> _main(ArgResults args) async {
       '-z',
       '/NODEFAULTLIB:MSVCRT',
     ],
+    '-lm',
     '-target',
     target,
     outDir.resolve('dart_api_dl.o').toFilePath(),
