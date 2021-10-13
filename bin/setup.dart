@@ -3,27 +3,75 @@
 // BSD-style license that can be found in the LICENSE file.
 
 // Builds the wasmer runtime library, to by used by package:wasm. Requires
-// rustc, cargo, clang, and clang++. If a target triple is not specified, it
-// will default to the host target.
-// Usage: dart run wasm:setup [optional target-triple]
+// Rust (rustc, rustup, cargo), and Clang (clang, clang++, ar).
+// Usage: dart run wasm:setup
+// For more details use the --help option.
 
 import 'dart:convert';
 import 'dart:io' hide exit;
 
+import 'package:args/args.dart';
 import 'package:package_config/package_config.dart' show findPackageConfig;
 import 'package:wasm/src/shared.dart';
 
-Future<void> main(List<String> args) async {
-  if (args.length > 1) {
-    print('Usage: $invocationString [target-triple]');
-    exitCode = 64; // bad usage
+Future<void> main(List<String> arguments) async {
+  final parser = ArgParser()
+    ..addOption(
+      'target',
+      abbr: 't',
+      help: 'Target triple. Defaults to host target.',
+    )
+    ..addOption(
+      'out-dir',
+      abbr: 'o',
+      help: 'Output directory. Defaults to the directory that package:wasm '
+          'searches.',
+    )
+    ..addOption(
+      'rustc',
+      help: "Path of rustc. Defaults to assuming it's in PATH variable.",
+    )
+    ..addOption(
+      'rustup',
+      help: "Path of rustup. Defaults to assuming it's in PATH variable.",
+    )
+    ..addOption(
+      'cargo',
+      help: "Path of cargo. Defaults to assuming it's in PATH variable.",
+    )
+    ..addOption(
+      'clang',
+      help: "Path of clang. Defaults to assuming it's in PATH variable.",
+    )
+    ..addOption(
+      'clangpp',
+      help: "Path of clang++. Defaults to assuming it's in PATH variable.",
+    )
+    ..addOption(
+      'ar',
+      help: "Path of ar. Defaults to assuming it's in PATH variable.",
+    )
+    ..addOption(
+      'sysroot',
+      help: 'Sysroot argument passed to linker.',
+    )
+    ..addFlag(
+      'help',
+      abbr: 'h',
+      negatable: false,
+      help: 'Show this help.',
+    );
+  final args = parser.parse(arguments);
+
+  if (args['help'] as bool) {
+    print('Usage: $invocationString [OPTION...]\n');
+    print(parser.usage);
+    exitCode = 0; // ok
     return;
   }
 
-  final target = args.isNotEmpty ? args[0] : await _getTargetTriple();
-
   try {
-    await _main(target);
+    await _main(args);
   } on ProcessException catch (e) {
     final invocation = [e.executable, ...e.arguments].join(' ');
     print('FAILED with exit code ${e.errorCode} `$invocation`');
@@ -144,9 +192,9 @@ String _getWasmerLib(String os) {
   return 'libwasmer.a';
 }
 
-Future<String> _getTargetTriple() async {
+Future<String> _getTargetTriple(String rustc) async {
   final _regexp = RegExp(r'^([^=]+)="(.*)"$');
-  final process = await Process.start('rustc', ['--print', 'cfg']);
+  final process = await Process.start(rustc, ['--print', 'cfg']);
   final sub = process.stderr
       .transform(utf8.decoder)
       .transform(const LineSplitter())
@@ -170,21 +218,56 @@ Future<String> _getTargetTriple() async {
       .join('-');
 }
 
-Future<void> _run(String exe, List<String> args) async {
+Future<void> _run(
+  String exe,
+  List<String> args, {
+  Map<String, String>? environment,
+}) async {
   print('\n$exe ${args.join(' ')}\n');
-  final process =
-      await Process.start(exe, args, mode: ProcessStartMode.inheritStdio);
+  final process = await Process.start(
+    exe,
+    args,
+    mode: ProcessStartMode.inheritStdio,
+    environment: environment,
+  );
   final result = await process.exitCode;
   if (result != 0) {
     throw ProcessException(exe, args, '', result);
   }
 }
 
-Future<void> _main(String target) async {
+String _findToolInPath(String tool) {
+  final delim = Platform.isWindows ? ';' : ':';
+  for (final path in (Platform.environment['PATH'] ?? '').split(delim)) {
+    final file = Uri.directory(path).resolve(tool).toFilePath();
+    if (FileSystemEntity.isFileSync(file)) {
+      return file;
+    }
+  }
+  throw FileSystemException(
+    "Can't find $tool in PATH variable",
+    Platform.environment['PATH'],
+  );
+}
+
+String _toUpperUnderscore(String string) {
+  return string.toUpperCase().replaceAll('-', '_');
+}
+
+Future<void> _main(ArgResults args) async {
+  final rustc = args['rustc'] as String? ?? 'rustc';
+  final rustup = args['rustup'] as String? ?? 'rustup';
+  final cargo = args['cargo'] as String? ?? 'cargo';
+  final clang = args['clang'] as String? ?? 'clang';
+  final clangpp = args['clangpp'] as String? ?? 'clang++';
+
+  final target = args['target'] as String? ?? await _getTargetTriple(rustc);
   final sdkDir = _getSdkDir();
   final sdkIncDir = _getSdkIncDir(sdkDir);
   final srcDir = await _getSrcDir();
-  final outDir = _getOutDir(Directory.current.uri);
+  final outDir = args['out-dir'] != null
+      ? Uri.directory(args['out-dir'] as String)
+      : _getOutDir(Directory.current.uri);
   final os = _getOsFromTarget(target);
   final outLib = outDir.resolve(_getOutLib(os)).toFilePath();
 
@@ -196,17 +279,32 @@ Future<void> _main(String target) async {
   print('OS: $os');
   print('Output library: $outLib');
 
+  // Make sure rust libs are installed for the target.
+  await _run(rustup, ['target', 'add', target]);
+
   // Build wasmer crate.
-  await _run('cargo', [
-    'build',
-    '--target',
-    target,
-    '--target-dir',
-    outDir.toFilePath(),
-    '--manifest-path',
-    srcDir.resolve('Cargo.toml').toFilePath(),
-    '--release'
-  ]);
+  await _run(
+    cargo,
+    [
+      'build',
+      '--target',
+      target,
+      '--target-dir',
+      outDir.toFilePath(),
+      '--manifest-path',
+      srcDir.resolve('Cargo.toml').toFilePath(),
+      '--release'
+    ],
+    environment: {
+      if (args['clangpp'] != null) ...{
+        'CC': clangpp,
+        'CXX': clangpp,
+        'LINKER': clangpp,
+        'CARGO_TARGET_${_toUpperUnderscore(target)}_LINKER': clangpp,
+      },
+      if (args['ar'] != null) 'AR': args['ar'] as String,
+    },
+  );
 
   // Hack around a bug with dart_api_dl_impl.h include path in dart_api_dl.c.
   const dartApiDlImplPath = 'include/internal/dart_api_dl_impl.h';
@@ -218,7 +316,7 @@ Future<void> _main(String target) async {
   }
 
   // Build dart_api_dl.o.
-  await _run('clang', [
+  await _run(clang, [
     '-DDART_SHARED_LIB',
     '-DNDEBUG',
     '-fno-exceptions',
@@ -237,7 +335,7 @@ Future<void> _main(String target) async {
   ]);
 
   // Build finalizers.o.
-  await _run('clang++', [
+  await _run(clangpp, [
     '-DDART_SHARED_LIB',
     '-DNDEBUG',
     '-fno-exceptions',
@@ -258,8 +356,9 @@ Future<void> _main(String target) async {
   ]);
 
   // Link wasmer, dart_api_dl, and finalizers to create the output library.
-  await _run('clang++', [
+  await _run(clang, [
     '-shared',
+    if (args['sysroot'] != null) '--sysroot=${args['sysroot']}',
     if (os != 'windows') '-fPIC',
     if (os == 'windows') ...[
       '-lws2_32',
