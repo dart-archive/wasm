@@ -282,8 +282,8 @@ Future<void> _main(ArgResults args) async {
       '--release'
     ],
     environment: {
+      if (args['clang'] != null) 'CC': clang,
       if (args['clangpp'] != null) ...{
-        'CC': clangpp,
         'CXX': clangpp,
         'LINKER': clangpp,
         'CARGO_TARGET_${_toUpperUnderscore(target)}_LINKER': clangpp,
@@ -321,14 +321,12 @@ Future<void> _main(ArgResults args) async {
   ]);
 
   // Build finalizers.o.
-  await _run(clangpp, [
+  await _run(clang, [
     '-DDART_SHARED_LIB',
     '-DNDEBUG',
     '-fno-exceptions',
-    '-fno-rtti',
     if (os != 'windows') '-fPIC',
     '-O3',
-    '-std=c++11',
     '-target',
     target,
     '-I',
@@ -336,7 +334,7 @@ Future<void> _main(ArgResults args) async {
     '-I',
     outDir.resolve('include/').toFilePath(),
     '-c',
-    srcDir.resolve('finalizers.cc').toFilePath(),
+    srcDir.resolve('finalizers.c').toFilePath(),
     '-o',
     outDir.resolve('finalizers.o').toFilePath()
   ]);
