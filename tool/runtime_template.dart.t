@@ -18,7 +18,7 @@ class WasmRuntime {
 
 /* <RUNTIME_MEMB> */
 
-  WasmRuntime._init() : _lib = _load_dynamic_lib() {
+  WasmRuntime._init() : _lib = _loadDynamicLib() {
 /* <RUNTIME_LOAD> */
 
     if (_Dart_InitializeApiDL(NativeApi.initializeApiDLData) != 0) {
@@ -30,17 +30,6 @@ class WasmRuntime {
     _store = _store_new(_engine);
     _checkNotEqual(_store, nullptr, 'Failed to create Wasm store.');
     _set_finalizer_for_store(this, _store);
-  }
-
-  static DynamicLibrary _load_dynamic_lib() {
-    try {
-      return DynamicLibrary.open(_getLibPath());
-    } catch (e) {
-      throw WasmError(
-        'Failed to load Wasm dynamic library. '
-        'Have you run `dart run wasm:setup`?\n    $e',
-      );
-    }
   }
 
   Pointer<WasmerModule> compile(
