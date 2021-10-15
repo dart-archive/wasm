@@ -30,13 +30,17 @@ jobs:
           .dart_tool/
         key: ${{ runner.os }}-${{ matrix.sdk }}
     - id: install
+      working-directory: wasm
       run: dart pub upgrade
     - run: dart format --output=none --set-exit-if-changed .
       if: always() && steps.install.outcome == 'success'
+      working-directory: wasm
     - run: dart analyze --fatal-infos
       if: always() && steps.install.outcome == 'success'
+      working-directory: wasm
     - name: validate boilerplate generation
       if: always() && steps.install.outcome == 'success'
+      working-directory: wasm
       run: |
         ./tool/generate_ffi_boilerplate.py
         dart format -owrite .
@@ -74,5 +78,8 @@ jobs:
           .dart_tool/
         key: ${{ runner.os }}-${{ matrix.sdk }}
     - run: dart pub upgrade
+      working-directory: wasm
     - run: dart run wasm:setup
+      working-directory: wasm
     - run: dart test
+      working-directory: wasm
