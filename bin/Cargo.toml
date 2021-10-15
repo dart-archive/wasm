@@ -10,4 +10,4 @@ path = "wasmer.rs"
 [dependencies.wasmer-c-api]
 version = "2.0.0"
 default-features = false
-features = ["jit", "cranelift", "wasi"]
+features = ["jit", "cranelift", "wasi", "universal"]

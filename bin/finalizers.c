@@ -6,8 +6,8 @@
 #include "dart_api_dl.h"
 
 #define FINALIZER(type)                                                        \
-  extern "C" void wasm_##type##_delete(void *);                                \
-  extern "C" void wasm_##type##_finalizer(void *, void *native_object) {       \
+  void wasm_##type##_delete(void *native_object);                              \
+  void wasm_##type##_finalizer(void *unused, void *native_object) {            \
     wasm_##type##_delete(native_object);                                       \
   }                                                                            \
   DART_EXPORT void set_finalizer_for_##type(Dart_Handle dart_object,           \
