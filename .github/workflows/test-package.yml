@@ -18,6 +18,9 @@ jobs:
     strategy:
       matrix:
         sdk: [ dev ]
+    defaults:
+      run:
+        working-directory: wasm
     steps:
     - uses: actions/checkout@v2.3.4
     - uses: dart-lang/setup-dart@v1.0
@@ -58,6 +61,9 @@ jobs:
       matrix:
         os: [ ubuntu-latest, macos-latest ]
         sdk: [ 2.12.0, dev ]
+    defaults:
+      run:
+        working-directory: wasm
     steps:
     - uses: dart-lang/setup-dart@v1.0
       with:
