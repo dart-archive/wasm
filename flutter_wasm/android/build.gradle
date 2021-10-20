@@ -1,0 +1,126 @@
+group 'dev.dart.flutter_wasm'
+version '1.0-SNAPSHOT'
+
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+
+buildscript {
+    ext.kotlin_version = '1.3.50'
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 30
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        minSdkVersion 16
+    }
+
+    def hostOs = DefaultNativePlatform.currentOperatingSystem.getName().toLowerCase()
+    def hostArch = DefaultNativePlatform.currentArchitecture.getName().replaceAll('-', '_')
+    def ndkBinDir = "${android.ndkDirectory}/toolchains/llvm/prebuilt/${hostOs}-${hostArch}/bin"
+    def projectProperties = new Properties()
+    projectProperties.load(project.rootProject.file('local.properties').newDataInputStream())
+    def flutterDir = projectProperties.getProperty('flutter.sdk')
+    def platformVersion = -1
+    fileTree("${android.ndkDirectory}/platforms").visit { FileVisitDetails details ->
+        if (details.isDirectory() && details.name.startsWith("android-")) {
+            platformVersion = Math.max(platformVersion, details.name.substring(8) as int)
+        }
+    }
+    if (platformVersion < 0) {
+        throw new Exception("Can't find any valid platforms in ${android.ndkDirectory}/platforms")
+    }
+
+    tasks.register('wasm-pub-get') {
+        doLast {
+            exec {
+                workingDir '..'
+                commandLine "${flutterDir}/bin/flutter", 'pub', 'get'
+            }
+        }
+    }
+
+    def architectures = [
+            ['arm64-v8a', 'aarch64-linux-android', 'aarch64-linux-android', 'aarch64-linux-android', 'arch-arm64'],
+            ['x86', 'i686-linux-android', 'i686-linux-android', 'i686-linux-android', 'arch-x86'],
+
+            // TODO: Enable these when they're supported by Wasmer. See:
+            // https://github.com/wasmerio/wasmer/issues/1652
+            // https://github.com/wasmerio/wasmer/issues/2099
+            // ['armeabi-v7a', 'armv7a-linux-androideabi', 'arm-linux-androideabi', 'armv7-linux-androideabi', 'arch-arm'],
+            // ['x86_64', 'x86_64-linux-android', 'x86_64-linux-android', 'x86_64-linux-android', 'arch-x86_64'],
+    ]
+    for (arch in architectures) {
+        def abi = arch[0]
+        def clangPrefix = "${arch[1]}${platformVersion}"
+        def arPrefix = arch[2]
+        def rustTriple = arch[3]
+        def sysroot = arch[4]
+        def sysrootDir = "${android.ndkDirectory}/platforms/android-${platformVersion}/${sysroot}"
+        def outDir = "${rootDir}/../build/app/intermediates/stripped_native_libs/debug/out/lib/${abi}/"
+
+        tasks.register("wasm-lib-${abi}") {
+            // Specify inputs and outputs so that incremental build works properly.
+            inputs.property('platformVersion', platformVersion)
+            inputs.property('abi', abi)
+            outputs.file("${outDir}/libwasmer.so")
+
+            dependsOn('wasm-pub-get')
+
+            doLast {
+                exec {
+                    workingDir '..'
+                    commandLine "${flutterDir}/bin/flutter", 'pub', 'run', 'wasm:setup',
+                            '--sysroot', sysrootDir,
+                            '--target', rustTriple,
+                            '--clang', "${ndkBinDir}/${clangPrefix}-clang",
+                            '--clangpp', "${ndkBinDir}/${clangPrefix}-clang++",
+                            '--ar', "${ndkBinDir}/${arPrefix}-ar",
+                            '-o', outDir
+                }
+            }
+        }
+    }
+
+    tasks.withType(JavaCompile) { compileTask ->
+        for (arch in architectures) {
+            def abi = arch[0]
+            compileTask.dependsOn("wasm-lib-${abi}")
+        }
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
