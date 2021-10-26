@@ -1,3 +1,7 @@
+// Copyright (c) 2021, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
+
 group 'dev.dart.flutter_wasm'
 version '1.0-SNAPSHOT'
 
@@ -75,9 +79,7 @@ android {
             ['arm64-v8a', 'aarch64-linux-android', 'aarch64-linux-android', 'aarch64-linux-android', 'arch-arm64'],
             ['x86', 'i686-linux-android', 'i686-linux-android', 'i686-linux-android', 'arch-x86'],
 
-            // TODO: Enable these when they're supported by Wasmer. See:
-            // https://github.com/wasmerio/wasmer/issues/1652
-            // https://github.com/wasmerio/wasmer/issues/2099
+            // TODO(#53,#54): Enable these when they're supported by Wasmer.
             // ['armeabi-v7a', 'armv7a-linux-androideabi', 'arm-linux-androideabi', 'armv7-linux-androideabi', 'arch-arm'],
             // ['x86_64', 'x86_64-linux-android', 'x86_64-linux-android', 'x86_64-linux-android', 'arch-x86_64'],
     ]

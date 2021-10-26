@@ -1,15 +1,22 @@
-# flutter_wasm
+Provides utilities for loading and running WASM modules in Flutter apps.
+Currently only Android is supported.
 
-A new flutter plugin project.
+This is a wrapper around [package:wasm](https://github.com/dart-lang/wasm/blob/main/wasm/README.md).
+See that package for more information and documentation. The basic
+usage is mostly the same as in that package. The main thing this plugin does is
+run `wasm:setup` for your target device during app compilation.
 
-## Getting Started
+## Usage
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+1. Add a dependency to *both* package `wasm` and `flutter_wasm` in
+`pubspec.yaml` and run `flutter pub get`. [#52](https://github.com/dart-lang/wasm/issues/52)
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Next run `flutter run wasm:setup` to build the Wasmer runtime for your host
+machine. This does not build the runtime for your target device. It will take a
+few minutes.
 
+1. Load your wasm code in your app. See the [example app](https://github.com/dart-lang/wasm/blob/main/flutter_wasm/example/lib/main.dart).
+
+1. Run your app using `flutter run`. If you see an error at runtime saying
+"libwasmer.so not found", just try rebuiling. The first build sometimes fails.
+[#51](https://github.com/dart-lang/wasm/issues/51)

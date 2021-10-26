@@ -192,7 +192,7 @@ packages:
     source: hosted
     version: "2.1.0"
   wasm:
-    dependency: transitive
+    dependency: "direct main"
     description:
       path: wasm
       ref: HEAD
