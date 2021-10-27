@@ -13,7 +13,7 @@ dependencies:
     sdk: flutter
   wasm:
     git:
-      url: git@github.com:dart-lang/wasm.git
+      url: https://github.com/dart-lang/wasm.git
       path: wasm
 
 dev_dependencies:
