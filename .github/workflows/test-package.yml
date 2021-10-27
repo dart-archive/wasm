@@ -85,9 +85,6 @@ jobs:
 
   flutter_analyze:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        sdk: [ dev ]
     defaults:
       run:
         working-directory: flutter_wasm
@@ -108,9 +105,6 @@ jobs:
 
   flutter_test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        sdk: [ dev ]
     defaults:
       run:
         working-directory: flutter_wasm
@@ -127,9 +121,6 @@ jobs:
 
   flutter_example_test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        sdk: [ dev ]
     defaults:
       run:
         working-directory: flutter_wasm/example
