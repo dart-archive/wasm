@@ -12,9 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   wasm:
-    git:
-      url: https://github.com/dart-lang/wasm.git
-      path: wasm
+    path: ../wasm
 
 dev_dependencies:
   flutter_lints: ^1.0.0

@@ -194,12 +194,10 @@ packages:
   wasm:
     dependency: "direct main"
     description:
-      path: wasm
-      ref: HEAD
-      resolved-ref: "544b12bcfd8f2dd360e464d5384a0f63861c6db4"
-      url: "git@github.com:dart-lang/wasm.git"
-    source: git
+      path: "../../wasm"
+      relative: true
+    source: path
     version: "0.2.0-dev"
 sdks:
-  dart: ">=2.15.0-96.0.dev <3.0.0"
+  dart: ">=2.14.0 <3.0.0"
   flutter: ">=2.5.0"
