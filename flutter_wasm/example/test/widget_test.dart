@@ -15,8 +15,8 @@ void main() {
     // Verify that the wasm code runs.
     expect(
       find.byWidgetPredicate(
-        (Widget widget) => widget is Text &&
-                           widget.data!.startsWith('12^2 == 144'),
+        (Widget widget) =>
+            widget is Text && widget.data!.startsWith('12^2 == 144'),
       ),
       findsOneWidget,
     );

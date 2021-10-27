@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
-import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_wasm/flutter_wasm.dart';
 
 // int64_t square(int64_t n) { return n * n; }
@@ -17,7 +15,7 @@ final _data = Uint8List.fromList([
 ]);
 
 final _inst = WasmModule(_data).builder().build();
-final wasmSquare = _inst.lookupFunction('square');
+final _wasmSquare = _inst.lookupFunction('square');
 
 void main() {
   runApp(const MyApp());
@@ -44,7 +42,7 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Wasm example app'),
         ),
         body: Center(
-          child: Text('12^2 == ${wasmSquare(12)}'),
+          child: Text('12^2 == ${_wasmSquare(12)}'),
         ),
       ),
     );

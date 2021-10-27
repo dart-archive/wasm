@@ -82,3 +82,30 @@ jobs:
     - run: dart pub upgrade
     - run: dart run wasm:setup
     - run: dart test
+
+  flutter_analyze:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sdk: [ dev ]
+    defaults:
+      run:
+        working-directory: flutter_wasm
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: dart-lang/setup-dart@v1.0
+      with:
+        sdk: ${{ matrix.sdk }}
+    - uses: actions/cache@v2.1.6
+      with:
+        path: |
+          ~/.pub-cache/hosted/
+          .dart_tool/
+        key: ${{ runner.os }}-${{ matrix.sdk }}
+    - id: install
+      run: dart pub upgrade
+    - run: dart format --output=none --set-exit-if-changed .
+      if: always() && steps.install.outcome == 'success'
+    - run: dart analyze --fatal-infos
+      if: always() && steps.install.outcome == 'success'
+

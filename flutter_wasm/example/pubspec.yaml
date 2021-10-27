@@ -6,6 +6,7 @@ environment:
   sdk: ">=2.15.0-96.0.dev <3.0.0"
 
 dependencies:
+  cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
   flutter_wasm:
@@ -14,12 +15,11 @@ dependencies:
     git:
       url: git@github.com:dart-lang/wasm.git
       path: wasm
-  cupertino_icons: ^1.0.2
 
 dev_dependencies:
+  flutter_lints: ^1.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^1.0.0
 
 flutter:
   uses-material-design: true
