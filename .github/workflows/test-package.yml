@@ -132,10 +132,13 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: '12.x'
+    - uses: android-actions/setup-android@v2
+    - uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r21e
     - uses: subosito/flutter-action@v1.5.3
       with:
         flutter-version: '2.5.0'
-    - uses: android-actions/setup-android@v2
     - run: flutter pub upgrade
     - run: flutter pub run wasm:setup
     - run: flutter test
