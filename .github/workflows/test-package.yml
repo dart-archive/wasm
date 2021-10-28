@@ -138,11 +138,13 @@ jobs:
         api: '21'
         arch: 'x86'
         install-location: 'toolchains'
+        force: true
     - uses: ravinderjangra/android-ndk-toolchain-setup@0.2
       with:
         api: '21'
         arch: 'arm64'
         install-location: 'toolchains'
+        force: true
     - uses: subosito/flutter-action@v1.5.3
       with:
         flutter-version: '2.5.0'
