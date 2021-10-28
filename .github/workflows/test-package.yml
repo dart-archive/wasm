@@ -97,10 +97,10 @@ jobs:
       with:
         flutter-version: '2.5.0'
     - id: install
-      run: dart pub upgrade
-    - run: dart format --output=none --set-exit-if-changed .
+      run: flutter pub upgrade
+    - run: flutter format --output=none --set-exit-if-changed .
       if: always() && steps.install.outcome == 'success'
-    - run: dart analyze --fatal-infos
+    - run: flutter analyze --fatal-infos
       if: always() && steps.install.outcome == 'success'
 
   flutter_test:
