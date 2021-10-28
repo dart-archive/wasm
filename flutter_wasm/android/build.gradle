@@ -32,6 +32,7 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 30
+    ndkVersion '21.1.6352462'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
