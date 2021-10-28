@@ -97,7 +97,9 @@ jobs:
       with:
         flutter-version: '2.5.0'
     - id: install
-      run: flutter pub upgrade
+      run: |
+        flutter pub upgrade
+        flutter pub upgrade --directory example
     - run: flutter format --output=none --set-exit-if-changed .
       if: always() && steps.install.outcome == 'success'
     - run: flutter analyze --fatal-infos
