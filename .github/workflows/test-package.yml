@@ -118,7 +118,8 @@ jobs:
     - uses: subosito/flutter-action@v1.5.3
       with:
         flutter-version: '2.5.0'
-    - run: flutter pub get
+    - run: flutter pub upgrade
+    - run: flutter pub run wasm:setup
     - run: flutter test
 
   flutter_example_test:
@@ -134,7 +135,8 @@ jobs:
     - uses: subosito/flutter-action@v1.5.3
       with:
         flutter-version: '2.5.0'
-    - run: flutter pub get
+    - run: flutter pub upgrade
+    - run: flutter pub run wasm:setup
     - run: flutter test
     - run: flutter build apk
     - run: flutter build appbundle
