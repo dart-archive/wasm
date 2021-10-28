@@ -135,6 +135,9 @@ jobs:
     - uses: subosito/flutter-action@v1.5.3
       with:
         flutter-version: '2.5.0'
+    - uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r21e
     - run: flutter pub upgrade
     - run: flutter pub run wasm:setup
     - run: flutter test
