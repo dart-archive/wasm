@@ -133,18 +133,10 @@ jobs:
       with:
         java-version: '12.x'
     - uses: android-actions/setup-android@v2.0.2
-    - uses: ravinderjangra/android-ndk-toolchain-setup@0.2
+    - uses: nttld/setup-ndk@v1
       with:
-        api: '21'
-        arch: 'x86'
-        install-location: 'toolchains'
-        force: true
-    - uses: ravinderjangra/android-ndk-toolchain-setup@0.2
-      with:
-        api: '21'
-        arch: 'arm64'
-        install-location: 'toolchains'
-        force: true
+        ndk-version: r21e
+        add-to-path: true
     - uses: subosito/flutter-action@v1.5.3
       with:
         flutter-version: '2.5.0'
