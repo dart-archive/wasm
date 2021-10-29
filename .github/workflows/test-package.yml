@@ -137,6 +137,7 @@ jobs:
       with:
         ndk-version: r21e
         add-to-path: true
+    - run: echo "ndk.dir=$(dirname $(which ndk-build))" >> android/local.properties
     - uses: subosito/flutter-action@v1.5.3
       with:
         flutter-version: '2.5.0'
