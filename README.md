@@ -4,6 +4,6 @@ These packages provide utilities for loading and running WASM modules.
 
 Runs WASM modules in Dart native.
 
-## flutter_wasm (coming soon)
+## [flutter_wasm](https://github.com/dart-lang/wasm/blob/main/flutter_wasm/README.md)
 
 Runs WASM modules in Flutter.

@@ -1,0 +1,27 @@
+name: flutter_wasm
+version: 0.0.1
+description: Flutter support for package:wasm
+repository: https://github.com/dart-lang/wasm
+publish_to: none
+
+environment:
+  sdk: '>=2.14.0 <3.0.0'
+  flutter: ">=2.5.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  wasm:
+    path: ../wasm
+
+dev_dependencies:
+  flutter_lints: ^1.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: dev.dart.flutter_wasm
+        pluginClass: FlutterWasmPlugin

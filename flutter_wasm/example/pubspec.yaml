@@ -1,0 +1,25 @@
+name: flutter_wasm_example
+description: Demonstrates how to use the flutter_wasm plugin.
+publish_to: 'none'
+
+environment:
+  sdk: '>=2.14.0 <3.0.0'
+  flutter: ">=2.5.0"
+
+dependencies:
+  cupertino_icons: ^1.0.2
+  flutter:
+    sdk: flutter
+  flutter_wasm:
+    path: ../
+  wasm:
+    path: ../../wasm
+
+dev_dependencies:
+  flutter_lints: ^1.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
