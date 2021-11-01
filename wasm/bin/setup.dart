@@ -221,6 +221,7 @@ Future<String> _getTargetTriple(String rustc) async {
 Future<void> _run(
   String exe,
   List<String> args, {
+  Uri? output,
   Map<String, String>? environment,
 }) async {
   print('\n$exe ${args.join(' ')}\n');
@@ -233,6 +234,11 @@ Future<void> _run(
   final result = await process.exitCode;
   if (result != 0) {
     throw ProcessException(exe, args, '', result);
+  }
+  if (output != null && !File.fromUri(output).existsSync()) {
+    throw FileSystemException(
+        'Command succeded, but the output file is missing',
+        output.toFilePath());
   }
 }
 
@@ -255,7 +261,10 @@ Future<void> _main(ArgResults args) async {
       ? Uri.directory(args['out-dir'] as String)
       : _getOutDir(Directory.current.uri);
   final os = _getOsFromTarget(target);
-  final outLib = outDir.resolve(_getOutLib(os)).toFilePath();
+  final outLib = outDir.resolve(_getOutLib(os));
+  final outWasmer = outDir.resolve('$target/release/${_getWasmerLib(os)}');
+  final outDartApi = outDir.resolve('dart_api_dl.o');
+  final outFinalizers = outDir.resolve('finalizers.o');
 
   print('Dart SDK directory: ${sdkDir.toFilePath()}');
   print('Dart SDK include directory: ${sdkIncDir.toFilePath()}');
@@ -263,7 +272,7 @@ Future<void> _main(ArgResults args) async {
   print('Output directory: ${outDir.toFilePath()}');
   print('Target: $target');
   print('OS: $os');
-  print('Output library: $outLib');
+  print('Output library: ${outLib.toFilePath()}');
 
   // Make sure rust libs are installed for the target.
   await _run(rustup, ['target', 'add', target]);
@@ -281,6 +290,7 @@ Future<void> _main(ArgResults args) async {
       srcDir.resolve('Cargo.toml').toFilePath(),
       '--release'
     ],
+    output: outWasmer,
     environment: {
       if (args['clang'] != null) 'CC': clang,
       if (args['clangpp'] != null) ...{
@@ -317,8 +327,8 @@ Future<void> _main(ArgResults args) async {
     '-c',
     sdkIncDir.resolve('dart_api_dl.c').toFilePath(),
     '-o',
-    outDir.resolve('dart_api_dl.o').toFilePath()
-  ]);
+    outDartApi.toFilePath()
+  ], output: outDartApi);
 
   // Build finalizers.o.
   await _run(clang, [
@@ -336,8 +346,8 @@ Future<void> _main(ArgResults args) async {
     '-c',
     srcDir.resolve('finalizers.c').toFilePath(),
     '-o',
-    outDir.resolve('finalizers.o').toFilePath()
-  ]);
+    outFinalizers.toFilePath()
+  ], output: outFinalizers);
 
   // Link wasmer, dart_api_dl, and finalizers to create the output library.
   await _run(clang, [
@@ -357,10 +367,10 @@ Future<void> _main(ArgResults args) async {
     '-lm',
     '-target',
     target,
-    outDir.resolve('dart_api_dl.o').toFilePath(),
-    outDir.resolve('finalizers.o').toFilePath(),
-    outDir.resolve('$target/release/${_getWasmerLib(os)}').toFilePath(),
+    outDartApi.toFilePath(),
+    outFinalizers.toFilePath(),
+    outWasmer.toFilePath(),
     '-o',
-    outLib
-  ]);
+    outLib.toFilePath()
+  ], output: outLib);
 }
