@@ -11,7 +11,7 @@ run `wasm:setup` for your target device during app compilation.
 1. Add a dependency to *both* package `wasm` and `flutter_wasm` in
 `pubspec.yaml` and run `flutter pub get`. [#52](https://github.com/dart-lang/wasm/issues/52)
 
-1. Next run `flutter run wasm:setup` to build the Wasmer runtime for your host
+1. Next run `flutter pub run wasm:setup` to build the Wasmer runtime for your host
 machine. This does not build the runtime for your target device. It will take a
 few minutes.
 
