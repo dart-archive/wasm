@@ -10,8 +10,14 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter:
     sdk: flutter
-  flutter_wasm: any
-  wasm: any
+  flutter_wasm:
+    git:
+      url: https://github.com/dart-lang/wasm.git
+      path: flutter_wasm
+  wasm:
+    git:
+      url: https://github.com/dart-lang/wasm.git
+      path: wasm
 
 dev_dependencies:
   flutter_lints: ^1.0.0
