@@ -237,8 +237,9 @@ Future<void> _run(
   }
   if (output != null && !File.fromUri(output).existsSync()) {
     throw FileSystemException(
-        'Command succeded, but the output file is missing',
-        output.toFilePath());
+      'Command succeded, but the output file is missing',
+      output.toFilePath(),
+    );
   }
 }
 
@@ -312,65 +313,77 @@ Future<void> _main(ArgResults args) async {
   }
 
   // Build dart_api_dl.o.
-  await _run(clang, [
-    '-DDART_SHARED_LIB',
-    '-DNDEBUG',
-    '-fno-exceptions',
-    if (os != 'windows') '-fPIC',
-    '-O3',
-    '-target',
-    target,
-    '-I',
-    sdkIncDir.toFilePath(),
-    '-I',
-    outDir.resolve('include/').toFilePath(),
-    '-c',
-    sdkIncDir.resolve('dart_api_dl.c').toFilePath(),
-    '-o',
-    outDartApi.toFilePath()
-  ], output: outDartApi);
+  await _run(
+    clang,
+    [
+      '-DDART_SHARED_LIB',
+      '-DNDEBUG',
+      '-fno-exceptions',
+      if (os != 'windows') '-fPIC',
+      '-O3',
+      '-target',
+      target,
+      '-I',
+      sdkIncDir.toFilePath(),
+      '-I',
+      outDir.resolve('include/').toFilePath(),
+      '-c',
+      sdkIncDir.resolve('dart_api_dl.c').toFilePath(),
+      '-o',
+      outDartApi.toFilePath()
+    ],
+    output: outDartApi,
+  );
 
   // Build finalizers.o.
-  await _run(clang, [
-    '-DDART_SHARED_LIB',
-    '-DNDEBUG',
-    '-fno-exceptions',
-    if (os != 'windows') '-fPIC',
-    '-O3',
-    '-target',
-    target,
-    '-I',
-    sdkIncDir.toFilePath(),
-    '-I',
-    outDir.resolve('include/').toFilePath(),
-    '-c',
-    srcDir.resolve('finalizers.c').toFilePath(),
-    '-o',
-    outFinalizers.toFilePath()
-  ], output: outFinalizers);
+  await _run(
+    clang,
+    [
+      '-DDART_SHARED_LIB',
+      '-DNDEBUG',
+      '-fno-exceptions',
+      if (os != 'windows') '-fPIC',
+      '-O3',
+      '-target',
+      target,
+      '-I',
+      sdkIncDir.toFilePath(),
+      '-I',
+      outDir.resolve('include/').toFilePath(),
+      '-c',
+      srcDir.resolve('finalizers.c').toFilePath(),
+      '-o',
+      outFinalizers.toFilePath()
+    ],
+    output: outFinalizers,
+  );
 
   // Link wasmer, dart_api_dl, and finalizers to create the output library.
-  await _run(clang, [
-    '-shared',
-    if (args['sysroot'] != null) '--sysroot=${args['sysroot']}',
-    if (os != 'windows') '-fPIC',
-    if (os == 'windows') ...[
-      '-lws2_32',
-      '-ladvapi32',
-      '-lbcrypt',
-      '-luserenv',
-      '-z',
-      '/DEF:${srcDir.resolve('module.g.def').toFilePath()}',
-      '-z',
-      '/NODEFAULTLIB:MSVCRT',
+  await _run(
+    clang,
+    [
+      '-shared',
+      if (args['sysroot'] != null) '--sysroot=${args['sysroot']}',
+      if (os != 'windows') '-fPIC',
+      if (os == 'windows') ...[
+        '-lws2_32',
+        '-ladvapi32',
+        '-lbcrypt',
+        '-luserenv',
+        '-z',
+        '/DEF:${srcDir.resolve('module.g.def').toFilePath()}',
+        '-z',
+        '/NODEFAULTLIB:MSVCRT',
+      ],
+      '-lm',
+      '-target',
+      target,
+      outDartApi.toFilePath(),
+      outFinalizers.toFilePath(),
+      outWasmer.toFilePath(),
+      '-o',
+      outLib.toFilePath()
     ],
-    '-lm',
-    '-target',
-    target,
-    outDartApi.toFilePath(),
-    outFinalizers.toFilePath(),
-    outWasmer.toFilePath(),
-    '-o',
-    outLib.toFilePath()
-  ], output: outLib);
+    output: outLib,
+  );
 }
