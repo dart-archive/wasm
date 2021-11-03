@@ -50,6 +50,7 @@ android {
         minSdkVersion 16
     }
 
+    def thisDir = file('.')
     def hostOs = DefaultNativePlatform.currentOperatingSystem.getName().toLowerCase()
     def hostArch = DefaultNativePlatform.currentArchitecture.getName().replaceAll('-', '_')
     def ndkBinDir = "${android.ndkDirectory}/toolchains/llvm/prebuilt/${hostOs}-${hostArch}/bin"
@@ -90,13 +91,14 @@ android {
         def rustTriple = arch[3]
         def sysroot = arch[4]
         def sysrootDir = "${android.ndkDirectory}/platforms/android-${platformVersion}/${sysroot}"
-        def outDir = "${rootDir}/../build/app/intermediates/stripped_native_libs/debug/out/lib/${abi}/"
+        def buildDir = "${rootDir}/../build/flutter_wasm/intermediates/stripped_native_libs/debug/out/lib/${abi}/"
+        def outDir = "${thisDir}/src/main/jniLibs/${abi}/"
 
-        tasks.register("wasm-lib-${abi}") {
+        tasks.register("build-wasm-lib-${abi}") {
             // Specify inputs and outputs so that incremental build works properly.
             inputs.property('platformVersion', platformVersion)
             inputs.property('abi', abi)
-            outputs.file("${outDir}/libwasmer.so")
+            outputs.file("${buildDir}/libwasmer.so")
 
             dependsOn('wasm-pub-get')
 
@@ -109,9 +111,15 @@ android {
                             '--clang', "${ndkBinDir}/${clangPrefix}-clang",
                             '--clangpp', "${ndkBinDir}/${clangPrefix}-clang++",
                             '--ar', "${ndkBinDir}/${arPrefix}-ar",
-                            '-o', outDir
+                            '-o', buildDir
                 }
             }
+        }
+
+        tasks.register("wasm-lib-${abi}", Copy) {
+            from "${buildDir}/libwasmer.so"
+            into outDir
+            dependsOn("build-wasm-lib-${abi}")
         }
     }
 
