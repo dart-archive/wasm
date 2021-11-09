@@ -82,9 +82,11 @@ EXPORTS
    wasm_memorytype_delete
    wasm_memorytype_new
    wasm_module_delete
+   wasm_module_deserialize
    wasm_module_exports
    wasm_module_imports
    wasm_module_new
+   wasm_module_serialize
    wasm_store_delete
    wasm_store_new
    wasm_trap_delete

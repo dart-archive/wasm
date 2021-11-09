@@ -571,6 +571,12 @@ typedef WasmerMemorytypeNewFn = Pointer<WasmerMemorytype> Function(
 typedef NativeWasmerModuleDeleteFn = Void Function(Pointer<WasmerModule>);
 typedef WasmerModuleDeleteFn = void Function(Pointer<WasmerModule>);
 
+// wasm_module_deserialize
+typedef NativeWasmerModuleDeserializeFn = Pointer<WasmerModule> Function(
+    Pointer<WasmerStore>, Pointer<WasmerByteVec>);
+typedef WasmerModuleDeserializeFn = Pointer<WasmerModule> Function(
+    Pointer<WasmerStore>, Pointer<WasmerByteVec>);
+
 // wasm_module_exports
 typedef NativeWasmerModuleExportsFn = Void Function(
     Pointer<WasmerModule>, Pointer<WasmerExporttypeVec>);
@@ -588,6 +594,12 @@ typedef NativeWasmerModuleNewFn = Pointer<WasmerModule> Function(
     Pointer<WasmerStore>, Pointer<WasmerByteVec>);
 typedef WasmerModuleNewFn = Pointer<WasmerModule> Function(
     Pointer<WasmerStore>, Pointer<WasmerByteVec>);
+
+// wasm_module_serialize
+typedef NativeWasmerModuleSerializeFn = Void Function(
+    Pointer<WasmerModule>, Pointer<WasmerByteVec>);
+typedef WasmerModuleSerializeFn = void Function(
+    Pointer<WasmerModule>, Pointer<WasmerByteVec>);
 
 // wasm_store_delete
 typedef NativeWasmerStoreDeleteFn = Void Function(Pointer<WasmerStore>);

@@ -32,9 +32,10 @@ class WasmRuntime {
     _set_finalizer_for_store(this, _store);
   }
 
-  Pointer<WasmerModule> compile(
+  Pointer<WasmerModule> loadModule(
     Object owner,
     Uint8List data,
+    bool isSerialized,
   ) {
     var dataPtr = calloc<Uint8>(data.length);
     for (var i = 0; i < data.length; ++i) {
@@ -44,14 +45,31 @@ class WasmRuntime {
     dataVec.ref.data = dataPtr;
     dataVec.ref.length = data.length;
 
-    var modulePtr = _module_new(_store, dataVec);
+    var modulePtr = isSerialized
+        ? _module_deserialize(_store, dataVec)
+        : _module_new(_store, dataVec);
 
     calloc.free(dataPtr);
     calloc.free(dataVec);
 
-    _checkNotEqual(modulePtr, nullptr, 'Wasm module compile failed.');
+    _checkNotEqual(
+      modulePtr,
+      nullptr,
+      'Wasm module ${isSerialized ? 'deserialization' : 'compilation'} failed.',
+    );
     _set_finalizer_for_module(owner, modulePtr);
     return modulePtr;
+  }
+
+  Uint8List serialize(Pointer<WasmerModule> module) {
+    final outVec = calloc<WasmerByteVec>();
+    outVec.ref.data = nullptr;
+    outVec.ref.length = 0;
+    _module_serialize(module, outVec);
+    final result = Uint8List.fromList(outVec.ref.list);
+    _byte_vec_delete(outVec);
+    calloc.free(outVec);
+    return result;
   }
 
   Pointer _externTypeToFuncOrGlobalType(

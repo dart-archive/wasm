@@ -23,7 +23,7 @@ void main() {
       () => WasmModule(data),
       throwsWasmError(
         allOf(
-          contains('Wasm module compile failed.'),
+          contains('Wasm module compilation failed.'),
           contains('Validation error: Bad magic number (at offset 0)'),
         ),
       ),
