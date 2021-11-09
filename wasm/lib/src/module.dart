@@ -217,8 +217,7 @@ class WasmInstanceBuilder {
   }
 
   /// Asynchronously build the module instance.
-  Future<WasmInstance> buildAsync() async =>
-      Future<WasmInstance>(() => build());
+  Future<WasmInstance> buildAsync() async => Future<WasmInstance>(build);
 }
 
 // TODO: should not be required once the min supported Dart SDK includes
