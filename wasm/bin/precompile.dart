@@ -12,7 +12,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:wasm/wasm.dart';
 
-int main(List<String> arguments) {
+void main(List<String> arguments) {
   final parser = ArgParser()
     ..addOption(
       'out',
@@ -30,19 +30,21 @@ int main(List<String> arguments) {
   if (args['help'] as bool) {
     print('Usage: dart run wasm:precompile wasm_module.wasm -o serialized\n');
     print(parser.usage);
-    return 0;
+    return;
   }
 
   if (args.rest.isEmpty) {
     print('No input file.');
-    return 1;
+    exitCode = 1;
+    return;
   }
 
   final inFile = args.rest[0];
   final outFile = args['out'] as String?;
   if (outFile == null) {
     print('No output file.');
-    return 1;
+    exitCode = 1;
+    return;
   }
 
   final inBytes = File(inFile).readAsBytesSync();
@@ -55,5 +57,5 @@ int main(List<String> arguments) {
   final outBytes = mod.serialize();
   File(outFile).writeAsBytesSync(outBytes);
   print('$outFile written successfully');
-  return 0;
+  return;
 }
