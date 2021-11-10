@@ -16,9 +16,10 @@ class WasmModule {
   late final Pointer<WasmerModule> _module;
 
   /// Compile a module.
-  WasmModule(Uint8List data) {
-    _module = runtime.compile(this, data);
-  }
+  WasmModule(Uint8List data) : this._(data, false);
+
+  /// Deserialize a module. See [WasmModule.serialize] for more details.
+  WasmModule.deserialize(Uint8List data) : this._(data, true);
 
   /// Asynchronously compile a module.
   static Future<WasmModule> compileAsync(Uint8List data) async =>
@@ -33,6 +34,13 @@ class WasmModule {
   WasmMemory createMemory(int pages, [int? maxPages]) =>
       WasmMemory._create(pages, maxPages);
 
+  /// Serialize the module to a [Uint8List].
+  ///
+  /// This buffer can be saved to a file, sent to another device, even with a
+  /// different CPU architecture, and then passed to [WasmModule.deserialize].
+  /// Doing so speeds up start up time, by skipping compilation.
+  Uint8List serialize() => runtime.serialize(_module);
+
   /// Returns a description of all of the module's imports and exports, for
   /// debugging.
   String describe() {
@@ -46,6 +54,10 @@ class WasmModule {
       description.write('export $exp\n');
     }
     return description.toString();
+  }
+
+  WasmModule._(Uint8List data, bool isSerialized) {
+    _module = runtime.loadModule(this, data, isSerialized);
   }
 }
 
