@@ -14,10 +14,6 @@ dependencies:
     git:
       url: https://github.com/dart-lang/wasm.git
       path: flutter_wasm
-  wasm:
-    git:
-      url: https://github.com/dart-lang/wasm.git
-      path: wasm
 
 dev_dependencies:
   flutter_lints: ^1.0.0
@@ -27,8 +23,6 @@ dev_dependencies:
 dependency_overrides:
   flutter_wasm:
     path: ../
-  wasm:
-    path: ../../wasm
 
 flutter:
   uses-material-design: true
