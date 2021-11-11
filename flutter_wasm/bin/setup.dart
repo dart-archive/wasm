@@ -9,20 +9,22 @@
 // Usage: flutter pub run flutter_wasm:setup
 // For more details use the --help option.
 
+import 'dart:async';
 import 'dart:io';
 
 Future<void> main(List<String> arguments) async {
   final workingDirectory = Uri.file(Platform.script.path).resolve('..');
   final process = await Process.start(
-      'flutter',
-      [
-        'pub',
-        'run',
-        'wasm:setup',
-        ...arguments,
-      ],
-      workingDirectory: workingDirectory.toFilePath());
-  stdout.addStream(process.stdout);
-  stderr.addStream(process.stderr);
+    'flutter',
+    [
+      'pub',
+      'run',
+      'wasm:setup',
+      ...arguments,
+    ],
+    workingDirectory: workingDirectory.toFilePath(),
+  );
+  unawaited(stdout.addStream(process.stdout));
+  unawaited(stderr.addStream(process.stderr));
   exitCode = await process.exitCode;
 }
