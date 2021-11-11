@@ -164,14 +164,6 @@ Future<Uri> _getSrcDir() async {
   );
 }
 
-Uri _getOutDir(Uri root) {
-  final pkgRoot = packageRootUri(root);
-  if (pkgRoot == null) {
-    throw ArgumentError('Could not find "$pkgConfigFile" within "$root".');
-  }
-  return pkgRoot.resolve(wasmToolDir);
-}
-
 String _getOsFromTarget(String target) {
   return RegExp(r'^[^-]*-[^-]*-([^-]*)').firstMatch(target)?.group(1) ?? '';
 }
@@ -260,7 +252,7 @@ Future<void> _main(ArgResults args) async {
   final srcDir = await _getSrcDir();
   final outDir = args['out-dir'] != null
       ? Uri.directory(args['out-dir'] as String)
-      : _getOutDir(Directory.current.uri);
+      : libBuildOutDir(Directory.current.uri);
   final os = _getOsFromTarget(target);
   final outLib = outDir.resolve(_getOutLib(os));
   final outWasmer = outDir.resolve('$target/release/${_getWasmerLib(os)}');

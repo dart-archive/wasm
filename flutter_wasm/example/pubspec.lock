@@ -192,13 +192,11 @@ packages:
     source: hosted
     version: "2.1.0"
   wasm:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      path: wasm
-      ref: HEAD
-      resolved-ref: f998c23b783473fb7118ead5b89d9fe0856209de
-      url: "https://github.com/dart-lang/wasm.git"
-    source: git
+      path: "../../wasm"
+      relative: true
+    source: path
     version: "0.2.0-dev"
 sdks:
   dart: ">=2.14.0 <3.0.0"

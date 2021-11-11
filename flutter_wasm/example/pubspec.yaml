@@ -23,6 +23,8 @@ dev_dependencies:
 dependency_overrides:
   flutter_wasm:
     path: ../
+  wasm:
+    path: ../../wasm
 
 flutter:
   uses-material-design: true

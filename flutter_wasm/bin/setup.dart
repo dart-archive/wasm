@@ -12,6 +12,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:wasm/src/shared.dart';
+
 final workingDirectory = Uri.file(Platform.script.path).resolve('..');
 
 Future<int> _runFlutter(List<String> args) async {
@@ -27,7 +29,9 @@ Future<int> _runFlutter(List<String> args) async {
 }
 
 Future<void> main(List<String> args) async {
+  final outDir = libBuildOutDir(Directory.current.uri).toFilePath();
   exitCode = await _runFlutter(['pub', 'get']);
   if (exitCode != 0) return;
-  exitCode = await _runFlutter(['pub', 'run', 'wasm:setup', ...args]);
+  exitCode =
+      await _runFlutter(['pub', 'run', 'wasm:setup', '-o', outDir, ...args]);
 }
