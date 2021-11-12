@@ -21,6 +21,10 @@ class WasmModule {
   /// Deserialize a module. See [WasmModule.serialize] for more details.
   WasmModule.deserialize(Uint8List data) : this._(data, true);
 
+  /// Asynchronously compile a module.
+  static Future<WasmModule> compileAsync(Uint8List data) async =>
+      Future<WasmModule>(() => WasmModule(data));
+
   /// Returns a [WasmInstanceBuilder] that is used to add all the imports that
   /// the module needs before instantiating it.
   WasmInstanceBuilder builder() => WasmInstanceBuilder._(this);
@@ -223,6 +227,9 @@ class WasmInstanceBuilder {
     }
     return WasmInstance._(_module, _importOwner, _imports, _wasiEnv);
   }
+
+  /// Asynchronously build the module instance.
+  Future<WasmInstance> buildAsync() async => Future<WasmInstance>(build);
 }
 
 // TODO: should not be required once the min supported Dart SDK includes
