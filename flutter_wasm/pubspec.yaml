@@ -31,3 +31,5 @@ flutter:
       android:
         package: dev.dart.flutter_wasm
         pluginClass: FlutterWasmPlugin
+      ios:
+        pluginClass: FlutterWasmPlugin

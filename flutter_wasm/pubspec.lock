@@ -50,13 +50,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.15.0"
-  cupertino_icons:
-    dependency: "direct main"
-    description:
-      name: cupertino_icons
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.3"
   fake_async:
     dependency: transitive
     description:
@@ -88,13 +81,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_wasm:
-    dependency: "direct main"
-    description:
-      path: ".."
-      relative: true
-    source: path
-    version: "0.0.1"
   lints:
     dependency: transitive
     description:
@@ -194,7 +180,7 @@ packages:
   wasm:
     dependency: "direct main"
     description:
-      path: "../../wasm"
+      path: "../wasm"
       relative: true
     source: path
     version: "0.2.0-dev"
