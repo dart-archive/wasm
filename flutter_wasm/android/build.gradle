@@ -52,6 +52,9 @@ android {
 
     def thisDir = file('.')
     def hostOs = DefaultNativePlatform.currentOperatingSystem.getName().toLowerCase()
+    if (hostOs.startsWith('mac')) {
+      hostOs = 'darwin'
+    }
     def hostArch = DefaultNativePlatform.currentArchitecture.getName().replaceAll('-', '_')
     def ndkBinDir = "${android.ndkDirectory}/toolchains/llvm/prebuilt/${hostOs}-${hostArch}/bin"
     def projectProperties = new Properties()
