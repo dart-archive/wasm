@@ -29,6 +29,9 @@ void main() {
     final fn = inst.lookupFunction('square');
     final n = fn(1234) as int;
     expect(n, 1234 * 1234);
+
+    // Uncomment this to regenerate serialized file for the test below.
+    // File('test/test_files/serialized').writeAsBytesSync(serialized);
   });
 
   test('deserializing module from file', () {
