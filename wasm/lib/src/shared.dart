@@ -21,3 +21,11 @@ Uri? packageRootUri(Uri root) {
   } while (root != (root = root.resolve('..')));
   return null;
 }
+
+Uri libBuildOutDir(Uri root) {
+  final pkgRoot = packageRootUri(root);
+  if (pkgRoot == null) {
+    throw ArgumentError('Could not find "$pkgConfigFile" within "$root".');
+  }
+  return pkgRoot.resolve(wasmToolDir);
+}
