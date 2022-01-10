@@ -3,7 +3,6 @@
 // BSD-style license that can be found in the LICENSE file.
 
 // Test that we can serialize and deserialize a wasm module.
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:test/test.dart';
