@@ -575,7 +575,7 @@ class WasmRuntime {
     final config = _config_new();
     final triple = _wasmer_triple_new_from_host();
     final cpuFeatures = _wasmer_cpu_features_new();
-    final sse2 = _allocateString("sse2");
+    final sse2 = _allocateString('sse2');
     _wasmer_cpu_features_add(cpuFeatures, sse2);
     calloc.free(sse2.ref.data);
     calloc.free(sse2);
