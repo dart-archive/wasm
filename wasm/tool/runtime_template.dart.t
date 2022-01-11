@@ -24,7 +24,7 @@ class WasmRuntime {
     if (_Dart_InitializeApiDL(NativeApi.initializeApiDLData) != 0) {
       throw WasmError('Failed to initialize Dart API');
     }
-    _engine = _engine_new();
+    _engine = _engine_new_with_config(_createEngineConfig());
     _checkNotEqual(_engine, nullptr, 'Failed to initialize Wasm engine.');
     _set_finalizer_for_engine(this, _engine);
     _store = _store_new(_engine);
@@ -32,20 +32,33 @@ class WasmRuntime {
     _set_finalizer_for_store(this, _store);
   }
 
+  Pointer<WasmerConfig> _createEngineConfig() {
+    final config = _config_new();
+    final triple = _wasmer_triple_new_from_host();
+    final cpuFeatures = _wasmer_cpu_features_new();
+    final sse2 = _allocateString("sse2");
+    _wasmer_cpu_features_add(cpuFeatures, sse2);
+    calloc.free(sse2.ref.data);
+    calloc.free(sse2);
+    final target = _wasmer_target_new(triple, cpuFeatures);
+    _config_set_target(config, target);
+    return config;
+  }
+
   Pointer<WasmerModule> loadModule(
     Object owner,
     Uint8List data,
     bool isSerialized,
   ) {
-    var dataPtr = calloc<Uint8>(data.length);
+    final dataPtr = calloc<Uint8>(data.length);
     for (var i = 0; i < data.length; ++i) {
       dataPtr[i] = data[i];
     }
-    var dataVec = calloc<WasmerByteVec>();
+    final dataVec = calloc<WasmerByteVec>();
     dataVec.ref.data = dataPtr;
     dataVec.ref.length = data.length;
 
-    var modulePtr = isSerialized
+    final modulePtr = isSerialized
         ? _module_deserialize(_store, dataVec)
         : _module_new(_store, dataVec);
 
@@ -319,15 +332,22 @@ class WasmRuntime {
     calloc.free(wasmerVal);
   }
 
+  Pointer<WasmerByteVec> _allocateString(String str) {
+    // Allocates both the WasmerByteVec and its internal byte list using calloc.
+    // The caller is responsible for freeing both.
+    final strList = utf8.encode(str);
+    final bytes = calloc<WasmerByteVec>();
+    bytes.ref.data = calloc<Uint8>(strList.length);
+    for (var i = 0; i < strList.length; ++i) {
+      bytes.ref.data[i] = strList[i];
+    }
+    bytes.ref.length = strList.length;
+    return bytes;
+  }
+
   Pointer<WasmerTrap> newTrap(Object exception) {
     final msg = 'dart:${exception.hashCode.toRadixString(36)}';
-    final msgList = utf8.encode(msg);
-    final bytes = calloc<WasmerByteVec>();
-    bytes.ref.data = calloc<Uint8>(msgList.length);
-    for (var i = 0; i < msgList.length; ++i) {
-      bytes.ref.data[i] = msgList[i];
-    }
-    bytes.ref.length = msgList.length;
+    final bytes = _allocateString(msg);
     var trap = _trap_new(_store, bytes);
     calloc.free(bytes.ref.data);
     calloc.free(bytes);
