@@ -26,7 +26,7 @@ Provides utilities for loading and running WASM modules in Flutter apps.
       :name => 'Build Wasm',
       :execution_position => :before_compile,
       :output_files => ['/Users/liama/temp/libwasmer.so'],
-      :script => 'flutter pub run wasm:setup --target aarch64-apple-ios -o /Users/liama/temp/',
+      :script => 'flutter pub run wasm:setup --target x86_64-apple-ios -o /Users/liama/temp/',
     },
   ]
 end
