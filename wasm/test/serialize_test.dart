@@ -34,6 +34,7 @@ void main() {
     // File('test/test_files/serialized').writeAsBytesSync(serialized);
   });
 
+  // TODO(GH-70): Fix and re-enable.
   test('deserializing module from file', () {
     // int64_t square(int64_t n) { return n * n; }
     final serialized = File('test/test_files/serialized').readAsBytesSync();
