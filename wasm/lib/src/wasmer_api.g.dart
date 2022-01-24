@@ -10,6 +10,9 @@
 
 part of 'wasmer_api.dart';
 
+// wasm_config_t
+class WasmerConfig extends Opaque {}
+
 // wasm_engine_t
 class WasmerEngine extends Opaque {}
 
@@ -63,6 +66,15 @@ class WasmerWasiConfig extends Opaque {}
 
 // wasi_env_t
 class WasmerWasiEnv extends Opaque {}
+
+// wasmer_cpu_features_t
+class WasmerWasmerCpuFeatures extends Opaque {}
+
+// wasmer_target_t
+class WasmerWasmerTarget extends Opaque {}
+
+// wasmer_triple_t
+class WasmerWasmerTriple extends Opaque {}
 
 // wasm_byte_vec_t
 class WasmerByteVec extends Struct {
@@ -249,13 +261,29 @@ typedef NativeWasmerByteVecNewUninitializedFn = Void Function(
 typedef WasmerByteVecNewUninitializedFn = void Function(
     Pointer<WasmerByteVec>, int);
 
+// wasm_config_delete
+typedef NativeWasmerConfigDeleteFn = Void Function(Pointer<WasmerConfig>);
+typedef WasmerConfigDeleteFn = void Function(Pointer<WasmerConfig>);
+
+// wasm_config_new
+typedef NativeWasmerConfigNewFn = Pointer<WasmerConfig> Function();
+typedef WasmerConfigNewFn = Pointer<WasmerConfig> Function();
+
+// wasm_config_set_target
+typedef NativeWasmerConfigSetTargetFn = Void Function(
+    Pointer<WasmerConfig>, Pointer<WasmerWasmerTarget>);
+typedef WasmerConfigSetTargetFn = void Function(
+    Pointer<WasmerConfig>, Pointer<WasmerWasmerTarget>);
+
 // wasm_engine_delete
 typedef NativeWasmerEngineDeleteFn = Void Function(Pointer<WasmerEngine>);
 typedef WasmerEngineDeleteFn = void Function(Pointer<WasmerEngine>);
 
-// wasm_engine_new
-typedef NativeWasmerEngineNewFn = Pointer<WasmerEngine> Function();
-typedef WasmerEngineNewFn = Pointer<WasmerEngine> Function();
+// wasm_engine_new_with_config
+typedef NativeWasmerEngineNewWithConfigFn = Pointer<WasmerEngine> Function(
+    Pointer<WasmerConfig>);
+typedef WasmerEngineNewWithConfigFn = Pointer<WasmerEngine> Function(
+    Pointer<WasmerConfig>);
 
 // wasm_exporttype_name
 typedef NativeWasmerExporttypeNameFn = Pointer<WasmerByteVec> Function(
@@ -656,6 +684,24 @@ typedef NativeWasmerValtypeVecNewUninitializedFn = Void Function(
 typedef WasmerValtypeVecNewUninitializedFn = void Function(
     Pointer<WasmerValtypeVec>, int);
 
+// wasmer_cpu_features_add
+typedef NativeWasmerWasmerCpuFeaturesAddFn = Uint8 Function(
+    Pointer<WasmerWasmerCpuFeatures>, Pointer<WasmerByteVec>);
+typedef WasmerWasmerCpuFeaturesAddFn = int Function(
+    Pointer<WasmerWasmerCpuFeatures>, Pointer<WasmerByteVec>);
+
+// wasmer_cpu_features_delete
+typedef NativeWasmerWasmerCpuFeaturesDeleteFn = Void Function(
+    Pointer<WasmerWasmerCpuFeatures>);
+typedef WasmerWasmerCpuFeaturesDeleteFn = void Function(
+    Pointer<WasmerWasmerCpuFeatures>);
+
+// wasmer_cpu_features_new
+typedef NativeWasmerWasmerCpuFeaturesNewFn = Pointer<WasmerWasmerCpuFeatures>
+    Function();
+typedef WasmerWasmerCpuFeaturesNewFn = Pointer<WasmerWasmerCpuFeatures>
+    Function();
+
 // wasmer_last_error_length
 typedef NativeWasmerWasmerLastErrorLengthFn = Int64 Function();
 typedef WasmerWasmerLastErrorLengthFn = int Function();
@@ -664,3 +710,25 @@ typedef WasmerWasmerLastErrorLengthFn = int Function();
 typedef NativeWasmerWasmerLastErrorMessageFn = Int64 Function(
     Pointer<Uint8>, Int64);
 typedef WasmerWasmerLastErrorMessageFn = int Function(Pointer<Uint8>, int);
+
+// wasmer_target_delete
+typedef NativeWasmerWasmerTargetDeleteFn = Void Function(
+    Pointer<WasmerWasmerTarget>);
+typedef WasmerWasmerTargetDeleteFn = void Function(Pointer<WasmerWasmerTarget>);
+
+// wasmer_target_new
+typedef NativeWasmerWasmerTargetNewFn = Pointer<WasmerWasmerTarget> Function(
+    Pointer<WasmerWasmerTriple>, Pointer<WasmerWasmerCpuFeatures>);
+typedef WasmerWasmerTargetNewFn = Pointer<WasmerWasmerTarget> Function(
+    Pointer<WasmerWasmerTriple>, Pointer<WasmerWasmerCpuFeatures>);
+
+// wasmer_triple_delete
+typedef NativeWasmerWasmerTripleDeleteFn = Void Function(
+    Pointer<WasmerWasmerTriple>);
+typedef WasmerWasmerTripleDeleteFn = void Function(Pointer<WasmerWasmerTriple>);
+
+// wasmer_triple_new_from_host
+typedef NativeWasmerWasmerTripleNewFromHostFn = Pointer<WasmerWasmerTriple>
+    Function();
+typedef WasmerWasmerTripleNewFromHostFn = Pointer<WasmerWasmerTriple>
+    Function();
