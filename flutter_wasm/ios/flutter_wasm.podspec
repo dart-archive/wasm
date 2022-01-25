@@ -25,8 +25,12 @@ Provides utilities for loading and running WASM modules in Flutter apps.
     {
       :name => 'Build Wasm',
       :execution_position => :before_compile,
-      :output_files => ['/Users/liama/temp/libwasmer.so'],
-      :script => 'flutter pub run wasm:setup --target x86_64-apple-ios -o /Users/liama/temp/',
+      :output_files => ['libwasmer.a'],
+      :script => 'flutter pub run wasm:setup --target x86_64-apple-ios --static -o /Users/liama/temp',
     },
   ]
+
+  # Haven't figured out the paths yet, so I've just been manually copying the
+  # lib from temp to this directory. Doesn't work either way.
+  s.ios.vendored_library = 'libwasmer.a'
 end
