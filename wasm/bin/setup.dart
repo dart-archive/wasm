@@ -176,9 +176,9 @@ String _getOsFromTarget(String target) {
 String _getOutLib(String os, bool staticLib) {
   if (staticLib) {
     if (os == 'windows') {
-      return 'wasmer.lib';
+      return 'wasm.lib';
     }
-    return 'libwasmer.a';
+    return 'libwasm.a';
   }
   if (os == 'darwin' || os == 'ios') {
     return appleLib;
@@ -307,6 +307,9 @@ Future<void> _main(ArgResults args) async {
         'CARGO_TARGET_${_toUpperUnderscore(target)}_LINKER': clangpp,
       },
       if (args['ar'] != null) 'AR': args['ar'] as String,
+      //'SDKROOT': '/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator15.2.sdk',
+      //'MACOSX_DEPLOYMENT_TARGET': '15.2',
+      // if (os == 'ios') 'RUSTFLAGS': '-L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/libs',
     },
   );
 
@@ -366,8 +369,6 @@ Future<void> _main(ArgResults args) async {
   );
 
   // Link wasmer, dart_api_dl, and finalizers to create the output library.
-  final finalLinkerOutput = staticLib ? outObjFile : outLib;
-
   if (staticLib) {
     await _run(
       ar,

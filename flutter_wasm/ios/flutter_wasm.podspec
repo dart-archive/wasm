@@ -18,19 +18,22 @@ Provides utilities for loading and running WASM modules in Flutter apps.
   s.platform = :ios, '8.0'
 
   # Flutter.framework does not contain a i386 slice.
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
+  s.pod_target_xcconfig = {
+    'DEFINES_MODULE' => 'YES',
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',  # i386
+    "OTHER_LDFLAGS[sdk=iphoneos*]" => "-force_load $(PODS_TARGET_SRCROOT)/Frameworks/flutter_wasm.xcframework/ios-arm64_armv7/libflutter_wasm.a",
+    "OTHER_LDFLAGS[sdk=iphonesimulator*]" => "-force_load $(PODS_TARGET_SRCROOT)/Frameworks/flutter_wasm.xcframework/ios-x86_64-simulator/libflutter_wasm.a",
+  }
   s.swift_version = '5.0'
 
   s.script_phases = [
     {
       :name => 'Build Wasm',
       :execution_position => :before_compile,
-      :output_files => ['libwasmer.a'],
-      :script => 'flutter pub run wasm:setup --target x86_64-apple-ios --static -o /Users/liama/temp',
+      :output_files => ['Frameworks/flutter_wasm.xcframework'],
+      :script => 'flutter pub run flutter_wasm:ios_setup ${PODS_TARGET_SRCROOT}',  #  $(xcrun -sdk iphonesimulator --show-sdk-path | head -n 1)
     },
   ]
 
-  # Haven't figured out the paths yet, so I've just been manually copying the
-  # lib from temp to this directory. Doesn't work either way.
-  s.ios.vendored_library = 'libwasmer.a'
+  s.ios.vendored_frameworks = 'Frameworks/flutter_wasm.xcframework'
 end
