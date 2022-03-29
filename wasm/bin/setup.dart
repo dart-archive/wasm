@@ -306,7 +306,7 @@ Future<void> _main(ArgResults args) async {
         'LINKER': clangpp,
         'CARGO_TARGET_${_toUpperUnderscore(target)}_LINKER': clangpp,
       },
-      if (args['ar'] != null) 'AR': args['ar'] as String,
+      if (args['ar'] != null) 'AR': ar,
       //'SDKROOT': '/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator15.2.sdk',
       //'MACOSX_DEPLOYMENT_TARGET': '15.2',
       // if (os == 'ios') 'RUSTFLAGS': '-L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/libs',
