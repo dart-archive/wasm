@@ -11,8 +11,8 @@ import 'dart:io';
 import 'package:wasm/src/shared.dart';
 
 final workingDirectory = Uri.file(Platform.script.path).resolve('..');
-const inputLibName = 'libwasm.a';
-const outputLibName = 'libflutter_wasm.a';
+const inputLibName = 'libwasm.so';
+const outputLibName = 'libflutter_wasm.so';
 
 class Abi {
   final String triple;
@@ -72,7 +72,7 @@ Future<void> main(List<String> args) async {
       if (!await abiOutDir.exists()) {
         await abiOutDir.create(recursive: true);
       }
-      await _run('flutter', ['pub', 'run', 'wasm:setup', '--static', '-t', abi.triple, '-o', abiOutDir.path]);
+      await _run('flutter', ['pub', 'run', 'wasm:setup', '-t', abi.triple, '-o', abiOutDir.path]);
       libs.add(abiOutDir.uri.resolve(inputLibName).toFilePath());
     }
     final fatLibPath = sdkOutDir.resolve(outputLibName).toFilePath();
