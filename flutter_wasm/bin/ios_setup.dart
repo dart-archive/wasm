@@ -12,8 +12,8 @@ import 'dart:io';
 import 'package:wasm/src/shared.dart';
 
 final workingDirectory = Uri.file(Platform.script.path).resolve('..');
-const inputLibName = 'libwasm.so';
-const outputLibName = 'libflutter_wasm.so';
+const inputLibName = 'libwasmer.dylib';
+const outputLibName = 'libflutter_wasm.dylib';
 
 class Abi {
   final String triple;
@@ -94,10 +94,10 @@ Future<void> main(List<String> args) async {
   for (final iOSSdk in iOSSdks) {
     final sdkOutDir = workingDirectory.resolve('ios/build/${iOSSdk.xcodeName}');
     final libs = <String>[];
+    final sdkPath = await iOSSdk.findSdk();
     final clangPath = await iOSSdk.findTool('clang');
     final clangppPath = await iOSSdk.findTool('clang++');
     final arPath = await iOSSdk.findTool('ar');
-    final sdkPath = await iOSSdk.findSdk();
     for (final abi in iOSSdk.abis) {
       final abiOutDir = Directory.fromUri(sdkOutDir.resolve(abi.triple));
       print('Building for ${abi.triple} in $abiOutDir');
