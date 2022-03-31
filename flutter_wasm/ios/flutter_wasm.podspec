@@ -10,19 +10,19 @@ Pod::Spec.new do |s|
 Provides utilities for loading and running WASM modules in Flutter apps.
                        DESC
   s.homepage         = 'https://github.com/dart-lang/wasm'
-  s.license          = { :file => '../../LICENSE' }
+  s.license          = { :file => 'LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.platform = :ios, '8.0'
+  s.platform = :ios, '9.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64',  # i386
-    "OTHER_LDFLAGS[sdk=iphoneos*]" => "-force_load $(PODS_TARGET_SRCROOT)/Frameworks/flutter_wasm.xcframework/ios-arm64_armv7/libflutter_wasm.a",
-    "OTHER_LDFLAGS[sdk=iphonesimulator*]" => "-force_load $(PODS_TARGET_SRCROOT)/Frameworks/flutter_wasm.xcframework/ios-x86_64-simulator/libflutter_wasm.a",
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'armv7',  # i386
+    "OTHER_LDFLAGS[sdk=iphoneos*]" => "-force_load $(PODS_TARGET_SRCROOT)/Frameworks/flutter_wasm.xcframework/ios-arm64_armv7/libflutter_wasm.dylib",
+    "OTHER_LDFLAGS[sdk=iphonesimulator*]" => "-force_load $(PODS_TARGET_SRCROOT)/Frameworks/flutter_wasm.xcframework/ios-x86_64-simulator/libflutter_wasm.dylib",
   }
   s.swift_version = '5.0'
 
