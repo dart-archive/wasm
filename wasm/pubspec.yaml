@@ -1,7 +1,7 @@
 name: wasm
 version: 0.2.0-dev
 description: Utilities for loading and running WASM modules from Dart code
-repository: https://github.com/dart-lang/wasm
+repository: https://github.com/dart-lang/wasm/tree/main/wasm
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
