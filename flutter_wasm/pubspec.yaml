@@ -1,7 +1,7 @@
 name: flutter_wasm
 version: 0.0.1
 description: Flutter support for package:wasm
-repository: https://github.com/dart-lang/wasm
+repository: https://github.com/dart-lang/wasm/tree/main/flutter_wasm
 publish_to: none
 
 environment:
