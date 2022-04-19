@@ -11,6 +11,7 @@ on:
 
 env:
   PUB_ENVIRONMENT: bot.github
+  RUST_BACKTRACE: 1  # Run all tests with full Rust stack tracing.
 
 jobs:
   analyze:
