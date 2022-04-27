@@ -102,11 +102,9 @@ class WasmRuntime {
   late final WasmerMemorytypeDeleteFn _memorytype_delete;
   late final WasmerMemorytypeNewFn _memorytype_new;
   late final WasmerModuleDeleteFn _module_delete;
-  late final WasmerModuleDeserializeFn _module_deserialize;
   late final WasmerModuleExportsFn _module_exports;
   late final WasmerModuleImportsFn _module_imports;
   late final WasmerModuleNewFn _module_new;
-  late final WasmerModuleSerializeFn _module_serialize;
   late final WasmerStoreDeleteFn _store_delete;
   late final WasmerStoreNewFn _store_new;
   late final WasmerTrapDeleteFn _trap_delete;
@@ -460,10 +458,6 @@ class WasmRuntime {
         _lib.lookupFunction<NativeWasmerModuleDeleteFn, WasmerModuleDeleteFn>(
       'wasm_module_delete',
     );
-    _module_deserialize = _lib.lookupFunction<NativeWasmerModuleDeserializeFn,
-        WasmerModuleDeserializeFn>(
-      'wasm_module_deserialize',
-    );
     _module_exports =
         _lib.lookupFunction<NativeWasmerModuleExportsFn, WasmerModuleExportsFn>(
       'wasm_module_exports',
@@ -475,10 +469,6 @@ class WasmRuntime {
     _module_new =
         _lib.lookupFunction<NativeWasmerModuleNewFn, WasmerModuleNewFn>(
       'wasm_module_new',
-    );
-    _module_serialize = _lib
-        .lookupFunction<NativeWasmerModuleSerializeFn, WasmerModuleSerializeFn>(
-      'wasm_module_serialize',
     );
     _store_delete =
         _lib.lookupFunction<NativeWasmerStoreDeleteFn, WasmerStoreDeleteFn>(
@@ -584,11 +574,7 @@ class WasmRuntime {
     return config;
   }
 
-  Pointer<WasmerModule> loadModule(
-    Object owner,
-    Uint8List data,
-    bool isSerialized,
-  ) {
+  Pointer<WasmerModule> compile(Object owner, Uint8List data) {
     final dataPtr = calloc<Uint8>(data.length);
     for (var i = 0; i < data.length; ++i) {
       dataPtr[i] = data[i];
@@ -597,31 +583,14 @@ class WasmRuntime {
     dataVec.ref.data = dataPtr;
     dataVec.ref.length = data.length;
 
-    final modulePtr = isSerialized
-        ? _module_deserialize(_store, dataVec)
-        : _module_new(_store, dataVec);
+    final modulePtr = _module_new(_store, dataVec);
 
     calloc.free(dataPtr);
     calloc.free(dataVec);
 
-    _checkNotEqual(
-      modulePtr,
-      nullptr,
-      'Wasm module ${isSerialized ? 'deserialization' : 'compilation'} failed.',
-    );
+    _checkNotEqual(modulePtr, nullptr, 'Wasm module compilation failed.');
     _set_finalizer_for_module(owner, modulePtr);
     return modulePtr;
-  }
-
-  Uint8List serialize(Pointer<WasmerModule> module) {
-    final outVec = calloc<WasmerByteVec>();
-    outVec.ref.data = nullptr;
-    outVec.ref.length = 0;
-    _module_serialize(module, outVec);
-    final result = Uint8List.fromList(outVec.ref.list);
-    _byte_vec_delete(outVec);
-    calloc.free(outVec);
-    return result;
   }
 
   Pointer _externTypeToFuncOrGlobalType(

@@ -349,8 +349,6 @@ WASM_API_EXTERN own wasm_trap_t* wasm_func_call(const wasm_func_t*, const wasm_v
 WASM_API_EXTERN own wasm_trap_t* wasm_trap_new(wasm_store_t* store, const wasm_message_t*);
 WASM_API_EXTERN void wasm_trap_message(const wasm_trap_t*, own wasm_message_t* out);
 WASM_API_EXTERN wasm_valkind_t wasm_valtype_kind(const wasm_valtype_t*);
-WASM_API_EXTERN void wasm_module_serialize(const wasm_module_t*, own wasm_byte_vec_t* out);
-WASM_API_EXTERN own wasm_module_t* wasm_module_deserialize(wasm_store_t*, const wasm_byte_vec_t*);
 
 wasi_config_t* wasi_config_new(const uint8_t* program_name);
 wasi_env_t* wasi_env_new(wasi_config_t* config);
