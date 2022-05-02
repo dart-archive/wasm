@@ -9,11 +9,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
 import 'package:wasm/src/shared.dart';
 
-final workingDirectory = Uri.file(Platform.script.path).resolve('..');
+final thisDir = path.dirname(Platform.script.path);
 const inputLibName = 'libwasmer.dylib';
-const outputLibName = 'libflutter_wasm.dylib';
+const outputLibName = 'flutter_wasm';
+const archiveName = 'flutter_wasm_archive';
 
 class Abi {
   final String triple;
@@ -54,15 +56,26 @@ Future<void> checkResult(Process process) async {
 }
 
 Future<void> _run(String program, List<String> args) async {
+  print('FFFFF: ${Platform.script.path}');
   print('$program ${args.join(' ')}');
   final process = await Process.start(
     program,
     args,
-    workingDirectory: workingDirectory.toFilePath(),
+    workingDirectory: thisDir,
   );
   unawaited(stderr.addStream(process.stderr));
   unawaited(stdout.addStream(process.stdout));
   await checkResult(process);
+}
+
+void copyDirectory(String from, String to) {
+  for (final f in Directory(from).listSync(recursive: true)) {
+    if (f is File) {
+      final toPath = path.join(to, path.relative(f.path, from: from));
+      Directory(path.dirname(toPath)).createSync(recursive: true);
+      f.copySync(toPath);
+    }
+  }
 }
 
 Future<String> _xcrun(List<String> args) async {
@@ -84,60 +97,82 @@ Future<void> main(List<String> args) async {
 
   final outDir = Directory(args[0]);
   print('Output directory: ${outDir.path}');
-  print('Working directory: ${workingDirectory.toFilePath()}');
+  print('This directory: $thisDir');
 
-  if (!await outDir.exists()) {
+  if (!outDir.existsSync()) {
     await outDir.create(recursive: true);
   }
 
-  final fatLibs = <String>[];
+  final tempFrameworks = <String>[];
   for (final iOSSdk in iOSSdks) {
-    final sdkOutDir = workingDirectory.resolve('ios/build/${iOSSdk.xcodeName}');
+    final sdkOutDir = path.join(thisDir, 'ios/build/${iOSSdk.xcodeName}');
+    // final frameworkTemplatePath = path.join(thisDir, 'ios/FrameworkTemplate');
+
+    // HACK
+    final frameworkTemplatePath = '/Users/liama/dev/wasm/flutter_wasm/ios/FrameworkTemplate';
+    print('zzzzzzz: $frameworkTemplatePath');
+
     final libs = <String>[];
     final sdkPath = await iOSSdk.findSdk();
     final clangPath = await iOSSdk.findTool('clang');
     final clangppPath = await iOSSdk.findTool('clang++');
+    final lipoPath = await iOSSdk.findTool('lipo');
     final arPath = await iOSSdk.findTool('ar');
     for (final abi in iOSSdk.abis) {
-      final abiOutDir = Directory.fromUri(sdkOutDir.resolve(abi.triple));
+      final abiOutDir = Directory(path.join(sdkOutDir, abi.triple));
       print('Building for ${abi.triple} in $abiOutDir');
-      if (!await abiOutDir.exists()) {
+      if (!abiOutDir.existsSync()) {
         await abiOutDir.create(recursive: true);
       }
-      await _run('flutter', [
-        'pub',
-        'run',
-        'wasm:setup',
-        '-t',
-        abi.triple,
-        '-o',
-        abiOutDir.path,
-        '--clang',
-        clangPath,
-        '--clangpp',
-        clangppPath,
-        '--ar',
-        arPath,
-        '--sysroot',
-        sdkPath,
-      ]);
-      libs.add(abiOutDir.uri.resolve(inputLibName).toFilePath());
+      // await _run('flutter', [
+      //   'pub',
+      //   'run',
+      //   'wasm:setup',
+      //   '-t',
+      //   abi.triple,
+      //   '-o',
+      //   abiOutDir.path,
+      //   '--clang',
+      //   clangPath,
+      //   '--clangpp',
+      //   clangppPath,
+      //   '--ar',
+      //   arPath,
+      //   '--sysroot',
+      //   sdkPath,
+      // ]);
+
+      // HACK
+      File('/Users/liama/libwasmer.dylib').copySync('/Users/liama/dev/wasm/flutter_wasm/example/.dart_tool/pub/bin/flutter_wasm/ios/build/iphonesimulator/x86_64-apple-ios/libwasmer.dylib');
+
+      libs.add(path.join(abiOutDir.path, inputLibName));
     }
-    final fatLibPath = sdkOutDir.resolve(outputLibName).toFilePath();
+    final fatLibPath = path.join(sdkOutDir, outputLibName);
     print('Creating fat library for ${iOSSdk.xcodeName} at $fatLibPath');
-    await _run('lipo', ['-create', ...libs, '-output', fatLibPath]);
-    fatLibs.add(fatLibPath);
+    await _run(lipoPath, ['-create', ...libs, '-output', fatLibPath]);
+    // final archivePath = sdkOutDir.resolve(archiveName).toFilePath();
+    // await _run(xcodebuildPath, [
+    //   'archive', '-scheme', 'WhatIsAScheme',
+    //   '-library', fatLibPath,
+    //   '-destination', 'generic/platform=${iOSSdk.xcodeName}',
+    //   '-archivePath', archivePath
+    //   ]);
+    final tempFrameworkPath = path.join(sdkOutDir, 'lib_wasm.framework');
+    copyDirectory(frameworkTemplatePath, tempFrameworkPath);
+    File(fatLibPath).copySync(path.join(tempFrameworkPath, 'lib_wasm'));
+    tempFrameworks.add(tempFrameworkPath);
   }
   final frameworkPath =
-      outDir.uri.resolve('Frameworks/flutter_wasm.xcframework').toFilePath();
+      path.join(outDir.path, 'Frameworks/flutter_wasm.xcframework');
   final frameworkDir = Directory(frameworkPath);
   if (await frameworkDir.exists()) {
     await frameworkDir.delete(recursive: true);
   }
   print('Creating framework at $frameworkPath');
-  await _run('xcodebuild', [
+  await _run('xcrun', [
+    'xcodebuild',
     '-create-xcframework',
-    for (final fatLib in fatLibs) ...['-library', fatLib],
+    for (final temp in tempFrameworks) ...['-framework', temp],
     '-output',
     frameworkPath,
   ]);

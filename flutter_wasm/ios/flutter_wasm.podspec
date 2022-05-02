@@ -20,20 +20,21 @@ Provides utilities for loading and running WASM modules in Flutter apps.
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = {
     'DEFINES_MODULE' => 'YES',
-    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'armv7',  # i386
-    "OTHER_LDFLAGS[sdk=iphoneos*]" => "-force_load $(PODS_TARGET_SRCROOT)/Frameworks/flutter_wasm.xcframework/ios-arm64_armv7/libflutter_wasm.dylib",
-    "OTHER_LDFLAGS[sdk=iphonesimulator*]" => "-force_load $(PODS_TARGET_SRCROOT)/Frameworks/flutter_wasm.xcframework/ios-x86_64-simulator/libflutter_wasm.dylib",
+    'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => ['i386', 'aarch64'],
+    'EXCLUDED_ARCHS[sdk=iphoneos*]' => ['armv7', 'aarch64'],
+    "OTHER_LDFLAGS[sdk=iphoneos*]" => "-force_load $(PODS_TARGET_SRCROOT)/Frameworks/flutter_wasm.xcframework/ios-arm64_armv7/flutter_wasm",
+    "OTHER_LDFLAGS[sdk=iphonesimulator*]" => "-force_load $(PODS_TARGET_SRCROOT)/Frameworks/flutter_wasm.xcframework/ios-x86_64-simulator/flutter_wasm",
   }
   s.swift_version = '5.0'
 
-  s.script_phases = [
-    {
-      :name => 'Build Wasm',
-      :execution_position => :before_compile,
-      :output_files => ['Frameworks/flutter_wasm.xcframework'],
-      :script => 'flutter pub run flutter_wasm:ios_setup ${PODS_TARGET_SRCROOT}',  #  $(xcrun -sdk iphonesimulator --show-sdk-path | head -n 1)
-    },
-  ]
+  # s.script_phases = [
+  #   {
+  #     :name => 'Build Wasm',
+  #     :execution_position => :before_compile,
+  #     :output_files => ['Frameworks/flutter_wasm.xcframework'],
+  #     :script => 'flutter pub run flutter_wasm:ios_setup ${PODS_TARGET_SRCROOT}',  #  $(xcrun -sdk iphonesimulator --show-sdk-path | head -n 1)
+  #   },
+  # ]
 
-  s.ios.vendored_frameworks = 'Frameworks/flutter_wasm.xcframework'
+  # s.ios.vendored_frameworks = 'Frameworks/flutter_wasm.xcframework'
 end
