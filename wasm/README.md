@@ -1,3 +1,7 @@
+[![pub package](https://img.shields.io/pub/v/wasm.svg)](https://pub.dev/packages/wasm)
+[![Build Status](https://github.com/dart-lang/wasm/workflows/CI/badge.svg)](https://github.com/dart-lang/wasm/actions?query=workflow%3ACI+branch%3Amain)
+[![Coverage Status](https://coveralls.io/repos/github/dart-lang/wasm/badge.svg?branch=main)](https://coveralls.io/github/dart-lang/wasm?branch=main)
+
 Provides utilities for loading and running WASM modules.
 
 Built on top of the [Wasmer](https://github.com/wasmerio/wasmer) runtime.
