@@ -84,6 +84,40 @@ jobs:
     - run: dart run wasm:setup
     - run: dart test
 
+  coverage:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wasm
+    steps:
+    - uses: dart-lang/setup-dart@v1.0
+      with:
+        sdk: dev
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/cache@v2.1.6
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          ~/.pub-cache/hosted/
+          .dart_tool/
+        key: ubuntu-latest-dev
+    - name: Install dependencies
+      run: dart pub get
+    - name: Setup wasm
+      run: dart run wasm:setup
+    - name: Install coverage
+      run: dart pub global activate coverage
+    - name: Collect and report coverage
+      run: dart pub global run coverage:test_with_coverage
+    - name: Upload coverage
+      uses: coverallsapp/github-action@v1.1.2
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        path-to-lcov: wasm/coverage/lcov.info
+
   flutter_analyze:
     runs-on: ubuntu-latest
     defaults:
