@@ -32,19 +32,6 @@ class WasmRuntime {
     _set_finalizer_for_store(this, _store);
   }
 
-  Pointer<WasmerConfig> _createEngineConfig() {
-    final config = _config_new();
-    final triple = _wasmer_triple_new_from_host();
-    final cpuFeatures = _wasmer_cpu_features_new();
-    final sse2 = _allocateString('sse2');
-    _wasmer_cpu_features_add(cpuFeatures, sse2);
-    calloc.free(sse2.ref.data);
-    calloc.free(sse2);
-    final target = _wasmer_target_new(triple, cpuFeatures);
-    _config_set_target(config, target);
-    return config;
-  }
-
   Pointer<WasmerModule> compile(Object owner, Uint8List data) {
     final dataPtr = calloc<Uint8>(data.length);
     for (var i = 0; i < data.length; ++i) {

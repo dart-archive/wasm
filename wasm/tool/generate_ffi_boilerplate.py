@@ -270,10 +270,6 @@ predefinedType('wasm_limits_t', 'WasmerLimits', 'WasmerLimits')
 predefinedType('wasm_val_t', 'WasmerVal', 'WasmerVal')
 predefinedType('Dart_Handle', 'Handle', 'Object')
 
-declareOwn('config')
-declareOwn('wasmer_triple')
-declareOwn('wasmer_cpu_features')
-declareOwn('wasmer_target')
 declareOwn('engine')
 declareOwn('store')
 declareOwn('wasi_config')
@@ -302,14 +298,7 @@ declareOwn('func')
 declareOwn('global')
 
 rawFns = '''
-WASM_API_EXTERN own wasm_config_t* wasm_config_new();
-WASM_API_EXTERN own wasmer_triple_t* wasmer_triple_new_from_host();
-WASM_API_EXTERN own wasmer_cpu_features_t* wasmer_cpu_features_new();
-WASM_API_EXTERN bool wasmer_cpu_features_add(wasmer_cpu_features_t*, wasm_name_t*);
-WASM_API_EXTERN own wasmer_target_t* wasmer_target_new(wasmer_triple_t*, wasmer_cpu_features_t*);
-WASM_API_EXTERN void wasm_config_set_target(wasm_config_t*, wasmer_target_t*);
 WASM_API_EXTERN own wasm_engine_t* wasm_engine_new();
-WASM_API_EXTERN own wasm_engine_t* wasm_engine_new_with_config(own wasm_config_t*);
 WASM_API_EXTERN own wasm_store_t* wasm_store_new(wasm_engine_t*);
 WASM_API_EXTERN own wasm_memorytype_t* wasm_memorytype_new(const wasm_limits_t*);
 WASM_API_EXTERN own wasm_module_t* wasm_module_new(wasm_store_t*, const wasm_byte_vec_t* binary);
