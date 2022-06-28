@@ -29,6 +29,7 @@ EXPORTS
    wasm_config_new
    wasm_config_set_target
    wasm_engine_delete
+   wasm_engine_new
    wasm_engine_new_with_config
    wasm_exporttype_name
    wasm_exporttype_type

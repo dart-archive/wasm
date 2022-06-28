@@ -44,6 +44,7 @@ class WasmRuntime {
   late final WasmerConfigNewFn _config_new;
   late final WasmerConfigSetTargetFn _config_set_target;
   late final WasmerEngineDeleteFn _engine_delete;
+  late final WasmerEngineNewFn _engine_new;
   late final WasmerEngineNewWithConfigFn _engine_new_with_config;
   late final WasmerExporttypeNameFn _exporttype_name;
   late final WasmerExporttypeTypeFn _exporttype_type;
@@ -231,6 +232,10 @@ class WasmRuntime {
     _engine_delete =
         _lib.lookupFunction<NativeWasmerEngineDeleteFn, WasmerEngineDeleteFn>(
       'wasm_engine_delete',
+    );
+    _engine_new =
+        _lib.lookupFunction<NativeWasmerEngineNewFn, WasmerEngineNewFn>(
+      'wasm_engine_new',
     );
     _engine_new_with_config = _lib.lookupFunction<
         NativeWasmerEngineNewWithConfigFn, WasmerEngineNewWithConfigFn>(
@@ -553,7 +558,7 @@ class WasmRuntime {
     if (_Dart_InitializeApiDL(NativeApi.initializeApiDLData) != 0) {
       throw WasmError('Failed to initialize Dart API');
     }
-    _engine = _engine_new_with_config(_createEngineConfig());
+    _engine = _engine_new();
     _checkNotEqual(_engine, nullptr, 'Failed to initialize Wasm engine.');
     _set_finalizer_for_engine(this, _engine);
     _store = _store_new(_engine);

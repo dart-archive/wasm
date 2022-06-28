@@ -279,6 +279,10 @@ typedef WasmerConfigSetTargetFn = void Function(
 typedef NativeWasmerEngineDeleteFn = Void Function(Pointer<WasmerEngine>);
 typedef WasmerEngineDeleteFn = void Function(Pointer<WasmerEngine>);
 
+// wasm_engine_new
+typedef NativeWasmerEngineNewFn = Pointer<WasmerEngine> Function();
+typedef WasmerEngineNewFn = Pointer<WasmerEngine> Function();
+
 // wasm_engine_new_with_config
 typedef NativeWasmerEngineNewWithConfigFn = Pointer<WasmerEngine> Function(
     Pointer<WasmerConfig>);

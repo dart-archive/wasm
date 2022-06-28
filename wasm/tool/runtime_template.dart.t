@@ -24,7 +24,7 @@ class WasmRuntime {
     if (_Dart_InitializeApiDL(NativeApi.initializeApiDLData) != 0) {
       throw WasmError('Failed to initialize Dart API');
     }
-    _engine = _engine_new_with_config(_createEngineConfig());
+    _engine = _engine_new();
     _checkNotEqual(_engine, nullptr, 'Failed to initialize Wasm engine.');
     _set_finalizer_for_engine(this, _engine);
     _store = _store_new(_engine);

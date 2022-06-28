@@ -308,6 +308,7 @@ WASM_API_EXTERN own wasmer_cpu_features_t* wasmer_cpu_features_new();
 WASM_API_EXTERN bool wasmer_cpu_features_add(wasmer_cpu_features_t*, wasm_name_t*);
 WASM_API_EXTERN own wasmer_target_t* wasmer_target_new(wasmer_triple_t*, wasmer_cpu_features_t*);
 WASM_API_EXTERN void wasm_config_set_target(wasm_config_t*, wasmer_target_t*);
+WASM_API_EXTERN own wasm_engine_t* wasm_engine_new();
 WASM_API_EXTERN own wasm_engine_t* wasm_engine_new_with_config(own wasm_config_t*);
 WASM_API_EXTERN own wasm_store_t* wasm_store_new(wasm_engine_t*);
 WASM_API_EXTERN own wasm_memorytype_t* wasm_memorytype_new(const wasm_limits_t*);
