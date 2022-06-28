@@ -40,11 +40,8 @@ class WasmRuntime {
   late final WasmerByteVecNewFn _byte_vec_new;
   late final WasmerByteVecNewEmptyFn _byte_vec_new_empty;
   late final WasmerByteVecNewUninitializedFn _byte_vec_new_uninitialized;
-  late final WasmerConfigDeleteFn _config_delete;
-  late final WasmerConfigNewFn _config_new;
-  late final WasmerConfigSetTargetFn _config_set_target;
   late final WasmerEngineDeleteFn _engine_delete;
-  late final WasmerEngineNewWithConfigFn _engine_new_with_config;
+  late final WasmerEngineNewFn _engine_new;
   late final WasmerExporttypeNameFn _exporttype_name;
   late final WasmerExporttypeTypeFn _exporttype_type;
   late final WasmerExporttypeVecDeleteFn _exporttype_vec_delete;
@@ -116,15 +113,8 @@ class WasmRuntime {
   late final WasmerValtypeVecNewFn _valtype_vec_new;
   late final WasmerValtypeVecNewEmptyFn _valtype_vec_new_empty;
   late final WasmerValtypeVecNewUninitializedFn _valtype_vec_new_uninitialized;
-  late final WasmerWasmerCpuFeaturesAddFn _wasmer_cpu_features_add;
-  late final WasmerWasmerCpuFeaturesDeleteFn _wasmer_cpu_features_delete;
-  late final WasmerWasmerCpuFeaturesNewFn _wasmer_cpu_features_new;
   late final WasmerWasmerLastErrorLengthFn _wasmer_last_error_length;
   late final WasmerWasmerLastErrorMessageFn _wasmer_last_error_message;
-  late final WasmerWasmerTargetDeleteFn _wasmer_target_delete;
-  late final WasmerWasmerTargetNewFn _wasmer_target_new;
-  late final WasmerWasmerTripleDeleteFn _wasmer_triple_delete;
-  late final WasmerWasmerTripleNewFromHostFn _wasmer_triple_new_from_host;
 
   WasmRuntime._init() : _lib = _loadDynamicLib() {
     _Dart_InitializeApiDL = _lib.lookupFunction<
@@ -216,25 +206,13 @@ class WasmRuntime {
         NativeWasmerByteVecNewUninitializedFn, WasmerByteVecNewUninitializedFn>(
       'wasm_byte_vec_new_uninitialized',
     );
-    _config_delete =
-        _lib.lookupFunction<NativeWasmerConfigDeleteFn, WasmerConfigDeleteFn>(
-      'wasm_config_delete',
-    );
-    _config_new =
-        _lib.lookupFunction<NativeWasmerConfigNewFn, WasmerConfigNewFn>(
-      'wasm_config_new',
-    );
-    _config_set_target = _lib
-        .lookupFunction<NativeWasmerConfigSetTargetFn, WasmerConfigSetTargetFn>(
-      'wasm_config_set_target',
-    );
     _engine_delete =
         _lib.lookupFunction<NativeWasmerEngineDeleteFn, WasmerEngineDeleteFn>(
       'wasm_engine_delete',
     );
-    _engine_new_with_config = _lib.lookupFunction<
-        NativeWasmerEngineNewWithConfigFn, WasmerEngineNewWithConfigFn>(
-      'wasm_engine_new_with_config',
+    _engine_new =
+        _lib.lookupFunction<NativeWasmerEngineNewFn, WasmerEngineNewFn>(
+      'wasm_engine_new',
     );
     _exporttype_name = _lib
         .lookupFunction<NativeWasmerExporttypeNameFn, WasmerExporttypeNameFn>(
@@ -513,18 +491,6 @@ class WasmRuntime {
         WasmerValtypeVecNewUninitializedFn>(
       'wasm_valtype_vec_new_uninitialized',
     );
-    _wasmer_cpu_features_add = _lib.lookupFunction<
-        NativeWasmerWasmerCpuFeaturesAddFn, WasmerWasmerCpuFeaturesAddFn>(
-      'wasmer_cpu_features_add',
-    );
-    _wasmer_cpu_features_delete = _lib.lookupFunction<
-        NativeWasmerWasmerCpuFeaturesDeleteFn, WasmerWasmerCpuFeaturesDeleteFn>(
-      'wasmer_cpu_features_delete',
-    );
-    _wasmer_cpu_features_new = _lib.lookupFunction<
-        NativeWasmerWasmerCpuFeaturesNewFn, WasmerWasmerCpuFeaturesNewFn>(
-      'wasmer_cpu_features_new',
-    );
     _wasmer_last_error_length = _lib.lookupFunction<
         NativeWasmerWasmerLastErrorLengthFn, WasmerWasmerLastErrorLengthFn>(
       'wasmer_last_error_length',
@@ -533,45 +499,16 @@ class WasmRuntime {
         NativeWasmerWasmerLastErrorMessageFn, WasmerWasmerLastErrorMessageFn>(
       'wasmer_last_error_message',
     );
-    _wasmer_target_delete = _lib.lookupFunction<
-        NativeWasmerWasmerTargetDeleteFn, WasmerWasmerTargetDeleteFn>(
-      'wasmer_target_delete',
-    );
-    _wasmer_target_new = _lib
-        .lookupFunction<NativeWasmerWasmerTargetNewFn, WasmerWasmerTargetNewFn>(
-      'wasmer_target_new',
-    );
-    _wasmer_triple_delete = _lib.lookupFunction<
-        NativeWasmerWasmerTripleDeleteFn, WasmerWasmerTripleDeleteFn>(
-      'wasmer_triple_delete',
-    );
-    _wasmer_triple_new_from_host = _lib.lookupFunction<
-        NativeWasmerWasmerTripleNewFromHostFn, WasmerWasmerTripleNewFromHostFn>(
-      'wasmer_triple_new_from_host',
-    );
 
     if (_Dart_InitializeApiDL(NativeApi.initializeApiDLData) != 0) {
       throw WasmError('Failed to initialize Dart API');
     }
-    _engine = _engine_new_with_config(_createEngineConfig());
+    _engine = _engine_new();
     _checkNotEqual(_engine, nullptr, 'Failed to initialize Wasm engine.');
     _set_finalizer_for_engine(this, _engine);
     _store = _store_new(_engine);
     _checkNotEqual(_store, nullptr, 'Failed to create Wasm store.');
     _set_finalizer_for_store(this, _store);
-  }
-
-  Pointer<WasmerConfig> _createEngineConfig() {
-    final config = _config_new();
-    final triple = _wasmer_triple_new_from_host();
-    final cpuFeatures = _wasmer_cpu_features_new();
-    final sse2 = _allocateString('sse2');
-    _wasmer_cpu_features_add(cpuFeatures, sse2);
-    calloc.free(sse2.ref.data);
-    calloc.free(sse2);
-    final target = _wasmer_target_new(triple, cpuFeatures);
-    _config_set_target(config, target);
-    return config;
   }
 
   Pointer<WasmerModule> compile(Object owner, Uint8List data) {

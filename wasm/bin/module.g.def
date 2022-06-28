@@ -25,11 +25,8 @@ EXPORTS
    wasm_byte_vec_new
    wasm_byte_vec_new_empty
    wasm_byte_vec_new_uninitialized
-   wasm_config_delete
-   wasm_config_new
-   wasm_config_set_target
    wasm_engine_delete
-   wasm_engine_new_with_config
+   wasm_engine_new
    wasm_exporttype_name
    wasm_exporttype_type
    wasm_exporttype_vec_delete
@@ -99,12 +96,5 @@ EXPORTS
    wasm_valtype_vec_new
    wasm_valtype_vec_new_empty
    wasm_valtype_vec_new_uninitialized
-   wasmer_cpu_features_add
-   wasmer_cpu_features_delete
-   wasmer_cpu_features_new
    wasmer_last_error_length
    wasmer_last_error_message
-   wasmer_target_delete
-   wasmer_target_new
-   wasmer_triple_delete
-   wasmer_triple_new_from_host
