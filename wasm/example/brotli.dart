@@ -37,9 +37,12 @@ void main(List<String> args) {
   print('Input size: ${inputData.length} bytes');
 
   print('\nLoading wasm module');
-  var brotliPath = Platform.script.resolve('libbrotli.wasm');
+  // var brotliPath = Platform.script.resolve('libbrotli.wasm');
+  // var moduleData = File(brotliPath.toFilePath()).readAsBytesSync();
+  // var module = WasmModule(moduleData);
+  var brotliPath = Platform.script.resolve('libbrotli.wm');
   var moduleData = File(brotliPath.toFilePath()).readAsBytesSync();
-  var module = WasmModule(moduleData);
+  var module = WasmModule.deserialize(moduleData);
   print(module.describe());
 
   var builder = module.builder()..enableWasi();
