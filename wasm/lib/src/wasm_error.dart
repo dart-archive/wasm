@@ -12,3 +12,14 @@ class WasmError extends Error {
   @override
   String toString() => 'WasmError: $message';
 }
+
+/// Exception that wraps exceptions (traps) thrown inside wasm code.
+class WasmException implements Exception {
+  /// Describes the nature of the exception.
+  final String message;
+
+  WasmException(this.message);
+
+  @override
+  String toString() => 'WasmException: $message';
+}

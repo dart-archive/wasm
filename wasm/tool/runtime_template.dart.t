@@ -118,9 +118,8 @@ class WasmRuntime {
       calloc.free(trapMessage);
       final entry = _traps.remove(message);
       if (entry == null) {
-        throw WasmError(
-          'This case is not (yet) supported. Please file an issue on pkg:wasm.',
-        );
+        // TODO(#87): Report a full stack trace to the user.
+        throw WasmException(message);
       }
       // ignore: only_throw_errors
       throw entry.exception;

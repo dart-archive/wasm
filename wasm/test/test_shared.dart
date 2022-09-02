@@ -8,3 +8,8 @@ import 'package:wasm/src/wasm_error.dart';
 Matcher throwsWasmError(Object messageMatcher) => throwsA(
       isA<WasmError>().having((p0) => p0.message, 'message', messageMatcher),
     );
+
+Matcher throwsWasmException(Object messageMatcher) => throwsA(
+      isA<WasmException>()
+          .having((p0) => p0.message, 'message', messageMatcher),
+    );
