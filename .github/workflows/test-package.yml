@@ -108,10 +108,8 @@ jobs:
       run: dart pub get
     - name: Setup wasm
       run: dart run wasm:setup
-    - name: Install coverage
-      run: dart pub global activate coverage
     - name: Collect and report coverage
-      run: dart pub global run coverage:test_with_coverage
+      run: dart test --coverage coverage
     - name: Upload coverage
       uses: coverallsapp/github-action@v1.1.2
       with:
