@@ -27,7 +27,7 @@ void main() {
       0x00, 0x00, 0x00,
     ]);
 
-    final builder = WasmModule(data).builder();
+    final builder = wasmModuleCompileSync(data).builder();
     final bar = builder.addGlobal('env', 'bar', 10);
     final inst = builder.build();
     final foo = inst.lookupGlobal('foo')!;

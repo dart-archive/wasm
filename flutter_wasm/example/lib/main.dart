@@ -14,7 +14,7 @@ final _data = Uint8List.fromList([
   0x7e, 0x0b,
 ]);
 
-final _inst = WasmModule(_data).builder().build();
+final _inst = wasmModuleCompileSync(_data).builder().build();
 final _wasmSquare = _inst.lookupFunction('square');
 
 void main() {

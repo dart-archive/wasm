@@ -184,7 +184,7 @@ void main() {
       return n;
     }
 
-    var builder = WasmModule(data).builder()
+    var builder = wasmModuleCompileSync(data).builder()
       ..addFunction('wasi_unstable', 'fd_write',
           (int fd, int iovs, int iovsLen, int unused) {
         // iovs points to an array of length iovs_len. Each element is two I32s,

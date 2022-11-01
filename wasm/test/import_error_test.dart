@@ -27,7 +27,7 @@ void main() {
       0x80, 0x80, 0x80, 0x00, 0x1a, 0x0b,
     ]);
 
-    var mod = WasmModule(data);
+    var mod = wasmModuleCompileSync(data);
 
     // Valid instantiation.
     (mod.builder()

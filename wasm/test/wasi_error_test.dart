@@ -19,7 +19,7 @@ void main() {
 
     // Failed to fill WASI imports (the empty module was not built with WASI).
     expect(
-      () => WasmModule(emptyModuleData).builder().enableWasi(),
+      () => wasmModuleCompileSync(emptyModuleData).builder().enableWasi(),
       throwsWasmError(startsWith('Failed to fill WASI imports.')),
     );
 
@@ -185,7 +185,7 @@ void main() {
 
     // Trying to import WASI twice.
     expect(
-      () => WasmModule(helloWorldData).builder()
+      () => wasmModuleCompileSync(helloWorldData).builder()
         ..enableWasi()
         ..enableWasi(),
       throwsWasmError(startsWith('WASI is already enabled')),
@@ -193,13 +193,13 @@ void main() {
 
     // Missing imports due to not enabling WASI.
     expect(
-      () => WasmModule(helloWorldData).builder().build(),
+      () => wasmModuleCompileSync(helloWorldData).builder().build(),
       throwsWasmError(startsWith('Missing import: ')),
     );
 
     // Trying to get stdout/stderr without WASI enabled (WASI function import has
     // been manually filled).
-    var inst = (WasmModule(helloWorldData).builder()
+    var inst = (wasmModuleCompileSync(helloWorldData).builder()
           ..addFunction(
             'wasi_unstable',
             'fd_write',

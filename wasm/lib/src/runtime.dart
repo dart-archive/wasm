@@ -11,7 +11,6 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 
 import 'shared.dart';
-import 'wasm_error.dart';
 import 'wasmer_api.dart';
 
 part 'runtime.g.dart';
@@ -102,7 +101,7 @@ String _getLibName() {
   if (Platform.isLinux || Platform.isAndroid) return linuxLib;
   if (Platform.isWindows) return windowsLib;
   // TODO(dartbug.com/37882): Support more platforms.
-  throw WasmError('Wasm not currently supported on this platform');
+  throw _WasmErrorRuntimeImpl('Wasm not currently supported on this platform');
 }
 
 String? _getLibPathFrom(Uri root) {
@@ -116,7 +115,27 @@ String _getLibPath() {
   if (path != null) return path;
   path = _getLibPathFrom(Directory.current.uri);
   if (path != null) return path;
-  throw WasmError('Wasm library not found. Did you `$invocationString`?');
+  throw _WasmErrorRuntimeImpl(
+    'Wasm library not found. Did you `$invocationString`?',
+  );
+}
+
+class _WasmErrorRuntimeImpl extends Error {
+  final String message;
+
+  _WasmErrorRuntimeImpl(this.message) : assert(message.trim() == message);
+
+  @override
+  String toString() => 'WasmError: $message';
+}
+
+class _WasmExceptionImpl extends Error {
+  final String message;
+
+  _WasmExceptionImpl(this.message) : assert(message.trim() == message);
+
+  @override
+  String toString() => 'WasmError: $message';
 }
 
 DynamicLibrary _loadDynamicLib() {

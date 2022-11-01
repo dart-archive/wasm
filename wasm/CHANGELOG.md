@@ -1,3 +1,6 @@
+## 0.3.0-dev
+- Expose a new dependency free API.
+
 ## 0.2.0-dev
 
 - Update to Wasmer 2.1.0

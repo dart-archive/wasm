@@ -25,7 +25,7 @@ void main() {
       0x6d, 0x6f, 0x72, 0x79,
     ]);
 
-    final inst = WasmModule(data).builder().build();
+    final inst = wasmModuleCompileSync(data).builder().build();
     final foo = inst.lookupFunction('foo');
     // ignore: unnecessary_lambdas
     expect(() => foo(), throwsWasmException('unreachable'));

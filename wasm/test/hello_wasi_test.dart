@@ -13,7 +13,7 @@ void main() {
   test(
     'hello wasi',
     () async {
-      var builder = WasmModule(_data).builder()
+      var builder = wasmModuleCompileSync(_data).builder()
         ..enableWasi(captureStdout: true);
       var inst = builder.build();
 
