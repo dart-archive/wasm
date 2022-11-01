@@ -139,8 +139,8 @@ abstract class WasmMemory {
   );
 
   // TODO(modulovalue): consider hiding uint8list and exposing the list
-  // TODO(modulovalue): interface. this depends on the use cases that
-  // TODO(modulovalue): we want to support.
+  // TODO(modulovalue):  interface. this depends on the use cases that
+  // TODO(modulovalue):  we want to support.
   /// A view into the memory.
   Uint8List get view;
 
@@ -160,7 +160,7 @@ abstract class WasmFunction {
     List<dynamic> args,
   );
 
-  // TODO(modulovalue): don't expose toString, but a some debug method.
+  // TODO(modulovalue): don't expose toString, but some debug method.
   @override
   String toString();
 }
@@ -176,7 +176,7 @@ abstract class WasmFunction {
 abstract class WasmGlobal {
   abstract dynamic value;
 
-  // TODO(modulovalue): don't expose toString, but a some debug method.
+  // TODO(modulovalue): don't expose toString, but some debug method.
   @override
   String toString();
 }
