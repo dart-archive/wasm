@@ -10,8 +10,9 @@ library _;
 
 import 'dart:typed_data';
 
-// TODO(modulovalue): document that the public api of this type is sealed.
 /// A compiled module that can be instantiated.
+///
+/// Users of this type may not implement, mix-in or extend this type.
 abstract class WasmModule {
   /// Returns a [WasmInstanceBuilder] that is used to add all the imports that
   /// the module needs before instantiating it.
@@ -31,9 +32,10 @@ abstract class WasmModule {
   String describe();
 }
 
-// TODO(modulovalue): document that the public api of this type is sealed.
 /// Used to collect all of the imports that a [WasmModule] requires before it is
 /// built.
+///
+/// Users of this type may not implement, mix-in or extend this type.
 abstract class WasmInstanceBuilder {
   /// Add a WasmMemory to the imports.
   void addMemory(
@@ -50,7 +52,7 @@ abstract class WasmInstanceBuilder {
   );
 
   /// Add a global to the imports.
-  /// TODO(modulovalue): make val a more refined type.
+  // TODO(modulovalue): make val a more refined type.
   WasmGlobal addGlobal(
     String moduleName,
     String name,
@@ -70,10 +72,11 @@ abstract class WasmInstanceBuilder {
   Future<WasmInstance> buildAsync();
 }
 
-// TODO(modulovalue): document that the public api of this type is sealed.
 /// An instantiated [WasmModule].
 ///
 /// Created by calling [WasmInstanceBuilder.build].
+///
+/// Users of this type may not implement, mix-in or extend this type.
 abstract class WasmInstance {
   /// Searches the instantiated module for the given function.
   ///
@@ -81,7 +84,7 @@ abstract class WasmInstance {
   /// easy invocation as a [Function].
   ///
   /// Returns `null` if no function exists with name [name].
-  /// TODO(modulovalue): return a more refined type.
+  // TODO(modulovalue): return a more refined type.
   dynamic lookupFunction(
     String name,
   );
@@ -100,23 +103,24 @@ abstract class WasmInstance {
   ///
   /// To use this, you must enable WASI when instantiating the module, and set
   /// `captureStdout` to `true`.
-  /// TODO(modulovalue): what happens when captureStdout is set to false?
-  /// TODO(modulovalue): replace with a capability fore more safety?
+  // TODO(modulovalue): what happens when captureStdout is set to false?
+  // TODO(modulovalue): replace with a capability fore more safety?
   Stream<List<int>> get stdout;
 
   /// Returns a stream that reads from `stderr`.
   ///
   /// To use this, you must enable WASI when instantiating the module, and set
   /// `captureStderr` to `true`.
-  /// TODO(modulovalue): what happens when captureStderr is set to false?
-  /// TODO(modulovalue): replace with a capability fore more safety?
+  // TODO(modulovalue): what happens when captureStderr is set to false?
+  // TODO(modulovalue): replace with a capability fore more safety?
   Stream<List<int>> get stderr;
 }
 
-// TODO(modulovalue): document that the public api of this type is sealed.
 /// Memory of a [WasmInstance].
 ///
 /// Access via [WasmInstance.memory] or create via [WasmModule.createMemory].
+///
+/// Users of this type may not implement, mix-in or extend this type.
 abstract class WasmMemory {
   /// The WASM spec defines the page size as 64KiB.
   static const int kPageSizeInBytes = 64 * 1024;
@@ -151,10 +155,11 @@ abstract class WasmMemory {
   );
 }
 
-// TODO(modulovalue): document that the public api of this type is sealed.
 /// A callable function from a [WasmInstance].
 ///
 /// Access by calling [WasmInstance.lookupFunction].
+///
+/// Users of this type may not implement, mix-in or extend this type.
 abstract class WasmFunction {
   dynamic apply(
     List<dynamic> args,
@@ -165,7 +170,6 @@ abstract class WasmFunction {
   String toString();
 }
 
-// TODO(modulovalue): document that the public api of this type is sealed.
 /// A global variable.
 ///
 /// To access globals exported from an instance, call
@@ -173,6 +177,8 @@ abstract class WasmFunction {
 ///
 /// To import globals during module instantiation, use
 /// [WasmInstanceBuilder.addGlobal].
+///
+/// Users of this type may not implement, mix-in or extend this type.
 abstract class WasmGlobal {
   abstract dynamic value;
 
@@ -182,7 +188,9 @@ abstract class WasmGlobal {
 }
 
 /// Error specific to unexpected behavior or incorrect usage of this package.
-/// TODO(modulovalue): have specific error subtypes for each use case.
+///
+/// Users of this type may not implement, mix-in or extend this type.
+// TODO(modulovalue): have specific error subtypes for each use case.
 abstract class WasmError implements Error {
   /// Describes the nature of the error.
   String get message;
@@ -192,8 +200,13 @@ abstract class WasmError implements Error {
 }
 
 /// Exception that wraps exceptions (traps) thrown inside wasm code.
-/// TODO(modulovalue): have specific exception subtypes for each use case.
+///
+/// Users of this type may not implement, mix-in or extend this type.
+// TODO(modulovalue): have specific exception subtypes for each use case.
 abstract class WasmException implements Exception {
   /// Describes the nature of the exception.
   String get message;
+
+  @override
+  String toString();
 }

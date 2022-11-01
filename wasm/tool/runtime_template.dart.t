@@ -119,7 +119,7 @@ class WasmRuntime {
       final entry = _traps.remove(message);
       if (entry == null) {
         // TODO(#87): Report a full stack trace to the user.
-        throw WasmException(message);
+        throw _WasmExceptionImpl(message);
       }
       // ignore: only_throw_errors
       throw entry.exception;
