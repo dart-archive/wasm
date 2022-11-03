@@ -35,15 +35,19 @@ class Brotli {
   /// any further compress or decompress calls. So make a copy if you need the
   /// data to last longer than that.
   Uint8List compress(Uint8List input) {
-    return _runBrotli(input, input.length, (int inputPtr, int outputSizePtr, int outputPtr) => _compress(
-      _kDefaultQuality,
-      _kDefaultWindow,
-      _kDefaultMode,
+    return _runBrotli(
+      input,
       input.length,
-      inputPtr,
-      outputSizePtr,
-      outputPtr,
-    ));
+      (int inputPtr, int outputSizePtr, int outputPtr) => _compress(
+        _kDefaultQuality,
+        _kDefaultWindow,
+        _kDefaultMode,
+        input.length,
+        inputPtr,
+        outputSizePtr,
+        outputPtr,
+      ) as int,
+    );
   }
 
   /// Decompresses the input data.
@@ -54,15 +58,23 @@ class Brotli {
   /// any further compress or decompress calls. So make a copy if you need the
   /// data to last longer than that.
   Uint8List decompress(Uint8List input, int maxDecompressedSize) {
-    return _runBrotli(input, maxDecompressedSize, (int inputPtr, int outputSizePtr, int outputPtr) => _decompress(
-      input.length,
-      inputPtr,
-      outputSizePtr,
-      outputPtr,
-    ));
+    return _runBrotli(
+      input,
+      maxDecompressedSize,
+      (int inputPtr, int outputSizePtr, int outputPtr) => _decompress(
+        input.length,
+        inputPtr,
+        outputSizePtr,
+        outputPtr,
+      ) as int,
+    );
   }
 
-  Uint8List _runBrotli(Uint8List input, int maxOutputSize, int Function(int, int, int) impl) {
+  Uint8List _runBrotli(
+    Uint8List input,
+    int maxOutputSize,
+    int Function(int, int, int) impl,
+  ) {
     // Ensure the wasm memory has enough space for our data.
     // Memory layout: [initial memory][input data][output data][size]
     final requiredBytes = _initMemBytes + input.length + maxOutputSize + 4;
@@ -86,13 +98,12 @@ class Brotli {
     // Call brotli.
     final status = impl(inputPtr, outSizePtr, outputPtr);
     if (status == 0) {
-      throw Exception("Brotli failed with code");
+      throw Exception('Brotli failed with code');
     }
 
     // Return the output buffer.
-    final outSize =
-        ByteData.sublistView(view, outSizePtr, outSizePtr + 4)
-            .getUint32(0, Endian.host);
+    final outSize = ByteData.sublistView(view, outSizePtr, outSizePtr + 4)
+        .getUint32(0, Endian.host);
     return Uint8List.sublistView(view, outputPtr, outputPtr + outSize);
   }
 }

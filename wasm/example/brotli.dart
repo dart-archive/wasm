@@ -7,7 +7,6 @@
 // dart brotli.dart input.txt
 
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'brotli_api.dart';
 
