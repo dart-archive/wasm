@@ -7,11 +7,11 @@ import 'dart:typed_data';
 import 'package:wasm/wasm.dart';
 
 class Brotli {
-  late WasmInstance _instance;
-  late WasmMemory _memory;
-  late dynamic _compress;
-  late dynamic _decompress;
-  late int _initMemBytes;
+  late final WasmInstance _instance;
+  late final WasmMemory _memory;
+  late final dynamic _compress;
+  late final dynamic _decompress;
+  late final int _initMemBytes;
 
   // Brotli compression parameters.
   static const _kDefaultQuality = 11;
@@ -98,7 +98,7 @@ class Brotli {
     // Call brotli.
     final status = impl(inputPtr, outSizePtr, outputPtr);
     if (status == 0) {
-      throw Exception('Brotli failed with code');
+      throw Exception('Brotli failed');
     }
 
     // Return the output buffer.
