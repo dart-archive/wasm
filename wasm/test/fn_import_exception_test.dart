@@ -26,7 +26,7 @@ void main() {
     ]);
 
     var thrownException = Exception('Hello exception!');
-    var inst = (WasmModule(data).builder()
+    var inst = (wasmModuleCompileSync(data).builder()
           ..addFunction('env', 'a', () {
             throw thrownException;
           })
@@ -38,7 +38,7 @@ void main() {
     var fn = inst.lookupFunction('fn');
     expect(() => fn(), throwsA(thrownException));
 
-    inst = (WasmModule(data).builder()
+    inst = (wasmModuleCompileSync(data).builder()
           ..addFunction('env', 'a', expectAsync0(() => null))
           ..addFunction('env', 'b', expectAsync0(() => null)))
         .build();

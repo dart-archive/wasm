@@ -20,7 +20,7 @@ class Brotli {
 
   /// Construct a Brotli compressor.
   Brotli(Uint8List brotliWasmModuleData) {
-    final module = WasmModule(brotliWasmModuleData);
+    final module = wasmModuleCompileSync(brotliWasmModuleData);
     final builder = module.builder()..enableWasi();
     _instance = builder.build();
     _memory = _instance.memory;

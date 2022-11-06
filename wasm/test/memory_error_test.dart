@@ -16,7 +16,7 @@ void main() {
     var data = Uint8List.fromList([
       0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x06, 0x81, 0x00, 0x00, //
     ]);
-    var module = WasmModule(data);
+    var module = wasmModuleCompileSync(data);
 
     expect(
       () => module.createMemory(1000000000),

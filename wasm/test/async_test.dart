@@ -21,7 +21,7 @@ void main() {
       0x7e, 0x0b,
     ]);
 
-    final mod = await WasmModule.compileAsync(data);
+    final mod = await wasmModuleCompileAsync(data);
     final inst = await mod.builder().buildAsync();
     final fn = inst.lookupFunction('square');
     final n = fn(1234) as int;
