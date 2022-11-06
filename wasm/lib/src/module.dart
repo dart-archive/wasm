@@ -11,18 +11,28 @@ import 'runtime.dart';
 import 'wasm_error.dart';
 import 'wasmer_api.dart';
 
+/// Creates a new wasm module asynchronously.
+Future<WasmModule> wasmModuleCompileAsync(
+  Uint8List data,
+) async {
+  return wasmModuleCompileSync(data);
+}
+
+/// Creates a new wasm module synchronously.
+WasmModule wasmModuleCompileSync(
+  Uint8List data,
+) {
+  return WasmModule._(data);
+}
+
 /// A compiled module that can be instantiated.
 class WasmModule {
   late final Pointer<WasmerModule> _module;
 
   /// Compile a module.
-  WasmModule(Uint8List data) {
+  WasmModule._(Uint8List data) {
     _module = runtime.compile(this, data);
   }
-
-  /// Asynchronously compile a module.
-  static Future<WasmModule> compileAsync(Uint8List data) async =>
-      Future<WasmModule>(() => WasmModule(data));
 
   /// Returns a [WasmInstanceBuilder] that is used to add all the imports that
   /// the module needs before instantiating it.

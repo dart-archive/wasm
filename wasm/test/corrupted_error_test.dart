@@ -20,7 +20,7 @@ void main() {
     ]);
 
     expect(
-      () => WasmModule(data),
+      () => wasmModuleCompileSync(data),
       throwsWasmError(
         allOf(
           contains('Wasm module compilation failed.'),
