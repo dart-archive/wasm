@@ -1,10 +1,7 @@
-## 0.3.0-dev
+## 0.2.0-dev
 
 - Provide a new way for creating a WasmModule via 
   `wasmModuleCompileAsync` and `wasmModuleCompileSync`
-
-## 0.2.0-dev
-
 - Update to Wasmer 2.1.0
 - All WASM modules and instances use a singleton store, to enable sharing of
   memory and functions.
