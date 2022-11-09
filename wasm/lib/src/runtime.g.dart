@@ -501,7 +501,7 @@ class WasmRuntime {
     );
 
     if (_Dart_InitializeApiDL(NativeApi.initializeApiDLData) != 0) {
-      throw WasmError('Failed to initialize Dart API');
+      throw _WasmRuntimeErrorImpl('Failed to initialize Dart API');
     }
     _engine = _engine_new();
     _checkNotEqual(_engine, nullptr, 'Failed to initialize Wasm engine.');
@@ -598,7 +598,7 @@ class WasmRuntime {
       final entry = _traps.remove(message);
       if (entry == null) {
         // TODO(#87): Report a full stack trace to the user.
-        throw WasmException(message);
+        throw _WasmRuntimeExceptionImpl(message);
       }
       // ignore: only_throw_errors
       throw entry.exception;
@@ -654,7 +654,7 @@ class WasmRuntime {
     if (rets.ref.length == 0) {
       return wasmerValKindVoid;
     } else if (rets.ref.length > 1) {
-      throw WasmError('Multiple return values are not supported');
+      throw _WasmRuntimeErrorImpl('Multiple return values are not supported');
     }
     return _valtype_kind(rets.ref.data[0]);
   }
@@ -730,7 +730,9 @@ class WasmRuntime {
   Pointer<WasmerVal> newValue(int type, dynamic val) {
     final wasmerVal = calloc<WasmerVal>();
     if (!wasmerVal.ref.fill(type, val)) {
-      throw WasmError('Bad value for WASM type: ${wasmerValKindName(type)}');
+      throw _WasmRuntimeErrorImpl(
+        'Bad value for WASM type: ${wasmerValKindName(type)}',
+      );
     }
     return wasmerVal;
   }
@@ -854,7 +856,7 @@ class WasmRuntime {
 
   T _checkNotEqual<T>(T x, T y, String errorMessage) {
     if (x == y) {
-      throw WasmError('$errorMessage\n${_getLastError()}'.trim());
+      throw _WasmRuntimeErrorImpl('$errorMessage\n${_getLastError()}'.trim());
     }
     return x;
   }

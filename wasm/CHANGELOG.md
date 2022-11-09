@@ -1,7 +1,8 @@
 ## 0.3.0-dev
 
-- Provide a new way for creating a WasmModule via 
+- Provide a new way for creating a WasmModule via
   `wasmModuleCompileAsync` and `wasmModuleCompileSync`
+- Migrate `WasmError` and `WasmException` to the new public API.
 
 ## 0.2.0-dev
 

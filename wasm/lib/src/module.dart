@@ -7,8 +7,8 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
+import '../wasm_api.dart' show WasmError;
 import 'runtime.dart';
-import 'wasm_error.dart';
 import 'wasmer_api.dart';
 
 /// Creates a new wasm module asynchronously.
@@ -140,9 +140,9 @@ class WasmInstanceBuilder {
   int _getIndex(String moduleName, String name) {
     final index = _importIndex['$moduleName::$name'];
     if (index == null) {
-      throw WasmError('Import not found: $moduleName::$name');
+      throw _WasmModuleErrorImpl('Import not found: $moduleName::$name');
     } else if (_imports.ref.data[index] != nullptr) {
-      throw WasmError('Import already filled: $moduleName::$name');
+      throw _WasmModuleErrorImpl('Import already filled: $moduleName::$name');
     } else {
       return index;
     }
@@ -157,7 +157,7 @@ class WasmInstanceBuilder {
     final index = _getIndex(moduleName, name);
     final imp = _importDescs[index];
     if (imp.kind != wasmerExternKindMemory) {
-      throw WasmError('Import is not a memory: $imp');
+      throw _WasmModuleErrorImpl('Import is not a memory: $imp');
     }
     _imports.ref.data[index] = runtime.memoryToExtern(memory._mem);
   }
@@ -168,7 +168,7 @@ class WasmInstanceBuilder {
     final imp = _importDescs[index];
 
     if (imp.kind != wasmerExternKindFunction) {
-      throw WasmError('Import is not a function: $imp');
+      throw _WasmModuleErrorImpl('Import is not a function: $imp');
     }
 
     final funcType = imp.type as Pointer<WasmerFunctype>;
@@ -192,7 +192,7 @@ class WasmInstanceBuilder {
     final imp = _importDescs[index];
 
     if (imp.kind != wasmerExternKindGlobal) {
-      throw WasmError('Import is not a global: $imp');
+      throw _WasmModuleErrorImpl('Import is not a global: $imp');
     }
 
     final globalType = imp.type as Pointer<WasmerGlobaltype>;
@@ -207,7 +207,7 @@ class WasmInstanceBuilder {
     bool captureStderr = false,
   }) {
     if (_wasiEnv != nullptr) {
-      throw WasmError('WASI is already enabled.');
+      throw _WasmModuleErrorImpl('WASI is already enabled.');
     }
     final config = runtime.newWasiConfig();
     if (captureStdout) runtime.captureWasiStdout(config);
@@ -220,7 +220,7 @@ class WasmInstanceBuilder {
   WasmInstance build() {
     for (var i = 0; i < _importDescs.length; ++i) {
       if (_imports.ref.data[i] == nullptr) {
-        throw WasmError('Missing import: ${_importDescs[i]}');
+        throw _WasmModuleErrorImpl('Missing import: ${_importDescs[i]}');
       }
     }
     return WasmInstance._(_module, _importOwner, _imports, _wasiEnv);
@@ -303,7 +303,7 @@ class WasmInstance {
   /// Returns the memory exported from this instance.
   WasmMemory get memory {
     if (_exportedMemory == null) {
-      throw WasmError('Wasm module did not export its memory.');
+      throw _WasmModuleErrorImpl('Wasm module did not export its memory.');
     }
     return WasmMemory._fromExport(_exportedMemory as Pointer<WasmerMemory>);
   }
@@ -314,7 +314,7 @@ class WasmInstance {
   /// `captureStdout` to `true`.
   Stream<List<int>> get stdout {
     if (_wasiEnv == nullptr) {
-      throw WasmError("Can't capture stdout without WASI enabled.");
+      throw _WasmModuleErrorImpl("Can't capture stdout without WASI enabled.");
     }
     return _stdout ??= runtime.getWasiStdoutStream(_wasiEnv);
   }
@@ -325,7 +325,7 @@ class WasmInstance {
   /// `captureStderr` to `true`.
   Stream<List<int>> get stderr {
     if (_wasiEnv == nullptr) {
-      throw WasmError("Can't capture stderr without WASI enabled.");
+      throw _WasmModuleErrorImpl("Can't capture stderr without WASI enabled.");
     }
     return _stderr ??= runtime.getWasiStderrStream(_wasiEnv);
   }
@@ -454,8 +454,20 @@ class WasmGlobal {
 
   set value(dynamic val) {
     if (_mut == wasmerMutabilityConst) {
-      throw WasmError("Can't set value of const global: $this");
+      throw _WasmModuleErrorImpl("Can't set value of const global: $this");
     }
     runtime.globalSet(_global, _type, val);
   }
+}
+
+class _WasmModuleErrorImpl extends Error implements WasmError {
+  @override
+  final String message;
+
+  _WasmModuleErrorImpl(
+    this.message,
+  ) : assert(message.trim() == message);
+
+  @override
+  String toString() => 'WasmModuleError: $message';
 }
