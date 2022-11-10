@@ -23,11 +23,11 @@ jobs:
       run:
         working-directory: wasm
     steps:
-    - uses: actions/checkout@v2.3.4
-    - uses: dart-lang/setup-dart@v1.0
+    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+    - uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
       with:
         sdk: ${{ matrix.sdk }}
-    - uses: actions/cache@v2.1.6
+    - uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7
       with:
         path: |
           ~/.pub-cache/hosted/
@@ -66,11 +66,11 @@ jobs:
       run:
         working-directory: wasm
     steps:
-    - uses: dart-lang/setup-dart@v1.0
+    - uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
       with:
         sdk: ${{ matrix.sdk }}
-    - uses: actions/checkout@v2.3.4
-    - uses: actions/cache@v2.1.6
+    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+    - uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7
       with:
         path: |
           ~/.cargo/bin/
@@ -90,11 +90,11 @@ jobs:
       run:
         working-directory: wasm
     steps:
-    - uses: dart-lang/setup-dart@v1.0
+    - uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
       with:
         sdk: dev
-    - uses: actions/checkout@v2.3.4
-    - uses: actions/cache@v2.1.6
+    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+    - uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7
       with:
         path: |
           ~/.cargo/bin/
@@ -113,7 +113,7 @@ jobs:
     - name: Collect and report coverage
       run: dart pub global run coverage:test_with_coverage
     - name: Upload coverage
-      uses: coverallsapp/github-action@v1.1.2
+      uses: coverallsapp/github-action@8cbef1dea373ebce56de0a14c68d6267baa10b44
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: wasm/coverage/lcov.info
@@ -124,11 +124,11 @@ jobs:
       run:
         working-directory: flutter_wasm
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-java@v1
+    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+    - uses: actions/setup-java@de1bb2b0c5634f0fc4438d7aa9944e68f9bf86cc
       with:
         java-version: '12.x'
-    - uses: subosito/flutter-action@v1.5.3
+    - uses: subosito/flutter-action@dbf1fa04f4d2e52c33185153d06cdb5443aa189d
       with:
         flutter-version: '2.5.0'
     - id: install
@@ -146,11 +146,11 @@ jobs:
       run:
         working-directory: flutter_wasm
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-java@v1
+    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+    - uses: actions/setup-java@de1bb2b0c5634f0fc4438d7aa9944e68f9bf86cc
       with:
         java-version: '12.x'
-    - uses: subosito/flutter-action@v1.5.3
+    - uses: subosito/flutter-action@dbf1fa04f4d2e52c33185153d06cdb5443aa189d
       with:
         flutter-version: '2.5.0'
     - run: flutter pub upgrade
@@ -163,17 +163,17 @@ jobs:
       run:
         working-directory: flutter_wasm/example
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-java@v1
+    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+    - uses: actions/setup-java@de1bb2b0c5634f0fc4438d7aa9944e68f9bf86cc
       with:
         java-version: '12.x'
-    - uses: android-actions/setup-android@v2.0.2
-    - uses: nttld/setup-ndk@v1
+    - uses: android-actions/setup-android@7c5672355aaa8fde5f97a91aa9a99616d1ace6bc
+    - uses: nttld/setup-ndk@8c3b609ff4d54576ea420551943fd34b4d03b0dc
       with:
         ndk-version: r21e
         add-to-path: true
     - run: echo "ndk.dir=$(dirname $(which ndk-build))" >> android/local.properties
-    - uses: subosito/flutter-action@v1.5.3
+    - uses: subosito/flutter-action@dbf1fa04f4d2e52c33185153d06cdb5443aa189d
       with:
         flutter-version: '2.5.0'
     - run: flutter pub upgrade
