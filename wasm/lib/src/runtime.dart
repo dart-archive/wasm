@@ -10,7 +10,7 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
-import '../wasm_api.dart' show WasmError, WasmException;
+import 'errors.dart';
 import 'shared.dart';
 import 'wasmer_api.dart';
 

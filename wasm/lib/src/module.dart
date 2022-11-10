@@ -7,7 +7,7 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
-import '../wasm_api.dart' show WasmError;
+import 'errors.dart';
 import 'runtime.dart';
 import 'wasmer_api.dart';
 
