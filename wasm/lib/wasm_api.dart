@@ -3,6 +3,8 @@
 // BSD-style license that can be found in the LICENSE file.
 import 'dart:typed_data';
 
+export 'src/errors.dart';
+
 /// A compiled module that can be instantiated.
 ///
 /// Users of this type may not implement, mix-in or extend this type.
@@ -160,20 +162,4 @@ abstract class WasmFunction {
 /// Users of this type may not implement, mix-in or extend this type.
 abstract class WasmGlobal {
   abstract dynamic value;
-}
-
-/// Error specific to unexpected behavior or incorrect usage of this package.
-///
-/// Users of this type may not implement, mix-in or extend this type.
-abstract class WasmError implements Error {
-  /// Describes the nature of the error.
-  String get message;
-}
-
-/// Exception that wraps exceptions (traps) thrown inside wasm code.
-///
-/// Users of this type may not implement, mix-in or extend this type.
-abstract class WasmException implements Exception {
-  /// Describes the nature of the exception.
-  String get message;
 }
