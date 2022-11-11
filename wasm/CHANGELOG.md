@@ -9,6 +9,7 @@
 - Add options to `setup.dart` for configuring the build.
 - Add `WasmModule.compileAsync` and `WasmInstanceBuilder.buildAsync`, so that
   the web API can be supported in the future.
+- Migrate dart finalizers from native to dart.
 
 ## 0.1.0+1
 

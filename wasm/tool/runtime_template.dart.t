@@ -26,10 +26,10 @@ class WasmRuntime {
     }
     _engine = _engine_new();
     _checkNotEqual(_engine, nullptr, 'Failed to initialize Wasm engine.');
-    _set_finalizer_for_engine(this, _engine);
+    Finalizer(_engine_delete).attach(this, _engine);
     _store = _store_new(_engine);
     _checkNotEqual(_store, nullptr, 'Failed to create Wasm store.');
-    _set_finalizer_for_store(this, _store);
+    Finalizer(_store_delete).attach(this, _store);
   }
 
   Pointer<WasmerModule> compile(Object owner, Uint8List data) {
@@ -47,7 +47,7 @@ class WasmRuntime {
     calloc.free(dataVec);
 
     _checkNotEqual(modulePtr, nullptr, 'Wasm module compilation failed.');
-    _set_finalizer_for_module(owner, modulePtr);
+    Finalizer(_module_delete).attach(owner, modulePtr);
     return modulePtr;
   }
 
@@ -137,7 +137,7 @@ class WasmRuntime {
     maybeThrowTrap(trap.value, 'module initialization function');
     calloc.free(trap);
     _checkNotEqual(inst, nullptr, 'Wasm module instantiation failed.');
-    _set_finalizer_for_instance(owner, inst);
+    Finalizer(_instance_delete).attach(owner, inst);
     return inst;
   }
 
@@ -206,13 +206,13 @@ class WasmRuntime {
     var memType = _memorytype_new(limPtr);
     calloc.free(limPtr);
     _checkNotEqual(memType, nullptr, 'Failed to create memory type.');
-    _set_finalizer_for_memorytype(owner, memType);
+    Finalizer(_memorytype_delete).attach(owner, memType);
     var memory = _checkNotEqual(
       _memory_new(_store, memType),
       nullptr,
       'Failed to create memory.',
     );
-    _set_finalizer_for_memory(owner, memory);
+    Finalizer(_memory_delete).attach(owner, memory);
     return memory;
   }
 
@@ -244,7 +244,7 @@ class WasmRuntime {
       finalizer.cast(),
     );
     _checkNotEqual(f, nullptr, 'Failed to create function.');
-    _set_finalizer_for_func(owner, f);
+    Finalizer(_func_delete).attach(owner, f);
     return f;
   }
 
@@ -265,7 +265,7 @@ class WasmRuntime {
   ) {
     final wasmerVal = newValue(getGlobalKind(globalType), val);
     final global = _global_new(_store, globalType, wasmerVal);
-    _set_finalizer_for_global(owner, global);
+    Finalizer(_global_delete).attach(owner, global);
     calloc.free(wasmerVal);
     return global;
   }
@@ -320,7 +320,7 @@ class WasmRuntime {
     calloc.free(bytes);
     _checkNotEqual(trap, nullptr, 'Failed to create trap.');
     var entry = _WasmTrapsEntry(exception);
-    _set_finalizer_for_trap(entry, trap);
+    Finalizer(_trap_delete).attach(entry, trap);
     _traps[msg] = entry;
     return trap;
   }
