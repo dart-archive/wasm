@@ -3,6 +3,7 @@
 - Provide a new way for creating a WasmModule via
   `wasmModuleCompileAsync` and `wasmModuleCompileSync`
 - Migrate `WasmError` and `WasmException` to the new public API.
+- Let module.dart implement the new public API.
 - Update to Wasmer 2.1.0
 - All WASM modules and instances use a singleton store, to enable sharing of
   memory and functions.
