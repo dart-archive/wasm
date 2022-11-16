@@ -10,8 +10,8 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
-import 'errors.dart';
 import 'shared.dart';
+import 'wasm_api.dart';
 import 'wasmer_api.dart';
 
 part 'runtime.g.dart';

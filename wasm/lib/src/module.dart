@@ -7,8 +7,8 @@ import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
-import 'errors.dart';
 import 'runtime.dart';
+import 'wasm_api.dart';
 import 'wasmer_api.dart';
 
 /// Creates a new wasm module asynchronously.
@@ -22,29 +22,24 @@ Future<WasmModule> wasmModuleCompileAsync(
 WasmModule wasmModuleCompileSync(
   Uint8List data,
 ) {
-  return WasmModule._(data);
+  return _WasmModule(data);
 }
 
-/// A compiled module that can be instantiated.
-class WasmModule {
+class _WasmModule implements WasmModule {
   late final Pointer<WasmerModule> _module;
 
-  /// Compile a module.
-  WasmModule._(Uint8List data) {
+  _WasmModule(Uint8List data) {
     _module = runtime.compile(this, data);
   }
 
-  /// Returns a [WasmInstanceBuilder] that is used to add all the imports that
-  /// the module needs before instantiating it.
-  WasmInstanceBuilder builder() => WasmInstanceBuilder._(this);
+  @override
+  _WasmInstanceBuilder builder() => _WasmInstanceBuilder._(this);
 
-  /// Create a new memory with the given number of initial pages, and optional
-  /// maximum number of pages.
-  WasmMemory createMemory(int pages, [int? maxPages]) =>
-      WasmMemory._create(pages, maxPages);
+  @override
+  _WasmMemory createMemory(int pages, [int? maxPages]) =>
+      _WasmMemory._create(pages, maxPages);
 
-  /// Returns a description of all of the module's imports and exports, for
-  /// debugging.
+  @override
   String describe() {
     final description = StringBuffer();
     final imports = runtime.importDescriptors(_module);
@@ -116,17 +111,15 @@ class _WasmFnImport extends Struct {
   }
 }
 
-/// Used to collect all of the imports that a [WasmModule] requires before it is
-/// built.
-class WasmInstanceBuilder {
+class _WasmInstanceBuilder implements WasmInstanceBuilder {
   final _importOwner = _WasmImportOwner();
   final _importIndex = <String, int>{};
   final _imports = calloc<WasmerExternVec>();
-  final WasmModule _module;
+  final _WasmModule _module;
   late final List<WasmImportDescriptor> _importDescs;
   Pointer<WasmerWasiEnv> _wasiEnv = nullptr;
 
-  WasmInstanceBuilder._(this._module)
+  _WasmInstanceBuilder._(this._module)
       : _importDescs = runtime.importDescriptors(_module._module) {
     _imports.ref.length = _importDescs.length;
     _imports.ref.data = calloc<Pointer<WasmerExtern>>(_importDescs.length);
@@ -148,11 +141,12 @@ class WasmInstanceBuilder {
     }
   }
 
-  /// Add a WasmMemory to the imports.
+  @override
   void addMemory(
     String moduleName,
     String name,
-    WasmMemory memory,
+    // As long as WasmMemory is sealed, the use of covariant will be safe here.
+    covariant _WasmMemory memory,
   ) {
     final index = _getIndex(moduleName, name);
     final imp = _importDescs[index];
@@ -162,7 +156,7 @@ class WasmInstanceBuilder {
     _imports.ref.data[index] = runtime.memoryToExtern(memory._mem);
   }
 
-  /// Add a function to the imports.
+  @override
   void addFunction(String moduleName, String name, Function fn) {
     final index = _getIndex(moduleName, name);
     final imp = _importDescs[index];
@@ -186,8 +180,8 @@ class WasmInstanceBuilder {
     _imports.ref.data[index] = runtime.functionToExtern(fnImp);
   }
 
-  /// Add a global to the imports.
-  WasmGlobal addGlobal(String moduleName, String name, dynamic val) {
+  @override
+  _WasmGlobal addGlobal(String moduleName, String name, dynamic val) {
     final index = _getIndex(moduleName, name);
     final imp = _importDescs[index];
 
@@ -198,10 +192,10 @@ class WasmInstanceBuilder {
     final globalType = imp.type as Pointer<WasmerGlobaltype>;
     final global = runtime.newGlobal(_importOwner, globalType, val);
     _imports.ref.data[index] = runtime.globalToExtern(global);
-    return WasmGlobal._('${imp.moduleName}::${imp.name}', global);
+    return _WasmGlobal._('${imp.moduleName}::${imp.name}', global);
   }
 
-  /// Enable WASI and add the default WASI imports.
+  @override
   void enableWasi({
     bool captureStdout = false,
     bool captureStderr = false,
@@ -216,32 +210,29 @@ class WasmInstanceBuilder {
     runtime.getWasiImports(_module._module, _wasiEnv, _imports);
   }
 
-  /// Build the module instance.
-  WasmInstance build() {
+  @override
+  _WasmInstance build() {
     for (var i = 0; i < _importDescs.length; ++i) {
       if (_imports.ref.data[i] == nullptr) {
         throw _WasmModuleErrorImpl('Missing import: ${_importDescs[i]}');
       }
     }
-    return WasmInstance._(_module, _importOwner, _imports, _wasiEnv);
+    return _WasmInstance._(_module, _importOwner, _imports, _wasiEnv);
   }
 
-  /// Asynchronously build the module instance.
-  Future<WasmInstance> buildAsync() async => Future<WasmInstance>(build);
+  @override
+  Future<_WasmInstance> buildAsync() async => Future<_WasmInstance>(build);
 }
 
 // TODO: should not be required once the min supported Dart SDK includes
 //  github.com/dart-lang/sdk/commit/8fd81f72281d9d3aa5ef3890c947cc7305c56a50
 class _WasmImportOwner {}
 
-/// An instantiated [WasmModule].
-///
-/// Created by calling [WasmInstanceBuilder.build].
-class WasmInstance {
+class _WasmInstance implements WasmInstance {
   final _WasmImportOwner _importOwner;
-  final _functions = <String, WasmFunction>{};
-  final _globals = <String, WasmGlobal>{};
-  final WasmModule _module;
+  final _functions = <String, _WasmFunction>{};
+  final _globals = <String, _WasmGlobal>{};
+  final _WasmModule _module;
   final Pointer<WasmerWasiEnv> _wasiEnv;
 
   late final Pointer<WasmerInstance> _instance;
@@ -250,7 +241,7 @@ class WasmInstance {
   Stream<List<int>>? _stdout;
   Stream<List<int>>? _stderr;
 
-  WasmInstance._(
+  _WasmInstance._(
     this._module,
     this._importOwner,
     Pointer<WasmerExternVec> imports,
@@ -271,7 +262,7 @@ class WasmInstance {
       if (kind == wasmerExternKindFunction) {
         final f = runtime.externToFunction(e);
         final ft = exportDescs[i].type as Pointer<WasmerFunctype>;
-        _functions[name] = WasmFunction._(
+        _functions[name] = _WasmFunction._(
           name,
           f,
           runtime.getArgTypes(ft),
@@ -282,36 +273,26 @@ class WasmInstance {
         final mem = runtime.externToMemory(e);
         _exportedMemory = mem;
       } else if (kind == wasmerExternKindGlobal) {
-        _globals[name] = WasmGlobal._(name, runtime.externToGlobal(e));
+        _globals[name] = _WasmGlobal._(name, runtime.externToGlobal(e));
       }
     }
   }
 
-  /// Searches the instantiated module for the given function.
-  ///
-  /// Returns a [WasmFunction], but the return type is [dynamic] to allow
-  /// easy invocation as a [Function].
-  ///
-  /// Returns `null` if no function exists with name [name].
+  @override
   dynamic lookupFunction(String name) => _functions[name];
 
-  /// Searches the instantiated module for the given global.
-  ///
-  /// Returns `null` if no global exists with name [name].
-  WasmGlobal? lookupGlobal(String name) => _globals[name];
+  @override
+  _WasmGlobal? lookupGlobal(String name) => _globals[name];
 
-  /// Returns the memory exported from this instance.
-  WasmMemory get memory {
+  @override
+  _WasmMemory get memory {
     if (_exportedMemory == null) {
       throw _WasmModuleErrorImpl('Wasm module did not export its memory.');
     }
-    return WasmMemory._fromExport(_exportedMemory as Pointer<WasmerMemory>);
+    return _WasmMemory._fromExport(_exportedMemory as Pointer<WasmerMemory>);
   }
 
-  /// Returns a stream that reads from `stdout`.
-  ///
-  /// To use this, you must enable WASI when instantiating the module, and set
-  /// `captureStdout` to `true`.
+  @override
   Stream<List<int>> get stdout {
     if (_wasiEnv == nullptr) {
       throw _WasmModuleErrorImpl("Can't capture stdout without WASI enabled.");
@@ -319,10 +300,7 @@ class WasmInstance {
     return _stdout ??= runtime.getWasiStdoutStream(_wasiEnv);
   }
 
-  /// Returns a stream that reads from `stderr`.
-  ///
-  /// To use this, you must enable WASI when instantiating the module, and set
-  /// `captureStderr` to `true`.
+  @override
   Stream<List<int>> get stderr {
     if (_wasiEnv == nullptr) {
       throw _WasmModuleErrorImpl("Can't capture stderr without WASI enabled.");
@@ -331,54 +309,44 @@ class WasmInstance {
   }
 }
 
-/// Memory of a [WasmInstance].
-///
-/// Access via [WasmInstance.memory] or create via [WasmModule.createMemory].
-class WasmMemory {
+class _WasmMemory implements WasmMemory {
   late final Pointer<WasmerMemory> _mem;
   late Uint8List _view;
 
-  WasmMemory._fromExport(this._mem) {
+  _WasmMemory._fromExport(this._mem) {
     _view = runtime.memoryView(_mem);
   }
 
-  WasmMemory._create(int pages, int? maxPages) {
+  _WasmMemory._create(int pages, int? maxPages) {
     _mem = runtime.newMemory(this, pages, maxPages);
     _view = runtime.memoryView(_mem);
   }
 
-  /// The WASM spec defines the page size as 64KiB.
-  static const int kPageSizeInBytes = 64 * 1024;
-
-  /// The length of the memory in pages.
+  @override
   int get lengthInPages => runtime.memoryLength(_mem);
 
-  /// The length of the memory in bytes.
+  @override
   int get lengthInBytes => _view.lengthInBytes;
 
-  /// The byte at the given [index].
+  @override
   int operator [](int index) => _view[index];
 
-  /// Sets the byte at the given index to value.
+  @override
   void operator []=(int index, int value) {
     _view[index] = value;
   }
 
-  /// A view into the memory.
+  @override
   Uint8List get view => _view;
 
-  /// Grow the memory by [deltaPages] and invalidates any existing views into
-  /// the memory.
+  @override
   void grow(int deltaPages) {
     runtime.growMemory(_mem, deltaPages);
     _view = runtime.memoryView(_mem);
   }
 }
 
-/// A callable function from a [WasmInstance].
-///
-/// Access by calling [WasmInstance.lookupFunction].
-class WasmFunction {
+class _WasmFunction implements WasmFunction {
   final String _name;
   final Pointer<WasmerFunc> _func;
   final List<int> _argTypes;
@@ -386,7 +354,7 @@ class WasmFunction {
   final Pointer<WasmerValVec> _args = calloc<WasmerValVec>();
   final Pointer<WasmerValVec> _results = calloc<WasmerValVec>();
 
-  WasmFunction._(this._name, this._func, this._argTypes, this._returnType) {
+  _WasmFunction._(this._name, this._func, this._argTypes, this._returnType) {
     _args.ref.length = _argTypes.length;
     _args.ref.data =
         _argTypes.isEmpty ? nullptr : calloc<WasmerVal>(_argTypes.length);
@@ -401,6 +369,7 @@ class WasmFunction {
   @override
   String toString() => getSignatureString(_name, _argTypes, _returnType);
 
+  @override
   dynamic apply(List<dynamic> args) {
     if (args.length != _argTypes.length) {
       throw ArgumentError('Wrong number arguments for WASM function: $this');
@@ -429,20 +398,13 @@ class WasmFunction {
   }
 }
 
-/// A global variable.
-///
-/// To access globals exported from an instance, call
-/// [WasmInstance.lookupGlobal].
-///
-/// To import globals during module instantiation, use
-/// [WasmInstanceBuilder.addGlobal].
-class WasmGlobal {
+class _WasmGlobal implements WasmGlobal {
   final String _name;
   final Pointer<WasmerGlobal> _global;
   final int _type;
   final int _mut;
 
-  WasmGlobal._(this._name, this._global)
+  _WasmGlobal._(this._name, this._global)
       : _type = runtime.getGlobalKind(runtime.getGlobalType(_global)),
         _mut = runtime.getGlobalMut(runtime.getGlobalType(_global));
 
@@ -450,8 +412,10 @@ class WasmGlobal {
   String toString() =>
       '${wasmerMutabilityName(_mut)} ${wasmerValKindName(_type)} $_name';
 
+  @override
   dynamic get value => runtime.globalGet(_global, _type);
 
+  @override
   set value(dynamic val) {
     if (_mut == wasmerMutabilityConst) {
       throw _WasmModuleErrorImpl("Can't set value of const global: $this");
