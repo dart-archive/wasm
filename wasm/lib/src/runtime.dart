@@ -5,19 +5,18 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 
-import 'shared.dart';
 import 'wasm_api.dart';
 import 'wasmer_api.dart';
+import 'wasmer_locator.dart';
 
 part 'runtime.g.dart';
 
 /// The singleton instance of [WasmRuntime].
-final runtime = WasmRuntime._init();
+final runtime = WasmRuntime._init(loadWasmerDynamicLibrary());
 
 class WasmRuntime with _WasmRuntimeGeneratedMixin {
   @override
@@ -26,7 +25,7 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
   late final Pointer<WasmerEngine> _engine;
   late final Pointer<WasmerStore> _store;
 
-  WasmRuntime._init() : _lib = _loadDynamicLib() {
+  WasmRuntime._init(this._lib) {
     initBindings();
     _engine = _engine_new();
     _checkNotEqual(_engine, nullptr, 'Failed to initialize Wasm engine.');
@@ -464,36 +463,6 @@ class _WasiStreamIterable extends Iterable<List<int>> {
 
   @override
   Iterator<List<int>> get iterator => _WasiStreamIterator(_env, _reader);
-}
-
-String _getLibName() {
-  if (Platform.isMacOS) return appleLib;
-  if (Platform.isLinux || Platform.isAndroid) return linuxLib;
-  if (Platform.isWindows) return windowsLib;
-  // TODO(dartbug.com/37882): Support more platforms.
-  throw _WasmRuntimeErrorImpl('Wasm not currently supported on this platform');
-}
-
-String? _getLibPathFrom(Uri root) {
-  final pkgRoot = packageRootUri(root);
-  return pkgRoot?.resolve('$wasmToolDir${_getLibName()}').toFilePath();
-}
-
-String _getLibPath() {
-  if (Platform.isAndroid) return _getLibName();
-  var path = _getLibPathFrom(Platform.script.resolve('./'));
-  if (path != null) return path;
-  path = _getLibPathFrom(Directory.current.uri);
-  if (path != null) return path;
-  throw _WasmRuntimeErrorImpl(
-    'Wasm library not found. Did you `$invocationString`?',
-  );
-}
-
-DynamicLibrary _loadDynamicLib() {
-  return Platform.isIOS
-      ? DynamicLibrary.process()
-      : DynamicLibrary.open(_getLibPath());
 }
 
 String getSignatureString(

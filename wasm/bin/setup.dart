@@ -12,7 +12,7 @@ import 'dart:io' hide exit;
 
 import 'package:args/args.dart';
 import 'package:package_config/package_config.dart' show findPackageConfig;
-import 'package:wasm/src/shared.dart';
+import 'package:wasm/src/wasmer_locator.dart';
 
 Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
