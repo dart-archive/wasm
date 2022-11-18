@@ -12,7 +12,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:wasm/src/shared.dart';
+import 'package:wasm/src/wasmer_locator.dart';
 
 final workingDirectory = Uri.file(Platform.script.path).resolve('..');
 
