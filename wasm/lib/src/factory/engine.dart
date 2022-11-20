@@ -2,5 +2,6 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
 
-export 'src/factory/engine.dart';
-export 'src/wasm_api.dart';
+export 'engine_unsupported.dart'
+    if (dart.library.html) 'engine_web.dart'
+    if (dart.library.io) 'engine_io.dart';
