@@ -390,29 +390,45 @@ genDoc = '''// This file has been automatically generated. Please do not edit it
 
 thisDir = os.path.dirname(os.path.abspath(__file__))
 
-
-def readFile(filename):
-    with open(os.path.abspath(os.path.join(thisDir, filename)), 'r') as f:
-        return f.read()
-
-
 def writeFile(filename, content):
     with open(os.path.abspath(os.path.join(thisDir, '..', filename)),
               'w') as f:
         f.write(content)
 
+runtimeText = '''// Copyright (c) 2020, the Dart project authors.  Please see the AUTHORS file
+// for details. All rights reserved. Use of this source code is governed by a
+// BSD-style license that can be found in the LICENSE file.
 
-wasmerApiText = readFile('wasmer_api_template.dart.t')
-wasmerApiText = wasmerApiText.replace('/* <WASMER_API> */', getWasmerApi())
-wasmerApiText = wasmerApiText.replace('/* <GEN_DOC> */', genDoc)
-writeFile('lib/src/wasmer_api.g.dart', wasmerApiText)
+/* <GEN_DOC> */
 
-runtimeText = readFile('runtime_template.dart.t')
+// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: unused_field
+// ignore_for_file: require_trailing_commas
+
+part of 'runtime.dart';
+
+mixin _WasmRuntimeGeneratedMixin {
+/* <RUNTIME_MEMB> */
+
+  void initBindings(DynamicLibrary _lib) {
+/* <RUNTIME_LOAD> */
+  }
+}
+
+/* <WASMER_API> */
+'''
 runtimeText = runtimeText.replace('/* <RUNTIME_MEMB> */', getRuntimeMemb())
 runtimeText = runtimeText.replace('/* <RUNTIME_LOAD> */', getRuntimeLoad())
+runtimeText = runtimeText.replace('/* <WASMER_API> */', getWasmerApi())
 runtimeText = runtimeText.replace('/* <GEN_DOC> */', genDoc)
 writeFile('lib/src/runtime.g.dart', runtimeText)
 
-winModuleText = readFile('module.def.t')
+winModuleText = '''; This file is used to define the library exports on windows. Clang uses a
+; different linker on windows, which by default doesn't re-export most of the
+; functions we need.
+LIBRARY wasmer
+EXPORTS
+; WINDOWS_EXPORTS
+'''
 winModuleText = winModuleText.replace('; WINDOWS_EXPORTS', getWindowsExports())
 writeFile('bin/module.g.def', winModuleText)

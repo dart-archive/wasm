@@ -9,7 +9,6 @@ import 'package:ffi/ffi.dart';
 
 import 'runtime.dart';
 import 'wasm_api.dart';
-import 'wasmer_api.dart';
 import 'wasmer_locator.dart';
 
 /// Creates a new wasm module asynchronously.
@@ -28,6 +27,12 @@ WasmModule wasmModuleCompileSync(
 
 final WasmRuntime _runtime = wasmRuntimeFactory(
   loadWasmerDynamicLibrary(),
+  (final message) => _WasmModuleTrapExceptionImpl(
+    message,
+  ),
+  (final message) => _WasmRuntimeErrorImpl(
+    message,
+  ),
 );
 
 class _WasmModule implements WasmModule {
@@ -461,4 +466,28 @@ class _WasmModuleErrorImpl extends Error implements WasmError {
 
   @override
   String toString() => 'WasmModuleError: $message';
+}
+
+class _WasmModuleTrapExceptionImpl implements WasmException {
+  @override
+  final String message;
+
+  const _WasmModuleTrapExceptionImpl(
+    this.message,
+  );
+
+  @override
+  String toString() => 'WasmModuleTrapException: $message';
+}
+
+class _WasmRuntimeErrorImpl extends Error implements WasmError {
+  @override
+  final String message;
+
+  _WasmRuntimeErrorImpl(
+    this.message,
+  ) : assert(message.trim() == message);
+
+  @override
+  String toString() => 'WasmRuntimeError: $message';
 }
