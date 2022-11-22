@@ -11,12 +11,14 @@ import 'package:ffi/ffi.dart';
 
 import 'wasm_api.dart';
 import 'wasmer_api.dart';
-import 'wasmer_locator.dart';
 
 part 'runtime.g.dart';
 
-/// The singleton instance of [WasmRuntime].
-final runtime = WasmRuntime._init(loadWasmerDynamicLibrary());
+WasmRuntime wasmRuntimeFactory(
+  DynamicLibrary lib,
+) {
+  return WasmRuntime._(lib);
+}
 
 class WasmRuntime with _WasmRuntimeGeneratedMixin {
   @override
@@ -25,7 +27,7 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
   late final Pointer<WasmerEngine> _engine;
   late final Pointer<WasmerStore> _store;
 
-  WasmRuntime._init(this._lib) {
+  WasmRuntime._(this._lib) {
     initBindings();
     _engine = _engine_new();
     _checkNotEqual(_engine, nullptr, 'Failed to initialize Wasm engine.');
@@ -72,14 +74,17 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
     _module_exports(module, exportsVec);
     var exps = <WasmExportDescriptor>[];
     for (var i = 0; i < exportsVec.ref.length; ++i) {
-      var exp = exportsVec.ref.data[i];
-      var extern = _exporttype_type(exp);
-      var kind = _externtype_kind(extern);
+      final exp = exportsVec.ref.data[i];
+      final extern = _exporttype_type(exp);
+      final kind = _externtype_kind(extern);
+      final name = _exporttype_name(exp).ref.toString();
+      final type = _externTypeToFuncOrGlobalType(kind, extern);
       exps.add(
         WasmExportDescriptor._(
           kind,
-          _exporttype_name(exp).ref.toString(),
-          _externTypeToFuncOrGlobalType(kind, extern),
+          name,
+          type,
+          _getImportExportString(kind, name, type),
         ),
       );
     }
@@ -92,15 +97,19 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
     _module_imports(module, importsVec);
     var imps = <WasmImportDescriptor>[];
     for (var i = 0; i < importsVec.ref.length; ++i) {
-      var imp = importsVec.ref.data[i];
-      var extern = _importtype_type(imp);
-      var kind = _externtype_kind(extern);
+      final imp = importsVec.ref.data[i];
+      final extern = _importtype_type(imp);
+      final kind = _externtype_kind(extern);
+      final moduleName = _importtype_module(imp).ref.toString();
+      final name = _importtype_name(imp).ref.toString();
+      final type = _externTypeToFuncOrGlobalType(kind, extern);
       imps.add(
         WasmImportDescriptor._(
           kind,
-          _importtype_module(imp).ref.toString(),
-          _importtype_name(imp).ref.toString(),
-          _externTypeToFuncOrGlobalType(kind, extern),
+          moduleName,
+          name,
+          type,
+          _getImportExportString(kind, '$moduleName::$name', type),
         ),
       );
     }
@@ -385,25 +394,29 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
     }
     return x;
   }
-}
 
-String _getImportExportString(int kind, String name, Pointer type) {
-  final kindName = wasmerExternKindName(kind);
-  if (kind == wasmerExternKindFunction) {
-    final funcType = type as Pointer<WasmerFunctype>;
-    final sig = getSignatureString(
-      name,
-      runtime.getArgTypes(funcType),
-      runtime.getReturnType(funcType),
-    );
-    return '$kindName: $sig';
-  } else if (kind == wasmerExternKindGlobal) {
-    final globalType = type as Pointer<WasmerGlobaltype>;
-    final typeName = wasmerValKindName(runtime.getGlobalKind(globalType));
-    final mutName = wasmerMutabilityName(runtime.getGlobalMut(globalType));
-    return '$kindName: $mutName $typeName $name';
-  } else {
-    return '$kindName: $name';
+  String _getImportExportString(
+    int kind,
+    String name,
+    Pointer type,
+  ) {
+    final kindName = wasmerExternKindName(kind);
+    if (kind == wasmerExternKindFunction) {
+      final funcType = type as Pointer<WasmerFunctype>;
+      final sig = getSignatureString(
+        name,
+        getArgTypes(funcType),
+        getReturnType(funcType),
+      );
+      return '$kindName: $sig';
+    } else if (kind == wasmerExternKindGlobal) {
+      final globalType = type as Pointer<WasmerGlobaltype>;
+      final typeName = wasmerValKindName(getGlobalKind(globalType));
+      final mutName = wasmerMutabilityName(getGlobalMut(globalType));
+      return '$kindName: $mutName $typeName $name';
+    } else {
+      return '$kindName: $name';
+    }
   }
 }
 
@@ -412,22 +425,35 @@ class WasmImportDescriptor {
   final String moduleName;
   final String name;
   final Pointer type;
+  final String description;
 
-  WasmImportDescriptor._(this.kind, this.moduleName, this.name, this.type);
+  const WasmImportDescriptor._(
+    this.kind,
+    this.moduleName,
+    this.name,
+    this.type,
+    this.description,
+  );
 
   @override
-  String toString() => _getImportExportString(kind, '$moduleName::$name', type);
+  String toString() => description;
 }
 
 class WasmExportDescriptor {
   final int kind;
   final String name;
   final Pointer type;
+  final String description;
 
-  WasmExportDescriptor._(this.kind, this.name, this.type);
+  const WasmExportDescriptor._(
+    this.kind,
+    this.name,
+    this.type,
+    this.description,
+  );
 
   @override
-  String toString() => _getImportExportString(kind, name, type);
+  String toString() => description;
 }
 
 class _WasmTrapsEntry {
