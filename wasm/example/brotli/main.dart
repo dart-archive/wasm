@@ -4,7 +4,7 @@
 
 // Example of using package:wasm to run a wasm build of the Brotli compression
 // library. Usage:
-// dart example.dart input.txt
+// dart main.dart input.txt
 
 import 'dart:io';
 
