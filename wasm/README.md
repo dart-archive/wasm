@@ -31,7 +31,7 @@ example directory.
 1. Add a dependency to package `wasm` in `pubspec.yaml` and run `dart pub get`
 
 1. Next run `dart run wasm:setup` to build the Wasmer runtime. This will take a few minutes.
-   
+
 1. Then add a new file `square.cc` with the following contents:
 
     ```c++
@@ -50,10 +50,10 @@ example directory.
     ```dart
     import 'dart:io';
     import 'package:wasm/wasm.dart';
-    
+
     void main() {
       final data = File('square.wasm').readAsBytesSync();
-      final mod = WasmModule(data);
+      final mod = wasmModuleCompileSync(data);
       print(mod.describe());
       final inst = mod.builder().build();
       final square = inst.lookupFunction('square');
@@ -66,6 +66,6 @@ example directory.
     ```
     export memory: memory
     export function: int32 square(int32)
-    
+
     144
     ```

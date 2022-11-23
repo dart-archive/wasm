@@ -5,7 +5,7 @@ This example demonstrates how to use package:wasm to run a wasm build of the
 
 ### Running the example
 
-`dart example.dart lipsum.txt`
+`dart main.dart lipsum.txt`
 
 This will compress lipsum.txt, report the compression ratio, then decompress it
 and verify that the result matches the input.
