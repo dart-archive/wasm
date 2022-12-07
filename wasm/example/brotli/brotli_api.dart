@@ -34,21 +34,19 @@ class Brotli {
   /// WARNING: The returned buffer is owned by wasm. It will be invalidated by
   /// any further compress or decompress calls. So make a copy if you need the
   /// data to last longer than that.
-  Uint8List compress(Uint8List input) {
-    return _runBrotli(
-      input,
-      input.length,
-      (int inputPtr, int outputSizePtr, int outputPtr) => _compress(
-        _kDefaultQuality,
-        _kDefaultWindow,
-        _kDefaultMode,
+  Uint8List compress(Uint8List input) => _runBrotli(
+        input,
         input.length,
-        inputPtr,
-        outputSizePtr,
-        outputPtr,
-      ) as int,
-    );
-  }
+        (int inputPtr, int outputSizePtr, int outputPtr) => _compress(
+          _kDefaultQuality,
+          _kDefaultWindow,
+          _kDefaultMode,
+          input.length,
+          inputPtr,
+          outputSizePtr,
+          outputPtr,
+        ) as int,
+      );
 
   /// Decompresses the input data.
   ///
@@ -57,18 +55,16 @@ class Brotli {
   /// WARNING: The returned buffer is owned by wasm. It will be invalidated by
   /// any further compress or decompress calls. So make a copy if you need the
   /// data to last longer than that.
-  Uint8List decompress(Uint8List input, int maxDecompressedSize) {
-    return _runBrotli(
-      input,
-      maxDecompressedSize,
-      (int inputPtr, int outputSizePtr, int outputPtr) => _decompress(
-        input.length,
-        inputPtr,
-        outputSizePtr,
-        outputPtr,
-      ) as int,
-    );
-  }
+  Uint8List decompress(Uint8List input, int maxDecompressedSize) => _runBrotli(
+        input,
+        maxDecompressedSize,
+        (int inputPtr, int outputSizePtr, int outputPtr) => _decompress(
+          input.length,
+          inputPtr,
+          outputSizePtr,
+          outputPtr,
+        ) as int,
+      );
 
   Uint8List _runBrotli(
     Uint8List input,

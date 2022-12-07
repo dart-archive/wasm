@@ -5,8 +5,7 @@ repository: https://github.com/dart-lang/wasm/tree/main/flutter_wasm
 publish_to: none
 
 environment:
-  sdk: '>=2.14.0 <3.0.0'
-  flutter: ">=2.5.0"
+  sdk: '>=2.18.0 <3.0.0'
 
 dependencies:
   flutter:
@@ -17,9 +16,9 @@ dependencies:
       path: wasm
 
 dev_dependencies:
-  flutter_lints: ^1.0.0
   flutter_test:
     sdk: flutter
+  lints: ^2.0.0
 
 dependency_overrides:
   wasm:

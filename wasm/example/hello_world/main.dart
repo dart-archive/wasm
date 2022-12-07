@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:typed_data';
+
 import 'package:wasm/wasm.dart';
 
 /// This is a simple 'hello world'-style example.
@@ -24,7 +25,7 @@ void main() {
   ]);
   final inst = wasmModuleCompileSync(data).builder().build();
   final fn = inst.lookupFunction('square');
-  final input = 1234;
+  const input = 1234;
   final result = fn(input) as int;
   print('$result == ${input * input}');
 }

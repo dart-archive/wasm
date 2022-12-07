@@ -1,5 +1,6 @@
 ## 0.2.0-dev
 
+- Require Dart 2.18
 - Provide a new way for creating a WasmModule via
   `wasmModuleCompileAsync` and `wasmModuleCompileSync`
 - Migrate `WasmError` and `WasmException` to the new public API.

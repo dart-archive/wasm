@@ -16,9 +16,8 @@ part 'runtime.g.dart';
 
 WasmRuntime wasmRuntimeFactory(
   DynamicLibrary lib,
-) {
-  return WasmRuntime._(lib);
-}
+) =>
+    WasmRuntime._(lib);
 
 class WasmRuntime with _WasmRuntimeGeneratedMixin {
   @override

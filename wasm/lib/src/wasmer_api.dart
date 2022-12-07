@@ -131,8 +131,8 @@ class WasmerVal extends Struct {
     }
   }
 
-  bool fill(int _kind, dynamic val) {
-    kind = _kind;
+  bool fill(int kind_, dynamic val) {
+    kind = kind_;
     switch (kind) {
       case wasmerValKindI32:
         if (val is! int) return false;

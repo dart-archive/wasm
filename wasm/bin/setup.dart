@@ -164,9 +164,8 @@ Future<Uri> _getSrcDir() async {
   );
 }
 
-String _getOsFromTarget(String target) {
-  return RegExp(r'^[^-]*-[^-]*-([^-]*)').firstMatch(target)?.group(1) ?? '';
-}
+String _getOsFromTarget(String target) =>
+    RegExp('^[^-]*-[^-]*-([^-]*)').firstMatch(target)?.group(1) ?? '';
 
 String _getOutLib(String os) {
   if (os == 'darwin' || os == 'ios') {
@@ -185,7 +184,7 @@ String _getWasmerLib(String os) {
 }
 
 Future<String> _getTargetTriple(String rustc) async {
-  final _regexp = RegExp(r'^([^=]+)="(.*)"$');
+  final regexp = RegExp(r'^([^=]+)="(.*)"$');
   final process = await Process.start(rustc, ['--print', 'cfg']);
   final sub = process.stderr
       .transform(utf8.decoder)
@@ -196,7 +195,7 @@ Future<String> _getTargetTriple(String rustc) async {
       .transform(utf8.decoder)
       .transform(const LineSplitter())
       .forEach((line) {
-    final match = _regexp.firstMatch(line);
+    final match = regexp.firstMatch(line);
     if (match != null) cfg[match.group(1)!] = match.group(2);
   });
   await sub.cancel();
@@ -235,9 +234,8 @@ Future<void> _run(
   }
 }
 
-String _toUpperUnderscore(String string) {
-  return string.toUpperCase().replaceAll('-', '_');
-}
+String _toUpperUnderscore(String string) =>
+    string.toUpperCase().replaceAll('-', '_');
 
 Future<void> _main(ArgResults args) async {
   final rustc = args['rustc'] as String? ?? 'rustc';

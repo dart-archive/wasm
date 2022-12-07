@@ -22,7 +22,7 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -35,16 +35,14 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Wasm example app'),
+  Widget build(BuildContext context) => MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Wasm example app'),
+          ),
+          body: Center(
+            child: Text('12^2 == ${_wasmSquare(12)}'),
+          ),
         ),
-        body: Center(
-          child: Text('12^2 == ${_wasmSquare(12)}'),
-        ),
-      ),
-    );
-  }
+      );
 }

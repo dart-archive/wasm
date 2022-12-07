@@ -11,20 +11,23 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:wasm/src/wasmer_locator.dart';
 
-final workingDirectory = Uri.file(Platform.script.path).resolve('..');
+final _workingDirectory = Isolate.resolvePackageUri(
+  Uri.parse('package:flutter_wasm/main.dart'),
+).then((value) => value!.resolve('..').toFilePath());
 
 Future<int> _runFlutter(List<String> args) async {
   print('flutter ${args.join(' ')}');
+
   final process = await Process.start(
     'flutter',
     args,
-    workingDirectory: workingDirectory.toFilePath(),
+    workingDirectory: await _workingDirectory,
+    mode: ProcessStartMode.inheritStdio,
   );
-  unawaited(stdout.addStream(process.stdout));
-  unawaited(stderr.addStream(process.stderr));
   return process.exitCode;
 }
 
