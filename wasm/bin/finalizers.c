@@ -4,11 +4,14 @@
 
 #include "dart_api.h"
 #include "dart_api_dl.h"
+#include <iostream>
 
 #define FINALIZER(type)                                                        \
   void wasm_##type##_delete(void *native_object);                              \
   void wasm_##type##_finalizer(void *unused, void *native_object) {            \
+    std::cerr << "ZZZZ wasm_" #type "_finalizer " << native_object << std::endl;\
     wasm_##type##_delete(native_object);                                       \
+    std::cerr << "ZZZZ wasm_" #type "_finalizer DONE" << std::endl;\
   }                                                                            \
   DART_EXPORT void set_finalizer_for_##type(Dart_Handle dart_object,           \
                                             void *native_object) {             \
