@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest]
-        sdk: [ 2.16.0, 2.17.0, 2.18.0, dev ]
+        sdk: [ 2.16.0, 2.17.0, 2.18.0, beta, dev ]
     defaults:
       run:
         working-directory: wasm
