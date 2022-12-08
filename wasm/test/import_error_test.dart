@@ -10,8 +10,8 @@ import 'package:wasm/wasm.dart';
 
 import 'test_shared.dart';
 
-void main() {
-  test('bad imports', () {
+void main() {print("TEST 0");
+  test('bad imports', () {print("TEST 1");
     // This module expects a function import like:
     // int64_t someFn(int32_t a, int64_t b, float c, double d);
     var data = Uint8List.fromList([
@@ -26,9 +26,9 @@ void main() {
       0x40, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x40, 0x10, 0x80,
       0x80, 0x80, 0x80, 0x00, 0x1a, 0x0b,
     ]);
-
+print("TEST 2");
     var mod = wasmModuleCompileSync(data);
-
+print("TEST 3");
     // Valid instantiation.
     (mod.builder()
           ..addFunction(
@@ -37,23 +37,23 @@ void main() {
             (int a, int b, num c, double d) => 123,
           ))
         .build();
-
+print("TEST 4");
     // Missing imports.
     expect(
       () => mod.builder().build(),
       throwsWasmError(startsWith('Missing import')),
     );
-
+print("TEST 5");
     // Wrong kind of import.
     expect(
       () => mod.builder().addMemory('env', 'someFn', mod.createMemory(10)),
       throwsWasmError(startsWith('Import is not a memory:')),
-    );
+    );print("TEST 6");
     expect(
       () => mod.builder().addGlobal('env', 'someFn', 123),
       throwsWasmError(startsWith('Import is not a global:')),
     );
-
+print("TEST 7");
     // Wrong namespace.
     expect(
       () => (mod.builder()
@@ -65,7 +65,7 @@ void main() {
           .build(),
       throwsWasmError(startsWith('Import not found:')),
     );
-
+print("TEST 8");
     // Wrong name.
     expect(
       () => (mod.builder()
@@ -77,7 +77,7 @@ void main() {
           .build(),
       throwsWasmError(startsWith('Import not found:')),
     );
-
+print("TEST 9");
     // Already filled.
     expect(
       () => (mod.builder()
@@ -93,6 +93,6 @@ void main() {
             ))
           .build(),
       throwsWasmError(startsWith('Import already filled: env::someFn')),
-    );
-  });
+    );print("TEST 11");
+  });print("TEST 12");
 }
