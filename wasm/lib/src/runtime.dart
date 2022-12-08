@@ -31,10 +31,10 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
     initBindings();
     _engine = _engine_new();
     _checkNotEqual(_engine, nullptr, 'Failed to initialize Wasm engine.');
-    _set_finalizer_for_engine(this, _engine);
+    // _set_finalizer_for_engine(this, _engine);
     _store = _store_new(_engine);
     _checkNotEqual(_store, nullptr, 'Failed to create Wasm store.');
-    _set_finalizer_for_store(this, _store);
+    // _set_finalizer_for_store(this, _store);
   }
 
   Pointer<WasmerModule> compile(Object owner, Uint8List data) {
