@@ -14,54 +14,13 @@ env:
   RUST_BACKTRACE: 1  # Run all tests with full Rust stack tracing.
 
 jobs:
-  analyze:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        sdk: [ dev ]
-    defaults:
-      run:
-        working-directory: wasm
-    steps:
-    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
-    - uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
-      with:
-        sdk: ${{ matrix.sdk }}
-    - uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7
-      with:
-        path: |
-          ~/.pub-cache/hosted/
-          .dart_tool/
-        key: ${{ runner.os }}-${{ matrix.sdk }}
-    - id: install
-      run: dart pub upgrade
-    - run: dart format --output=none --set-exit-if-changed .
-      if: always() && steps.install.outcome == 'success'
-    - run: dart analyze --fatal-infos
-      if: always() && steps.install.outcome == 'success'
-    - name: validate boilerplate generation
-      if: always() && steps.install.outcome == 'success'
-      run: |
-        ./tool/generate_ffi_boilerplate.py
-        dart format -owrite .
-        export DIFF_OUTPUT="$(git diff)"
-        if [[ $DIFF_OUTPUT ]]; then
-          echo "::error::Build needs to be re-run!"
-          echo "::group::git diff"
-          echo "$DIFF_OUTPUT"
-          echo "::endgroup::"
-          exit 1
-        else
-          echo "Build output is all good!"
-        fi
-
   test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
-        sdk: [ 2.12.0, dev ]
+        os: [ ubuntu-latest]
+        sdk: [ 2.16.0, 2.17.0, 2.18.0, dev ]
     defaults:
       run:
         working-directory: wasm
@@ -118,7 +77,7 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         path-to-lcov: wasm/coverage/lcov.info
 
-  flutter_analyze:
+  flutter_ad:
     runs-on: ubuntu-latest
     defaults:
       run:
