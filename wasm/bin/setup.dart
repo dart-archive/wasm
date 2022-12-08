@@ -56,6 +56,11 @@ Future<void> main(List<String> arguments) async {
       help: 'Sysroot argument passed to linker.',
     )
     ..addFlag(
+      'static',
+      negatable: false,
+      help: 'Build a static library, instead of a dynamic one.',
+    )
+    ..addFlag(
       'help',
       abbr: 'h',
       negatable: false,
@@ -168,7 +173,13 @@ String _getOsFromTarget(String target) {
   return RegExp(r'^[^-]*-[^-]*-([^-]*)').firstMatch(target)?.group(1) ?? '';
 }
 
-String _getOutLib(String os) {
+String _getOutLib(String os, bool staticLib) {
+  if (staticLib) {
+    if (os == 'windows') {
+      return 'wasm.lib';
+    }
+    return 'libwasm.a';
+  }
   if (os == 'darwin' || os == 'ios') {
     return appleLib;
   } else if (os == 'windows') {
@@ -245,6 +256,8 @@ Future<void> _main(ArgResults args) async {
   final cargo = args['cargo'] as String? ?? 'cargo';
   final clang = args['clang'] as String? ?? 'clang';
   final clangpp = args['clangpp'] as String? ?? 'clang++';
+  final ar = args['ar'] as String? ?? 'ar';
+  final staticLib = args['static'] as bool;
 
   final target = args['target'] as String? ?? await _getTargetTriple(rustc);
   final sdkDir = _getSdkDir();
@@ -254,11 +267,13 @@ Future<void> _main(ArgResults args) async {
       ? Uri.directory(args['out-dir'] as String)
       : libBuildOutDir(Directory.current.uri);
   final os = _getOsFromTarget(target);
-  final outLib = outDir.resolve(_getOutLib(os));
+  final outLib = outDir.resolve(_getOutLib(os, staticLib));
   final outWasmer = outDir.resolve('$target/release/${_getWasmerLib(os)}');
   final outDartApi = outDir.resolve('dart_api_dl.o');
   final outFinalizers = outDir.resolve('finalizers.o');
+  final outObjFile = outDir.resolve('wasmer.o');  // Only used when creating a static library.
 
+  print('Building a ${staticLib ? 'static' : 'dynamic'} library');
   print('Dart SDK directory: ${sdkDir.toFilePath()}');
   print('Dart SDK include directory: ${sdkIncDir.toFilePath()}');
   print('Source directory: ${srcDir.toFilePath()}');
@@ -291,7 +306,10 @@ Future<void> _main(ArgResults args) async {
         'LINKER': clangpp,
         'CARGO_TARGET_${_toUpperUnderscore(target)}_LINKER': clangpp,
       },
-      if (args['ar'] != null) 'AR': args['ar'] as String,
+      if (args['ar'] != null) 'AR': ar,
+      //'SDKROOT': '/Applications/Xcode-beta.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator15.2.sdk',
+      //'MACOSX_DEPLOYMENT_TARGET': '15.2',
+      // if (os == 'ios') 'RUSTFLAGS': '-L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/libs',
     },
   );
 
@@ -311,6 +329,7 @@ Future<void> _main(ArgResults args) async {
       '-DDART_SHARED_LIB',
       '-DNDEBUG',
       '-fno-exceptions',
+      if (args['sysroot'] != null) '--sysroot=${args['sysroot']}',
       if (os != 'windows') '-fPIC',
       '-O3',
       '-target',
@@ -334,6 +353,7 @@ Future<void> _main(ArgResults args) async {
       '-DDART_SHARED_LIB',
       '-DNDEBUG',
       '-fno-exceptions',
+      if (args['sysroot'] != null) '--sysroot=${args['sysroot']}',
       if (os != 'windows') '-fPIC',
       '-O3',
       '-target',
@@ -351,31 +371,50 @@ Future<void> _main(ArgResults args) async {
   );
 
   // Link wasmer, dart_api_dl, and finalizers to create the output library.
-  await _run(
-    clang,
-    [
-      '-shared',
-      if (args['sysroot'] != null) '--sysroot=${args['sysroot']}',
-      if (os != 'windows') '-fPIC',
-      if (os == 'windows') ...[
-        '-lws2_32',
-        '-ladvapi32',
-        '-lbcrypt',
-        '-luserenv',
-        '-z',
-        '/DEF:${srcDir.resolve('module.g.def').toFilePath()}',
-        '-z',
-        '/NODEFAULTLIB:MSVCRT',
+  if (staticLib) {
+    await _run(
+      ar,
+      [
+        'rcs',
+        outLib.toFilePath(),
+        outDartApi.toFilePath(),
+        outFinalizers.toFilePath(),
+        outWasmer.toFilePath()
       ],
-      '-lm',
-      '-target',
-      target,
-      outDartApi.toFilePath(),
-      outFinalizers.toFilePath(),
-      outWasmer.toFilePath(),
-      '-o',
-      outLib.toFilePath()
-    ],
-    output: outLib,
-  );
+      output: outLib,
+    );
+  } else {
+    await _run(
+      clang,
+      [
+        '-shared',
+        if (args['sysroot'] != null) '--sysroot=${args['sysroot']}',
+        if (os != 'windows') '-fPIC',
+        if (os == 'windows') ...[
+          '-lws2_32',
+          '-ladvapi32',
+          '-lbcrypt',
+          '-luserenv',
+          '-z',
+          '/DEF:${srcDir.resolve('module.g.def').toFilePath()}',
+          '-z',
+          '/NODEFAULTLIB:MSVCRT',
+        ],
+        if (os == 'ios') ...[
+          '-framework',
+          'Security',
+          '-lobjc',
+        ],
+        '-lm',
+        '-target',
+        target,
+        outDartApi.toFilePath(),
+        outFinalizers.toFilePath(),
+        outWasmer.toFilePath(),
+        '-o',
+        outLib.toFilePath(),
+      ],
+      output: outLib,
+    );
+  }
 }
