@@ -3,17 +3,16 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:typed_data';
+
 import '../module.dart' as module;
 import '../wasm_api.dart';
 
 Future<WasmModule> wasmModuleCompileAsync(
   Uint8List data,
-) {
-  return module.wasmModuleCompileAsync(data);
-}
+) =>
+    module.wasmModuleCompileAsync(data);
 
 WasmModule wasmModuleCompileSync(
   Uint8List data,
-) {
-  return module.wasmModuleCompileSync(data);
-}
+) =>
+    module.wasmModuleCompileSync(data);

@@ -52,9 +52,7 @@ class WasmLocatorError extends Error {
   );
 
   @override
-  String toString() {
-    return 'WasmLocatorError: $message';
-  }
+  String toString() => 'WasmLocatorError: $message';
 }
 
 /// The command that can be used to set up this package.

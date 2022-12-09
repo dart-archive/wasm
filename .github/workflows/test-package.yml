@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest]
-        sdk: [ 2.16.0, 2.17.0, 2.18.0, beta, dev ]
+        sdk: [ 2.18.5, beta, dev ]
     defaults:
       run:
         working-directory: wasm
@@ -41,4 +41,4 @@ jobs:
         key: ${{ runner.os }}-${{ matrix.sdk }}
     - run: dart pub upgrade
     - run: dart run wasm:setup
-    - run: dart test
+    - run: dart test -j 1
