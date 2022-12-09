@@ -218,13 +218,13 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
     var memType = _memorytype_new(limPtr);
     calloc.free(limPtr);
     _checkNotEqual(memType, nullptr, 'Failed to create memory type.');
-    _set_finalizer_for_memorytype(owner, memType);
+    // _set_finalizer_for_memorytype(owner, memType);
     var memory = _checkNotEqual(
       _memory_new(_store, memType),
       nullptr,
       'Failed to create memory.',
     );
-    _set_finalizer_for_memory(owner, memory);
+    // _set_finalizer_for_memory(owner, memory);
     return memory;
   }
 
