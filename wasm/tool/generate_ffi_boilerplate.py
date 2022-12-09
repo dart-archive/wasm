@@ -82,9 +82,9 @@ def nativeTypeToDart(n):
 
 
 def getFns():
-    for name, retType, args in sorted(fns):
+    for name, retType, args, asFnPtr in sorted(fns):
         if name not in unusedFns:
-            yield name, retType, args
+            yield name, retType, args, asFnPtr
 
 
 opaqueTypeTemplate = '''// %s_t
@@ -135,27 +135,32 @@ def getWasmerApi():
         fnApiTemplate %
         (name, dartFnTypeName(name), dartFnType(retType, args, 0),
          dartFnTypeName(name), dartFnType(retType, args, 1))
-        for name, retType, args in getFns()
+        for name, retType, args, _ in getFns()
     ]))
 
 
 def getRuntimeMemb():
     return '\n'.join([
-        "  late final Wasmer%sFn %s;" %
-        (dartFnTypeName(name), dartFnMembName(name)) for name, _, _ in getFns()
+        ("  late final Pointer<NativeFunction<NativeWasmer%sFn>> %s;"
+            if asFnPtr else "  late final Wasmer%sFn %s;") %
+        (dartFnTypeName(name), dartFnMembName(name))
+            for name, _, _, asFnPtr in getFns()
     ])
 
 
 def getRuntimeLoad():
     return '\n'.join([
-        "    %s = _lib.lookupFunction<NativeWasmer%sFn, Wasmer%sFn>('%s',);" %
-        (dartFnMembName(name), dartFnTypeName(name), dartFnTypeName(name), name)
-        for name, _, _ in getFns()
+        ("    %s = _lib.lookup<NativeFunction<NativeWasmer%sFn>>('%s',);" %
+            (dartFnMembName(name), dartFnTypeName(name), name)) if asFnPtr else
+        ("    %s = _lib.lookupFunction<NativeWasmer%sFn, Wasmer%sFn>('%s',);" %
+            (dartFnMembName(name), dartFnTypeName(name), dartFnTypeName(name),
+                name))
+            for name, _, _, asFnPtr in getFns()
     ])
 
 
 def getWindowsExports():
-    return '\n'.join(['   %s' % name for name, _, _ in getFns()])
+    return '\n'.join(['   %s' % name for name, _, _, _ in getFns()])
 
 
 def predefinedType(nativeType, ffiType, dartType):
@@ -211,7 +216,7 @@ def parseType(s):
 reFnSig = re.compile(r'(.*) ([^ ]*)\((.*)\);?')
 
 
-def addFn(sig):
+def addFn(sig, asFnPtr = False):
     ret, name, argpack = match(reFnSig, sig)
     retType = parseType(ret)
     args = [parseType(a) for a in argpack.split(',') if len(a.strip()) > 0]
@@ -220,13 +225,13 @@ def addFn(sig):
                 t[:-2]) not in opaqueTypes and removePrefix(
                     t[:-6]) not in vecTypes:
             print('Missing type: ' + t)
-    fns.append((name, retType, args))
+    fns.append((name, retType, args, asFnPtr))
 
 
 def declareOwn(name):
     opaqueTypes.add(name)
     n = addPrefix(name)
-    addFn('void %s_delete(%s_t*)' % (n, n))
+    addFn('void %s_delete(%s_t*)' % (n, n), True)
 
 
 def declareVec(name, storePtr):

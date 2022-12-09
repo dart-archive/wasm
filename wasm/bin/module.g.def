@@ -3,16 +3,6 @@
 ; functions we need.
 LIBRARY wasmer
 EXPORTS
-   Dart_InitializeApiDL
-   set_finalizer_for_engine
-   set_finalizer_for_func
-   set_finalizer_for_global
-   set_finalizer_for_instance
-   set_finalizer_for_memory
-   set_finalizer_for_memorytype
-   set_finalizer_for_module
-   set_finalizer_for_store
-   set_finalizer_for_trap
    wasi_config_capture_stderr
    wasi_config_capture_stdout
    wasi_config_new

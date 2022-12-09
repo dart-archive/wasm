@@ -16,9 +16,5 @@ mixin _WasmRuntimeGeneratedMixin {
 
   void initBindings() {
 /* <RUNTIME_LOAD> */
-
-    if (_Dart_InitializeApiDL(NativeApi.initializeApiDLData) != 0) {
-      throw _WasmRuntimeErrorImpl('Failed to initialize Dart API');
-    }
   }
 }

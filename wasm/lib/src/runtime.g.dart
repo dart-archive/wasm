@@ -14,20 +14,11 @@ part of 'runtime.dart';
 mixin _WasmRuntimeGeneratedMixin {
   DynamicLibrary get _lib;
 
-  late final WasmerDartInitializeApiDLFn _Dart_InitializeApiDL;
-  late final WasmerSetFinalizerForEngineFn _set_finalizer_for_engine;
-  late final WasmerSetFinalizerForFuncFn _set_finalizer_for_func;
-  late final WasmerSetFinalizerForGlobalFn _set_finalizer_for_global;
-  late final WasmerSetFinalizerForInstanceFn _set_finalizer_for_instance;
-  late final WasmerSetFinalizerForMemoryFn _set_finalizer_for_memory;
-  late final WasmerSetFinalizerForMemorytypeFn _set_finalizer_for_memorytype;
-  late final WasmerSetFinalizerForModuleFn _set_finalizer_for_module;
-  late final WasmerSetFinalizerForStoreFn _set_finalizer_for_store;
-  late final WasmerSetFinalizerForTrapFn _set_finalizer_for_trap;
   late final WasmerWasiConfigCaptureStderrFn _wasi_config_capture_stderr;
   late final WasmerWasiConfigCaptureStdoutFn _wasi_config_capture_stdout;
   late final WasmerWasiConfigNewFn _wasi_config_new;
-  late final WasmerWasiEnvDeleteFn _wasi_env_delete;
+  late final Pointer<NativeFunction<NativeWasmerWasiEnvDeleteFn>>
+      _wasi_env_delete;
   late final WasmerWasiEnvNewFn _wasi_env_new;
   late final WasmerWasiEnvReadStderrFn _wasi_env_read_stderr;
   late final WasmerWasiEnvReadStdoutFn _wasi_env_read_stdout;
@@ -36,7 +27,7 @@ mixin _WasmRuntimeGeneratedMixin {
   late final WasmerByteVecNewFn _byte_vec_new;
   late final WasmerByteVecNewEmptyFn _byte_vec_new_empty;
   late final WasmerByteVecNewUninitializedFn _byte_vec_new_uninitialized;
-  late final WasmerEngineDeleteFn _engine_delete;
+  late final Pointer<NativeFunction<NativeWasmerEngineDeleteFn>> _engine_delete;
   late final WasmerEngineNewFn _engine_new;
   late final WasmerExporttypeNameFn _exporttype_name;
   late final WasmerExporttypeTypeFn _exporttype_type;
@@ -48,7 +39,7 @@ mixin _WasmRuntimeGeneratedMixin {
   late final WasmerExternAsFuncFn _extern_as_func;
   late final WasmerExternAsGlobalFn _extern_as_global;
   late final WasmerExternAsMemoryFn _extern_as_memory;
-  late final WasmerExternDeleteFn _extern_delete;
+  late final Pointer<NativeFunction<NativeWasmerExternDeleteFn>> _extern_delete;
   late final WasmerExternKindFn _extern_kind;
   late final WasmerExternVecDeleteFn _extern_vec_delete;
   late final WasmerExternVecNewFn _extern_vec_new;
@@ -56,23 +47,26 @@ mixin _WasmRuntimeGeneratedMixin {
   late final WasmerExternVecNewUninitializedFn _extern_vec_new_uninitialized;
   late final WasmerExterntypeAsFunctypeFn _externtype_as_functype;
   late final WasmerExterntypeAsGlobaltypeFn _externtype_as_globaltype;
-  late final WasmerExterntypeDeleteFn _externtype_delete;
+  late final Pointer<NativeFunction<NativeWasmerExterntypeDeleteFn>>
+      _externtype_delete;
   late final WasmerExterntypeKindFn _externtype_kind;
   late final WasmerFuncAsExternFn _func_as_extern;
   late final WasmerFuncCallFn _func_call;
-  late final WasmerFuncDeleteFn _func_delete;
+  late final Pointer<NativeFunction<NativeWasmerFuncDeleteFn>> _func_delete;
   late final WasmerFuncNewWithEnvFn _func_new_with_env;
-  late final WasmerFunctypeDeleteFn _functype_delete;
+  late final Pointer<NativeFunction<NativeWasmerFunctypeDeleteFn>>
+      _functype_delete;
   late final WasmerFunctypeParamsFn _functype_params;
   late final WasmerFunctypeResultsFn _functype_results;
   late final WasmerGlobalAsExternFn _global_as_extern;
-  late final WasmerGlobalDeleteFn _global_delete;
+  late final Pointer<NativeFunction<NativeWasmerGlobalDeleteFn>> _global_delete;
   late final WasmerGlobalGetFn _global_get;
   late final WasmerGlobalNewFn _global_new;
   late final WasmerGlobalSetFn _global_set;
   late final WasmerGlobalTypeFn _global_type;
   late final WasmerGlobaltypeContentFn _globaltype_content;
-  late final WasmerGlobaltypeDeleteFn _globaltype_delete;
+  late final Pointer<NativeFunction<NativeWasmerGlobaltypeDeleteFn>>
+      _globaltype_delete;
   late final WasmerGlobaltypeMutabilityFn _globaltype_mutability;
   late final WasmerImporttypeModuleFn _importtype_module;
   late final WasmerImporttypeNameFn _importtype_name;
@@ -82,28 +76,31 @@ mixin _WasmRuntimeGeneratedMixin {
   late final WasmerImporttypeVecNewEmptyFn _importtype_vec_new_empty;
   late final WasmerImporttypeVecNewUninitializedFn
       _importtype_vec_new_uninitialized;
-  late final WasmerInstanceDeleteFn _instance_delete;
+  late final Pointer<NativeFunction<NativeWasmerInstanceDeleteFn>>
+      _instance_delete;
   late final WasmerInstanceExportsFn _instance_exports;
   late final WasmerInstanceNewFn _instance_new;
   late final WasmerMemoryAsExternFn _memory_as_extern;
   late final WasmerMemoryDataFn _memory_data;
   late final WasmerMemoryDataSizeFn _memory_data_size;
-  late final WasmerMemoryDeleteFn _memory_delete;
+  late final Pointer<NativeFunction<NativeWasmerMemoryDeleteFn>> _memory_delete;
   late final WasmerMemoryGrowFn _memory_grow;
   late final WasmerMemoryNewFn _memory_new;
   late final WasmerMemorySizeFn _memory_size;
-  late final WasmerMemorytypeDeleteFn _memorytype_delete;
+  late final Pointer<NativeFunction<NativeWasmerMemorytypeDeleteFn>>
+      _memorytype_delete;
   late final WasmerMemorytypeNewFn _memorytype_new;
-  late final WasmerModuleDeleteFn _module_delete;
+  late final Pointer<NativeFunction<NativeWasmerModuleDeleteFn>> _module_delete;
   late final WasmerModuleExportsFn _module_exports;
   late final WasmerModuleImportsFn _module_imports;
   late final WasmerModuleNewFn _module_new;
-  late final WasmerStoreDeleteFn _store_delete;
+  late final Pointer<NativeFunction<NativeWasmerStoreDeleteFn>> _store_delete;
   late final WasmerStoreNewFn _store_new;
-  late final WasmerTrapDeleteFn _trap_delete;
+  late final Pointer<NativeFunction<NativeWasmerTrapDeleteFn>> _trap_delete;
   late final WasmerTrapMessageFn _trap_message;
   late final WasmerTrapNewFn _trap_new;
-  late final WasmerValtypeDeleteFn _valtype_delete;
+  late final Pointer<NativeFunction<NativeWasmerValtypeDeleteFn>>
+      _valtype_delete;
   late final WasmerValtypeKindFn _valtype_kind;
   late final WasmerValtypeVecDeleteFn _valtype_vec_delete;
   late final WasmerValtypeVecNewFn _valtype_vec_new;
@@ -113,47 +110,6 @@ mixin _WasmRuntimeGeneratedMixin {
   late final WasmerWasmerLastErrorMessageFn _wasmer_last_error_message;
 
   void initBindings() {
-    _Dart_InitializeApiDL = _lib.lookupFunction<
-        NativeWasmerDartInitializeApiDLFn, WasmerDartInitializeApiDLFn>(
-      'Dart_InitializeApiDL',
-    );
-    _set_finalizer_for_engine = _lib.lookupFunction<
-        NativeWasmerSetFinalizerForEngineFn, WasmerSetFinalizerForEngineFn>(
-      'set_finalizer_for_engine',
-    );
-    _set_finalizer_for_func = _lib.lookupFunction<
-        NativeWasmerSetFinalizerForFuncFn, WasmerSetFinalizerForFuncFn>(
-      'set_finalizer_for_func',
-    );
-    _set_finalizer_for_global = _lib.lookupFunction<
-        NativeWasmerSetFinalizerForGlobalFn, WasmerSetFinalizerForGlobalFn>(
-      'set_finalizer_for_global',
-    );
-    _set_finalizer_for_instance = _lib.lookupFunction<
-        NativeWasmerSetFinalizerForInstanceFn, WasmerSetFinalizerForInstanceFn>(
-      'set_finalizer_for_instance',
-    );
-    _set_finalizer_for_memory = _lib.lookupFunction<
-        NativeWasmerSetFinalizerForMemoryFn, WasmerSetFinalizerForMemoryFn>(
-      'set_finalizer_for_memory',
-    );
-    _set_finalizer_for_memorytype = _lib.lookupFunction<
-        NativeWasmerSetFinalizerForMemorytypeFn,
-        WasmerSetFinalizerForMemorytypeFn>(
-      'set_finalizer_for_memorytype',
-    );
-    _set_finalizer_for_module = _lib.lookupFunction<
-        NativeWasmerSetFinalizerForModuleFn, WasmerSetFinalizerForModuleFn>(
-      'set_finalizer_for_module',
-    );
-    _set_finalizer_for_store = _lib.lookupFunction<
-        NativeWasmerSetFinalizerForStoreFn, WasmerSetFinalizerForStoreFn>(
-      'set_finalizer_for_store',
-    );
-    _set_finalizer_for_trap = _lib.lookupFunction<
-        NativeWasmerSetFinalizerForTrapFn, WasmerSetFinalizerForTrapFn>(
-      'set_finalizer_for_trap',
-    );
     _wasi_config_capture_stderr = _lib.lookupFunction<
         NativeWasmerWasiConfigCaptureStderrFn, WasmerWasiConfigCaptureStderrFn>(
       'wasi_config_capture_stderr',
@@ -166,8 +122,7 @@ mixin _WasmRuntimeGeneratedMixin {
         _lib.lookupFunction<NativeWasmerWasiConfigNewFn, WasmerWasiConfigNewFn>(
       'wasi_config_new',
     );
-    _wasi_env_delete =
-        _lib.lookupFunction<NativeWasmerWasiEnvDeleteFn, WasmerWasiEnvDeleteFn>(
+    _wasi_env_delete = _lib.lookup<NativeFunction<NativeWasmerWasiEnvDeleteFn>>(
       'wasi_env_delete',
     );
     _wasi_env_new =
@@ -202,8 +157,7 @@ mixin _WasmRuntimeGeneratedMixin {
         NativeWasmerByteVecNewUninitializedFn, WasmerByteVecNewUninitializedFn>(
       'wasm_byte_vec_new_uninitialized',
     );
-    _engine_delete =
-        _lib.lookupFunction<NativeWasmerEngineDeleteFn, WasmerEngineDeleteFn>(
+    _engine_delete = _lib.lookup<NativeFunction<NativeWasmerEngineDeleteFn>>(
       'wasm_engine_delete',
     );
     _engine_new =
@@ -247,8 +201,7 @@ mixin _WasmRuntimeGeneratedMixin {
         .lookupFunction<NativeWasmerExternAsMemoryFn, WasmerExternAsMemoryFn>(
       'wasm_extern_as_memory',
     );
-    _extern_delete =
-        _lib.lookupFunction<NativeWasmerExternDeleteFn, WasmerExternDeleteFn>(
+    _extern_delete = _lib.lookup<NativeFunction<NativeWasmerExternDeleteFn>>(
       'wasm_extern_delete',
     );
     _extern_kind =
@@ -280,8 +233,8 @@ mixin _WasmRuntimeGeneratedMixin {
         NativeWasmerExterntypeAsGlobaltypeFn, WasmerExterntypeAsGlobaltypeFn>(
       'wasm_externtype_as_globaltype',
     );
-    _externtype_delete = _lib.lookupFunction<NativeWasmerExterntypeDeleteFn,
-        WasmerExterntypeDeleteFn>(
+    _externtype_delete =
+        _lib.lookup<NativeFunction<NativeWasmerExterntypeDeleteFn>>(
       'wasm_externtype_delete',
     );
     _externtype_kind = _lib
@@ -295,16 +248,15 @@ mixin _WasmRuntimeGeneratedMixin {
     _func_call = _lib.lookupFunction<NativeWasmerFuncCallFn, WasmerFuncCallFn>(
       'wasm_func_call',
     );
-    _func_delete =
-        _lib.lookupFunction<NativeWasmerFuncDeleteFn, WasmerFuncDeleteFn>(
+    _func_delete = _lib.lookup<NativeFunction<NativeWasmerFuncDeleteFn>>(
       'wasm_func_delete',
     );
     _func_new_with_env = _lib
         .lookupFunction<NativeWasmerFuncNewWithEnvFn, WasmerFuncNewWithEnvFn>(
       'wasm_func_new_with_env',
     );
-    _functype_delete = _lib
-        .lookupFunction<NativeWasmerFunctypeDeleteFn, WasmerFunctypeDeleteFn>(
+    _functype_delete =
+        _lib.lookup<NativeFunction<NativeWasmerFunctypeDeleteFn>>(
       'wasm_functype_delete',
     );
     _functype_params = _lib
@@ -319,8 +271,7 @@ mixin _WasmRuntimeGeneratedMixin {
         .lookupFunction<NativeWasmerGlobalAsExternFn, WasmerGlobalAsExternFn>(
       'wasm_global_as_extern',
     );
-    _global_delete =
-        _lib.lookupFunction<NativeWasmerGlobalDeleteFn, WasmerGlobalDeleteFn>(
+    _global_delete = _lib.lookup<NativeFunction<NativeWasmerGlobalDeleteFn>>(
       'wasm_global_delete',
     );
     _global_get =
@@ -343,8 +294,8 @@ mixin _WasmRuntimeGeneratedMixin {
         WasmerGlobaltypeContentFn>(
       'wasm_globaltype_content',
     );
-    _globaltype_delete = _lib.lookupFunction<NativeWasmerGlobaltypeDeleteFn,
-        WasmerGlobaltypeDeleteFn>(
+    _globaltype_delete =
+        _lib.lookup<NativeFunction<NativeWasmerGlobaltypeDeleteFn>>(
       'wasm_globaltype_delete',
     );
     _globaltype_mutability = _lib.lookupFunction<
@@ -380,8 +331,8 @@ mixin _WasmRuntimeGeneratedMixin {
         WasmerImporttypeVecNewUninitializedFn>(
       'wasm_importtype_vec_new_uninitialized',
     );
-    _instance_delete = _lib
-        .lookupFunction<NativeWasmerInstanceDeleteFn, WasmerInstanceDeleteFn>(
+    _instance_delete =
+        _lib.lookup<NativeFunction<NativeWasmerInstanceDeleteFn>>(
       'wasm_instance_delete',
     );
     _instance_exports = _lib
@@ -404,8 +355,7 @@ mixin _WasmRuntimeGeneratedMixin {
         .lookupFunction<NativeWasmerMemoryDataSizeFn, WasmerMemoryDataSizeFn>(
       'wasm_memory_data_size',
     );
-    _memory_delete =
-        _lib.lookupFunction<NativeWasmerMemoryDeleteFn, WasmerMemoryDeleteFn>(
+    _memory_delete = _lib.lookup<NativeFunction<NativeWasmerMemoryDeleteFn>>(
       'wasm_memory_delete',
     );
     _memory_grow =
@@ -420,16 +370,15 @@ mixin _WasmRuntimeGeneratedMixin {
         _lib.lookupFunction<NativeWasmerMemorySizeFn, WasmerMemorySizeFn>(
       'wasm_memory_size',
     );
-    _memorytype_delete = _lib.lookupFunction<NativeWasmerMemorytypeDeleteFn,
-        WasmerMemorytypeDeleteFn>(
+    _memorytype_delete =
+        _lib.lookup<NativeFunction<NativeWasmerMemorytypeDeleteFn>>(
       'wasm_memorytype_delete',
     );
     _memorytype_new =
         _lib.lookupFunction<NativeWasmerMemorytypeNewFn, WasmerMemorytypeNewFn>(
       'wasm_memorytype_new',
     );
-    _module_delete =
-        _lib.lookupFunction<NativeWasmerModuleDeleteFn, WasmerModuleDeleteFn>(
+    _module_delete = _lib.lookup<NativeFunction<NativeWasmerModuleDeleteFn>>(
       'wasm_module_delete',
     );
     _module_exports =
@@ -444,15 +393,13 @@ mixin _WasmRuntimeGeneratedMixin {
         _lib.lookupFunction<NativeWasmerModuleNewFn, WasmerModuleNewFn>(
       'wasm_module_new',
     );
-    _store_delete =
-        _lib.lookupFunction<NativeWasmerStoreDeleteFn, WasmerStoreDeleteFn>(
+    _store_delete = _lib.lookup<NativeFunction<NativeWasmerStoreDeleteFn>>(
       'wasm_store_delete',
     );
     _store_new = _lib.lookupFunction<NativeWasmerStoreNewFn, WasmerStoreNewFn>(
       'wasm_store_new',
     );
-    _trap_delete =
-        _lib.lookupFunction<NativeWasmerTrapDeleteFn, WasmerTrapDeleteFn>(
+    _trap_delete = _lib.lookup<NativeFunction<NativeWasmerTrapDeleteFn>>(
       'wasm_trap_delete',
     );
     _trap_message =
@@ -462,8 +409,7 @@ mixin _WasmRuntimeGeneratedMixin {
     _trap_new = _lib.lookupFunction<NativeWasmerTrapNewFn, WasmerTrapNewFn>(
       'wasm_trap_new',
     );
-    _valtype_delete =
-        _lib.lookupFunction<NativeWasmerValtypeDeleteFn, WasmerValtypeDeleteFn>(
+    _valtype_delete = _lib.lookup<NativeFunction<NativeWasmerValtypeDeleteFn>>(
       'wasm_valtype_delete',
     );
     _valtype_kind =
@@ -495,9 +441,5 @@ mixin _WasmRuntimeGeneratedMixin {
         NativeWasmerWasmerLastErrorMessageFn, WasmerWasmerLastErrorMessageFn>(
       'wasmer_last_error_message',
     );
-
-    if (_Dart_InitializeApiDL(NativeApi.initializeApiDLData) != 0) {
-      throw _WasmRuntimeErrorImpl('Failed to initialize Dart API');
-    }
   }
 }

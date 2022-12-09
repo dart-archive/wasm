@@ -23,20 +23,39 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
   @override
   final DynamicLibrary _lib;
   final _traps = <String, _WasmTrapsEntry>{};
-  late final Pointer<WasmerEngine> _engine;
-  late final Pointer<WasmerStore> _store;
+  late final WasmFinalizable<WasmerEngine> _engine;
+  late final WasmFinalizable<WasmerStore> _store;
+  late final NativeFinalizer _engineFinalizer;
+  late final NativeFinalizer _storeFinalizer;
+  late final NativeFinalizer _moduleFinalizer;
+  late final NativeFinalizer _instanceFinalizer;
+  late final NativeFinalizer _trapFinalizer;
+  late final NativeFinalizer _memorytypeFinalizer;
+  late final NativeFinalizer _memoryFinalizer;
+  late final NativeFinalizer _funcFinalizer;
+  late final NativeFinalizer _globalFinalizer;
 
   WasmRuntime._(this._lib) {
     initBindings();
-    _engine = _engine_new();
-    _checkNotEqual(_engine, nullptr, 'Failed to initialize Wasm engine.');
-    // _set_finalizer_for_engine(this, _engine);
-    _store = _store_new(_engine);
-    _checkNotEqual(_store, nullptr, 'Failed to create Wasm store.');
-    // _set_finalizer_for_store(this, _store);
+
+    _engineFinalizer = NativeFinalizer(_engine_delete.cast());
+    _storeFinalizer = NativeFinalizer(_store_delete.cast());
+    _moduleFinalizer = NativeFinalizer(_module_delete.cast());
+    _instanceFinalizer = NativeFinalizer(_instance_delete.cast());
+    _trapFinalizer = NativeFinalizer(_trap_delete.cast());
+    _memorytypeFinalizer = NativeFinalizer(_memorytype_delete.cast());
+    _memoryFinalizer = NativeFinalizer(_memory_delete.cast());
+    _funcFinalizer = NativeFinalizer(_func_delete.cast());
+    _globalFinalizer = NativeFinalizer(_global_delete.cast());
+
+    _engine = WasmFinalizable(_engine_new(), _engineFinalizer);
+    _checkNotEqual(_engine.ptr, nullptr, 'Failed to initialize Wasm engine.');
+
+    _store = WasmFinalizable(_store_new(_engine.ptr), _storeFinalizer);
+    _checkNotEqual(_store.ptr, nullptr, 'Failed to create Wasm store.');
   }
 
-  Pointer<WasmerModule> compile(Object owner, Uint8List data) {
+  WasmFinalizable<WasmerModule> compile(Uint8List data) {
     final dataPtr = calloc<Uint8>(data.length);
     for (var i = 0; i < data.length; ++i) {
       dataPtr[i] = data[i];
@@ -45,14 +64,14 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
     dataVec.ref.data = dataPtr;
     dataVec.ref.length = data.length;
 
-    final modulePtr = _module_new(_store, dataVec);
+    final modulePtr =
+        WasmFinalizable(_module_new(_store.ptr, dataVec), _moduleFinalizer);
 
     calloc
       ..free(dataPtr)
       ..free(dataVec);
 
-    _checkNotEqual(modulePtr, nullptr, 'Wasm module compilation failed.');
-    // _set_finalizer_for_module(owner, modulePtr);
+    _checkNotEqual(modulePtr.ptr, nullptr, 'Wasm module compilation failed.');
     return modulePtr;
   }
 
@@ -138,17 +157,16 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
     }
   }
 
-  Pointer<WasmerInstance> instantiate(
-    Object owner,
+  WasmFinalizable<WasmerInstance> instantiate(
     Pointer<WasmerModule> module,
     Pointer<WasmerExternVec> imports,
   ) {
     var trap = calloc<Pointer<WasmerTrap>>()..value = nullptr;
-    var inst = _instance_new(_store, module, imports, trap);
+    var inst = WasmFinalizable(
+        _instance_new(_store.ptr, module, imports, trap), _instanceFinalizer);
     maybeThrowTrap(trap.value, 'module initialization function');
     calloc.free(trap);
-    _checkNotEqual(inst, nullptr, 'Wasm module instantiation failed.');
-    // _set_finalizer_for_instance(owner, inst);
+    _checkNotEqual(inst.ptr, nullptr, 'Wasm module instantiation failed.');
     return inst;
   }
 
@@ -206,8 +224,7 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
   Pointer<WasmerExtern> memoryToExtern(Pointer<WasmerMemory> memory) =>
       _memory_as_extern(memory);
 
-  Pointer<WasmerMemory> newMemory(
-    Object owner,
+  WasmFinalizable<WasmerMemory> newMemory(
     int pages,
     int? maxPages,
   ) {
@@ -217,14 +234,14 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
     var memType = _memorytype_new(limPtr);
     calloc.free(limPtr);
     _checkNotEqual(memType, nullptr, 'Failed to create memory type.');
-    // _set_finalizer_for_memorytype(owner, memType);
-    var memory = _checkNotEqual(
-      _memory_new(_store, memType),
-      nullptr,
-      'Failed to create memory.',
-    );
-    // _set_finalizer_for_memory(owner, memory);
-    return memory;
+    // TODO: Finalizable for mem type.
+    return WasmFinalizable(
+        _checkNotEqual(
+          _memory_new(_store.ptr, memType),
+          nullptr,
+          'Failed to create memory.',
+        ),
+        _memoryFinalizer);
   }
 
   void growMemory(Pointer<WasmerMemory> memory, int deltaPages) {
@@ -240,22 +257,22 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
   Uint8List memoryView(Pointer<WasmerMemory> memory) =>
       _memory_data(memory).asTypedList(_memory_data_size(memory));
 
-  Pointer<WasmerFunc> newFunc(
-    Object owner,
+  WasmFinalizable<WasmerFunc> newFunc(
     Pointer<WasmerFunctype> funcType,
     Pointer func,
     Pointer env,
     Pointer finalizer,
   ) {
-    var f = _func_new_with_env(
-      _store,
-      funcType,
-      func.cast(),
-      env.cast(),
-      finalizer.cast(),
-    );
-    _checkNotEqual(f, nullptr, 'Failed to create function.');
-    _set_finalizer_for_func(owner, f);
+    var f = WasmFinalizable(
+        _func_new_with_env(
+          _store.ptr,
+          funcType,
+          func.cast(),
+          env.cast(),
+          finalizer.cast(),
+        ),
+        _funcFinalizer);
+    _checkNotEqual(f.ptr, nullptr, 'Failed to create function.');
     return f;
   }
 
@@ -269,14 +286,13 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
     return wasmerVal;
   }
 
-  Pointer<WasmerGlobal> newGlobal(
-    Object owner,
+  WasmFinalizable<WasmerGlobal> newGlobal(
     Pointer<WasmerGlobaltype> globalType,
     dynamic val,
   ) {
     final wasmerVal = newValue(getGlobalKind(globalType), val);
-    final global = _global_new(_store, globalType, wasmerVal);
-    // _set_finalizer_for_global(owner, global);
+    final global = WasmFinalizable(
+        _global_new(_store.ptr, globalType, wasmerVal), _globalFinalizer);
     calloc.free(wasmerVal);
     return global;
   }
@@ -326,15 +342,14 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
   Pointer<WasmerTrap> newTrap(Object exception) {
     final msg = 'dart:${exception.hashCode.toRadixString(36)}';
     final bytes = _allocateString(msg);
-    var trap = _trap_new(_store, bytes);
+    var trap = WasmFinalizable(_trap_new(_store.ptr, bytes), _trapFinalizer);
     calloc
       ..free(bytes.ref.data)
       ..free(bytes);
-    _checkNotEqual(trap, nullptr, 'Failed to create trap.');
-    var entry = _WasmTrapsEntry(exception);
-    // _set_finalizer_for_trap(entry, trap);
+    _checkNotEqual(trap.ptr, nullptr, 'Failed to create trap.');
+    var entry = _WasmTrapsEntry(exception, trap);
     _traps[msg] = entry;
-    return trap;
+    return trap.ptr;
   }
 
   Pointer<WasmerWasiConfig> newWasiConfig() {
@@ -366,7 +381,7 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
     Pointer<WasmerExternVec> imports,
   ) {
     _checkNotEqual(
-      _wasi_get_imports(_store, mod, env, imports),
+      _wasi_get_imports(_store.ptr, mod, env, imports),
       0,
       'Failed to fill WASI imports.',
     );
@@ -419,6 +434,20 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
   }
 }
 
+// Owns a pointer. The pointer is destroyed when this object is GC'd.
+class WasmFinalizable<T extends NativeType> implements Finalizable {
+  final Pointer<T> ptr;
+
+  WasmFinalizable(this.ptr, NativeFinalizer finalizer) {
+    if (ptr != nullptr) {
+      finalizer.attach(this, ptr.cast(), detach: this);
+    }
+  }
+
+  // Constructs a WasmFinalizable without taking ownership of the pointer.
+  WasmFinalizable.unowned(this.ptr);
+}
+
 class WasmImportDescriptor {
   final int kind;
   final String moduleName;
@@ -457,8 +486,9 @@ class WasmExportDescriptor {
 
 class _WasmTrapsEntry {
   final Object exception;
+  final WasmFinalizable trap;
 
-  _WasmTrapsEntry(this.exception);
+  _WasmTrapsEntry(this.exception, this.trap);
 }
 
 class _WasiStreamIterator implements Iterator<List<int>> {
