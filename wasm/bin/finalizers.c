@@ -10,14 +10,14 @@
   void wasm_##type##_delete(void *native_object);                              \
   void wasm_##type##_finalizer(void *unused, void *native_object) {            \
     printf("ZZZZ wasm_" #type "_finalizer %p\n", native_object);fflush(stdout);\
-    wasm_##type##_delete(native_object);                                       \
+    /*wasm_##type##_delete(native_object);*/                                       \
     printf("ZZZZ wasm_" #type "_finalizer DONE\n");fflush(stdout);\
   }                                                                            \
   DART_EXPORT void set_finalizer_for_##type(Dart_Handle dart_object,           \
                                             void *native_object) {             \
     printf("ZZZZ set_finalizer_for_" #type " %p\n",native_object);fflush(stdout);\
-    Dart_NewFinalizableHandle_DL(dart_object, native_object, 0,                \
-                                 wasm_##type##_finalizer);                     \
+    /*Dart_NewFinalizableHandle_DL(dart_object, native_object, 0,*/                \
+    /*                             wasm_##type##_finalizer);*/                     \
     printf("ZZZZ set_finalizer_for_" #type " DONE\n");fflush(stdout);\
   }
 
