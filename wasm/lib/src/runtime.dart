@@ -218,13 +218,13 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
     var memType = _memorytype_new(limPtr);
     calloc.free(limPtr);
     _checkNotEqual(memType, nullptr, 'Failed to create memory type.');
-    // _set_finalizer_for_memorytype(owner, memType);
+    _set_finalizer_for_memorytype(owner, memType);
     var memory = _checkNotEqual(
       _memory_new(_store, memType),
       nullptr,
       'Failed to create memory.',
     );
-    // _set_finalizer_for_memory(owner, memory);
+    _set_finalizer_for_memory(owner, memory);
     return memory;
   }
 
@@ -256,7 +256,7 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
       finalizer.cast(),
     );
     _checkNotEqual(f, nullptr, 'Failed to create function.');
-    // _set_finalizer_for_func(owner, f);
+    _set_finalizer_for_func(owner, f);
     return f;
   }
 
@@ -277,7 +277,7 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
   ) {
     final wasmerVal = newValue(getGlobalKind(globalType), val);
     final global = _global_new(_store, globalType, wasmerVal);
-    // _set_finalizer_for_global(owner, global);
+    _set_finalizer_for_global(owner, global);
     calloc.free(wasmerVal);
     return global;
   }
@@ -333,7 +333,7 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
       ..free(bytes);
     _checkNotEqual(trap, nullptr, 'Failed to create trap.');
     var entry = _WasmTrapsEntry(exception);
-    // _set_finalizer_for_trap(entry, trap);
+    _set_finalizer_for_trap(entry, trap);
     _traps[msg] = entry;
     return trap;
   }
