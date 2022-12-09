@@ -15,16 +15,14 @@ import 'wasmer_locator.dart';
 /// Creates a new wasm module asynchronously.
 Future<WasmModule> wasmModuleCompileAsync(
   Uint8List data,
-) async {
-  return wasmModuleCompileSync(data);
-}
+) async =>
+    wasmModuleCompileSync(data);
 
 /// Creates a new wasm module synchronously.
 WasmModule wasmModuleCompileSync(
   Uint8List data,
-) {
-  return _WasmModule(data, _runtime);
-}
+) =>
+    _WasmModule(data, _runtime);
 
 final WasmRuntime _runtime = wasmRuntimeFactory(
   loadWasmerDynamicLibrary(),
@@ -103,7 +101,7 @@ class _WasmFnImport extends Struct {
     Pointer<WasmerValVec> rawResult,
   ) {
     final fn = _wasmFnImportToFn[imp.address] as Function;
-    final args = [];
+    final args = <dynamic>[];
     for (var i = 0; i < rawArgs.ref.length; ++i) {
       args.add(rawArgs.ref.data[i].toDynamic);
     }
