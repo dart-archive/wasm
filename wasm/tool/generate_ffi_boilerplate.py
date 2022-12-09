@@ -349,17 +349,6 @@ void wasi_config_capture_stdout(wasi_config_t* config);
 void wasi_config_capture_stderr(wasi_config_t* config);
 intptr_t wasi_env_read_stderr(wasi_env_t* env, uint8_t* buffer, uintptr_t buffer_len);
 intptr_t wasi_env_read_stdout(wasi_env_t* env, uint8_t* buffer, uintptr_t buffer_len);
-
-intptr_t Dart_InitializeApiDL(void* data);
-void set_finalizer_for_engine(Dart_Handle, wasm_engine_t*);
-void set_finalizer_for_store(Dart_Handle, wasm_store_t*);
-void set_finalizer_for_module(Dart_Handle, wasm_module_t*);
-void set_finalizer_for_instance(Dart_Handle, wasm_instance_t*);
-void set_finalizer_for_trap(Dart_Handle, wasm_trap_t*);
-void set_finalizer_for_memorytype(Dart_Handle, wasm_memorytype_t*);
-void set_finalizer_for_memory(Dart_Handle, wasm_memory_t*);
-void set_finalizer_for_func(Dart_Handle, wasm_func_t*);
-void set_finalizer_for_global(Dart_Handle, wasm_global_t*);
 '''
 for f in rawFns.split('\n'):
     if len(f.strip()) > 0:

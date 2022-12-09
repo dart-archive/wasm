@@ -277,7 +277,7 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
   ) {
     final wasmerVal = newValue(getGlobalKind(globalType), val);
     final global = _global_new(_store, globalType, wasmerVal);
-    _set_finalizer_for_global(owner, global);
+    // _set_finalizer_for_global(owner, global);
     calloc.free(wasmerVal);
     return global;
   }
@@ -333,7 +333,7 @@ class WasmRuntime with _WasmRuntimeGeneratedMixin {
       ..free(bytes);
     _checkNotEqual(trap, nullptr, 'Failed to create trap.');
     var entry = _WasmTrapsEntry(exception);
-    _set_finalizer_for_trap(entry, trap);
+    // _set_finalizer_for_trap(entry, trap);
     _traps[msg] = entry;
     return trap;
   }
