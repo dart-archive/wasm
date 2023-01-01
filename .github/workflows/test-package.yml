@@ -23,7 +23,7 @@ jobs:
       run:
         working-directory: wasm
     steps:
-    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+    - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
     - uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
       with:
         sdk: ${{ matrix.sdk }}
@@ -69,7 +69,7 @@ jobs:
     - uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
       with:
         sdk: ${{ matrix.sdk }}
-    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+    - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
     - uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7
       with:
         path: |
@@ -93,7 +93,7 @@ jobs:
     - uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
       with:
         sdk: dev
-    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+    - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
     - uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7
       with:
         path: |
@@ -124,7 +124,7 @@ jobs:
       run:
         working-directory: flutter_wasm
     steps:
-    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+    - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
     - uses: actions/setup-java@v1
       with:
         java-version: '12.x'
@@ -146,7 +146,7 @@ jobs:
       run:
         working-directory: flutter_wasm
     steps:
-    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+    - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
     - uses: actions/setup-java@v1
       with:
         java-version: '12.x'
@@ -163,7 +163,7 @@ jobs:
       run:
         working-directory: flutter_wasm/example
     steps:
-    - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+    - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
     - uses: actions/setup-java@de1bb2b0c5634f0fc4438d7aa9944e68f9bf86cc
       with:
         java-version: 11
