@@ -27,7 +27,7 @@ jobs:
     - uses: dart-lang/setup-dart@a57a6c04cf7d4840e88432aad6281d1e125f0d46
       with:
         sdk: ${{ matrix.sdk }}
-    - uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12
+    - uses: actions/cache@627f0f41f6904a5b1efbaed9f96d9eb58e92e920
       with:
         path: |
           ~/.pub-cache/hosted/
@@ -70,7 +70,7 @@ jobs:
       with:
         sdk: ${{ matrix.sdk }}
     - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-    - uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12
+    - uses: actions/cache@627f0f41f6904a5b1efbaed9f96d9eb58e92e920
       with:
         path: |
           ~/.cargo/bin/
@@ -94,7 +94,7 @@ jobs:
       with:
         sdk: dev
     - uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-    - uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12
+    - uses: actions/cache@627f0f41f6904a5b1efbaed9f96d9eb58e92e920
       with:
         path: |
           ~/.cargo/bin/
