@@ -155,7 +155,9 @@ jobs:
         java-version: '12.x'
     - uses: subosito/flutter-action@dbf1fa04f4d2e52c33185153d06cdb5443aa189d
       with:
-        flutter-version: '3.3.9'
+        channel: 'stable'
+        cache: true
+        cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
     - run: flutter pub upgrade
     - run: flutter pub run flutter_wasm:setup
     - run: flutter test
@@ -177,10 +179,12 @@ jobs:
         ndk-version: r25b
         local-cache: true
         add-to-path: true
-    - run: echo "ndk.dir=$(dirname $(which ndk-build))" >> android/local.properties
+    - run: echo "ndk.dir=${{ steps.setup-ndk.outputs.ndk-path }}" >> android/local.properties
     - uses: subosito/flutter-action@dbf1fa04f4d2e52c33185153d06cdb5443aa189d
       with:
-        flutter-version: '3.3.9'
+        channel: 'stable'
+        cache: true
+        cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
     - run: flutter pub upgrade
     - run: flutter pub run flutter_wasm:setup
     - run: flutter test
