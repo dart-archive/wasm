@@ -61,7 +61,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, macos-latest ]
-        sdk: [ 2.18.5, dev ]
+        sdk: [ 2.18.5, beta, dev ]
+        exclude:
+          - os: macos-latest
+            sdk: 2.18.5
     defaults:
       run:
         working-directory: wasm
