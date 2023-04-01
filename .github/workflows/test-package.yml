@@ -128,7 +128,7 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: '12.x'
-    - uses: subosito/flutter-action@dbf1fa04f4d2e52c33185153d06cdb5443aa189d
+    - uses: subosito/flutter-action@48cafc24713cca54bbe03cdc3a423187d413aafa
       with:
         flutter-version: '3.3.9'
     - id: install
@@ -150,7 +150,7 @@ jobs:
     - uses: actions/setup-java@v1
       with:
         java-version: '12.x'
-    - uses: subosito/flutter-action@dbf1fa04f4d2e52c33185153d06cdb5443aa189d
+    - uses: subosito/flutter-action@48cafc24713cca54bbe03cdc3a423187d413aafa
       with:
         flutter-version: '3.3.9'
     - run: flutter pub upgrade
@@ -175,7 +175,7 @@ jobs:
         local-cache: true
         add-to-path: true
     - run: echo "ndk.dir=$(dirname $(which ndk-build))" >> android/local.properties
-    - uses: subosito/flutter-action@dbf1fa04f4d2e52c33185153d06cdb5443aa189d
+    - uses: subosito/flutter-action@48cafc24713cca54bbe03cdc3a423187d413aafa
       with:
         flutter-version: '3.3.9'
     - run: flutter pub upgrade
