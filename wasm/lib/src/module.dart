@@ -78,10 +78,10 @@ void _wasmFnImportFinalizer(Pointer<_WasmFnImport> imp) {
 
 final _wasmFnImportTrampolineNative = Pointer.fromFunction<
     Pointer<WasmerTrap> Function(
-  Pointer<_WasmFnImport>,
-  Pointer<WasmerValVec>,
-  Pointer<WasmerValVec>,
-)>(_wasmFnImportTrampoline);
+      Pointer<_WasmFnImport>,
+      Pointer<WasmerValVec>,
+      Pointer<WasmerValVec>,
+    )>(_wasmFnImportTrampoline);
 final _wasmFnImportToFn = <int, Function>{};
 
 // This will be needed again once #47 is fixed.
