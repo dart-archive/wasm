@@ -1,5 +1,7 @@
 ## 0.2.0-dev
 
+- Updated the readme to reflect the fact that the package has been discontinued;
+  see also https://github.com/dart-lang/wasm/issues/146.
 - Require Dart 2.18
 - Provide a new way for creating a WasmModule via
   `wasmModuleCompileAsync` and `wasmModuleCompileSync`

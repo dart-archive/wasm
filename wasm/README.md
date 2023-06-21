@@ -2,11 +2,22 @@
 [![Build Status](https://github.com/dart-lang/wasm/workflows/CI/badge.svg)](https://github.com/dart-lang/wasm/actions?query=workflow%3ACI+branch%3Amain)
 [![Coverage Status](https://coveralls.io/repos/github/dart-lang/wasm/badge.svg?branch=main)](https://coveralls.io/github/dart-lang/wasm?branch=main)
 
-Provides utilities for loading and running WASM modules.
+Provides utilities for loading and running WASM modules. Built on top of the
+[Wasmer](https://github.com/wasmerio/wasmer) runtime.
 
-Built on top of the [Wasmer](https://github.com/wasmerio/wasmer) runtime.
+## Status: Discontinued
 
-Flutter and web are **not supported** at the moment. Stay tuned though ;)
+**Notice**: This package was an experiment in consuming WASM code - integrating
+a WASM runtime into applications, allowing them to leverage existing native
+libraries compiled to WASM. While this is still an interesting path to explore,
+generally as a team we're investing in producing WASM from Dart - letting a Dart
+based app run in a WASM runtime (ala Flutter Web in a browser). See
+https://docs.flutter.dev/platform-integration/web/wasm for more information.
+
+For people who do wish to continue to experiment with a similar technique to
+package:wasm / leveraging a wasm runtime, please feel free to fork this repo.
+
+See also https://github.com/dart-lang/wasm/issues/146.
 
 ## Setup
 

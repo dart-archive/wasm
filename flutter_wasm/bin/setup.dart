@@ -20,6 +20,7 @@ final _workingDirectory = Isolate.resolvePackageUri(
 ).then((value) => value!.resolve('..').toFilePath());
 
 Future<int> _runFlutter(List<String> args) async {
+  // ignore: avoid_print
   print('flutter ${args.join(' ')}');
 
   final process = await Process.start(
