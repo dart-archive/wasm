@@ -1,19 +1,22 @@
 These packages provide utilities for loading and running WASM modules.
 
-* [wasm](https://github.com/dart-lang/wasm/blob/main/wasm/README.md): Runs WASM modules in Dart native.
-* [flutter_wasm](https://github.com/dart-lang/wasm/blob/main/flutter_wasm/README.md): Runs WASM modules in Flutter.
+## Status: Discontinued
 
-## Status: Experimental
+**Notice**: This package was an experiment in consuming WASM code - integrating
+a WASM runtime into applications, allowing them to leverage existing native
+libraries compiled to WASM. While this is still an interesting path to explore,
+generally as a team we're investing in producing WASM from Dart - letting a Dart
+based app run in a WASM runtime (ala Flutter Web in a browser). See
+https://docs.flutter.dev/platform-integration/web/wasm for more information.
 
-**NOTE**: This package is currently experimental and published under the
-[labs.dart.dev](https://dart.dev/dart-team-packages) pub publisher in order to
-solicit feedback. 
+For people who do wish to continue to experiment with a similar technique to
+package:wasm / leveraging a wasm runtime, please feel free to fork this repo.
 
-For packages in the labs.dart.dev publisher we generally plan to either graduate
-the package into a supported publisher (dart.dev, tools.dart.dev) after a period
-of feedback and iteration, or discontinue the package. These packages have a
-much higher expected rate of API and breaking changes.
+See also https://github.com/dart-lang/wasm/issues/146.
 
-Your feedback is valuable and will help us evolve this package. For general
-feedback, suggestions, and comments, please file an issue in the 
-[bug tracker](https://github.com/dart-lang/wasm/issues).
+##  Packages
+
+| Package | Description | Published Version |
+| --- | --- | --- |
+| [wasm](wasm/) | Runs WASM modules in Dart native. | [![pub package](https://img.shields.io/pub/v/wasm.svg)](https://pub.dev/packages/wasm) |
+| [flutter_wasm](flutter_wasm/) | Runs WASM modules in Flutter. | |

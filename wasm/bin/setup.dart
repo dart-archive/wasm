@@ -279,7 +279,7 @@ Future<void> _main(ArgResults args) async {
       outDir.toFilePath(),
       '--manifest-path',
       srcDir.resolve('Cargo.toml').toFilePath(),
-      '--release'
+      '--release',
     ],
     output: outWasmer,
     environment: {
@@ -320,7 +320,7 @@ Future<void> _main(ArgResults args) async {
       '-c',
       sdkIncDir.resolve('dart_api_dl.c').toFilePath(),
       '-o',
-      outDartApi.toFilePath()
+      outDartApi.toFilePath(),
     ],
     output: outDartApi,
   );
@@ -343,7 +343,7 @@ Future<void> _main(ArgResults args) async {
       '-c',
       srcDir.resolve('finalizers.c').toFilePath(),
       '-o',
-      outFinalizers.toFilePath()
+      outFinalizers.toFilePath(),
     ],
     output: outFinalizers,
   );
@@ -372,7 +372,7 @@ Future<void> _main(ArgResults args) async {
       outFinalizers.toFilePath(),
       outWasmer.toFilePath(),
       '-o',
-      outLib.toFilePath()
+      outLib.toFilePath(),
     ],
     output: outLib,
   );
